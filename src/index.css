@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: #2D6A4F;
+    --primary-50: #EAF4EE;
+    --accent: #F4A261;
+    --accent-50: #FEF3EA;
+    --surface: #FAFAF8;
+    --surface-2: #F2F2EE;
+    --surface-3: #E8E8E4;
+    --border: #E2E2DE;
+    --text-primary: #1C1C1E;
+    --text-muted: #6B7280;
+    --text-subtle: #9CA3AF;
+    --success: #059669;
+    --warning: #D97706;
+    --danger: #DC2626;
+    --info: #2563EB;
+  }
+
+  .dark {
+    --surface: #1A1A18;
+    --surface-2: #242422;
+    --surface-3: #2E2E2C;
+    --border: #3A3A38;
+    --text-primary: #E5E5E3;
+    --text-muted: #9CA3AF;
+  }
+
+  html {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--surface);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .btn-effect {
+    @apply transition-all duration-200 ease-out active:scale-95 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40;
+  }
+
+  .card-hover {
+    @apply transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg active:scale-[0.99];
+  }
+}
+
+@keyframes pulse-success {
+  0% { transform: scale(0.9); opacity: 0; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-pulse-success {
+  animation: pulse-success 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}

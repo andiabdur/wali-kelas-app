@@ -1,0 +1,52 @@
+{
+  "kelas": [
+    {
+      "nama": "Kelas 4B",
+      "tahunAjaran": "2025/2026",
+      "namaWaliKelas": "Ibu Rani",
+      "namaSekolah": "SD Harapan",
+      "id": 1
+    }
+  ],
+  "siswa": [
+    {
+      "id": "0d822a1f-c7cf-4463-b672-f3f0c9c04fa9",
+      "nama": "Siti Aisyah",
+      "nomorAbsen": 1,
+      "jenisKelamin": "L",
+      "teleponOrtu": "",
+      "potensi": [
+        "matematika"
+      ],
+      "aktif": true,
+      "createdAt": "2026-08-06T13:38:27.277Z"
+    }
+  ],
+  "absensi": [],
+  "mataPelajaran": [
+    {
+      "id": "6741aa05-9e77-4ab5-83ed-ca5d5606805f",
+      "nama": "Matematika",
+      "urutan": 1
+    }
+  ],
+  "nilai": [
+    {
+      "id": "c2265fed-c155-4d12-b8fd-77be6a3a272a",
+      "siswaId": "0d822a1f-c7cf-4463-b672-f3f0c9c04fa9",
+      "mapelId": "6741aa05-9e77-4ab5-83ed-ca5d5606805f",
+      "jenis": "kuis",
+      "tanggal": "2026-08-06",
+      "nilai": 88
+    }
+  ],
+  "catatan": [
+    {
+      "id": "4cde6a70-6943-4aee-a0ab-1da8a83f2423",
+      "siswaId": "0d822a1f-c7cf-4463-b672-f3f0c9c04fa9",
+      "tanggal": "2026-08-06",
+      "isi": "Aktif berdiskusi dan cepat memahami pola angka."
+    }
+  ],
+  "exportedAt": "2026-08-06T13:38:28.244Z"
+}
