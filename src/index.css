@@ -37,7 +37,10 @@
     color-scheme: dark;
   }
 
-  .dark button {
+  .dark button,
+  .dark input,
+  .dark select,
+  .dark textarea {
     color: var(--text-primary);
   }
 
@@ -47,7 +50,24 @@
   .dark button.bg-blue-500,
   .dark button.bg-amber-500,
   .dark button.bg-amber-600 {
-    color: #FFFFFF;
+    color: #FFFFFF !important;
+  }
+
+  /* Universal dark mode override for any light/grey backgrounds */
+  .dark [class*="bg-white"],
+  .dark [class*="bg-gray-50"],
+  .dark [class*="bg-gray-100"],
+  .dark [class*="bg-gray-200"] {
+    background-color: var(--surface-2) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
+  }
+
+  .dark [class*="bg-white"]:hover,
+  .dark [class*="bg-gray-50"]:hover,
+  .dark [class*="bg-gray-100"]:hover {
+    background-color: var(--surface-3) !important;
+    color: #FFFFFF !important;
   }
 
   .dark select,
@@ -56,9 +76,9 @@
   .dark input[type="number"],
   .dark input[type="date"],
   .dark input[type="month"] {
-    background-color: var(--surface-2);
-    color: var(--text-primary);
-    border-color: var(--border);
+    background-color: var(--surface-2) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border) !important;
   }
 
   .dark select option {
