@@ -173,16 +173,24 @@ export function synthesizePsychologicalProfile(
   
   // Aggregate traits from responses
   const traitCounts: Record<string, number> = {}
-  const keywords: string[] = []
+  const customAnswers: string[] = []
 
   answeredList.forEach((a) => {
+    const jawaban = a.jawabanSiswa?.trim() || ''
+    if (!jawaban) return
+
+    // 1. Try matching with curriculum options (exact or partial)
     const matchedPilihan = getActiveCurriculum().flatMap((q) => q.pilihan).find(
-      (p) => p.label.toLowerCase() === a.jawabanSiswa?.toLowerCase()
+      (p) => p.label.toLowerCase() === jawaban.toLowerCase() || jawaban.toLowerCase().includes(p.label.toLowerCase()) || p.label.toLowerCase().includes(jawaban.toLowerCase())
     )
+
     if (matchedPilihan) {
       const sifat = matchedPilihan.sifat
       traitCounts[sifat] = (traitCounts[sifat] || 0) + 1
-      keywords.push(matchedPilihan.makna)
+    } else {
+      // 2. Free-text write-in custom answer
+      customAnswers.push(jawaban)
+      traitCounts['Ekspresif & Unik'] = (traitCounts['Ekspresif & Unik'] || 0) + 1
     }
   })
 
@@ -191,7 +199,7 @@ export function synthesizePsychologicalProfile(
     .sort((a, b) => b[1] - a[1])
     .map(([trait]) => trait)
 
-  const topTraits = sortedTraits.length > 0 ? sortedTraits.slice(0, 3) : ['Eksploratif', 'Kreatif', 'Kooperatif']
+  const topTraits = sortedTraits.length > 0 ? sortedTraits.slice(0, 3) : ['Ekspresif', 'Kreatif', 'Eksploratif']
 
   // Determine academic average
   const avgNilai = nilaiRecords.length
@@ -204,7 +212,7 @@ export function synthesizePsychologicalProfile(
   const persenHadir = Math.round((totalHadir / totalAbsen) * 100)
 
   // Construct Psychological Narrative based on findings
-  let narasiKarakter = `Berdasarkan rangkuman observasi harian melalui presensi interaktif dan rekapitas performa, Ananda ${namaSiswa} menunjukkan kecenderungan karakter utama yang ${topTraits.join(', ').toLowerCase()}. `
+  let narasiKarakter = `Berdasarkan rangkuman observasi harian melalui presensi interaktif dan rekapitulasi performa, Ananda ${namaSiswa} menunjukkan kecenderungan karakter utama yang ${topTraits.join(', ').toLowerCase()}. `
 
   if (persenHadir >= 90) {
     narasiKarakter += `Ananda memiliki tingkat kedisiplinan dan kehadiran yang sangat konsisten (${persenHadir}%), mencerminkan rasa tanggung jawab serta keterikatan positif terhadap suasana pembelajaran di kelas. `
@@ -212,8 +220,11 @@ export function synthesizePsychologicalProfile(
     narasiKarakter += `Tingkat kehadiran Ananda mencapai ${persenHadir}%, menunjukkan potensi perkembangan yang terus dapat didampingi dengan dorongan motivasi harian. `
   }
 
-  if (answeredList.length > 0) {
-    narasiKarakter += `Dalam sesi tanya-jawab interaktif harian, ${namaSiswa} secara konsisten memilih opsi yang mencerminkan kecerdasan emosional dan daya imajinasi yang aktif. `
+  if (customAnswers.length > 0) {
+    const sampleText = customAnswers.slice(0, 3).map((t) => `"${t}"`).join(', ')
+    narasiKarakter += `Dalam sesi tanya-jawab interaktif presensi harian, Ananda ${namaSiswa} secara terbuka menyampaikan pilihan dan ide mandirinya seperti ${sampleText}. Hal ini mencerminkan rasa percaya diri, daya imajinasi yang bebas, serta keberanian mengekspresikan pendapat pribadi secara otentik. `
+  } else if (answeredList.length > 0) {
+    narasiKarakter += `Dalam sesi tanya-jawab interaktif harian, ${namaSiswa} secara konsisten memberikan respon yang mencerminkan kecerdasan emosional dan daya imajinasi yang aktif. `
   }
 
   if (avgNilai >= 85) {

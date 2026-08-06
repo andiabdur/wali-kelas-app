@@ -231,7 +231,7 @@ export async function generateStudentPsychologicalProfileAI(
 
   const userPrompt = `Nama Siswa: ${namaSiswa}
 Jumlah Respon Presensi Interaktif: ${answeredList.length}
-Respon Presensi Harian Siswa:
+Respon Presensi Harian Siswa (termasuk jawaban pilihan & jawaban bebas siswa):
 ${answeredList.map((a) => `- ${a.tanggal}: Pertanyaan "${a.pertanyaanHariIni}" -> Jawaban Siswa "${a.jawabanSiswa}"`).join('\n')}
 
 Data Akademis (Rata-rata nilai: ${avgNilai}):
@@ -240,7 +240,9 @@ ${nilaiRecords.map((n) => `- Nilai ${n.jenis}: ${n.nilai}`).join('\n')}
 Catatan Wali Kelas:
 ${catatanRecords.map((c) => `- ${c.isi}`).join('\n')}
 
-Berdasarkan data di atas dan referensi psikologi pendidikan anak (Big Five, Holland Themes, Multiple Intelligences), hasilkan analisis naratif kepribadian anak ini dalam format JSON berikut:
+Catatan Penting: Siswa dapat memberikan jawaban bebas yang otentik. Analisis jawaban bebas tersebut secara psikologis untuk mengungkap karakter, imajinasi, dan bakat anak secara hangat dan mendalam.
+
+Hasilkan analisis kepribadian anak dalam format JSON berikut:
 {
   "karakterUtama": ["Sifat 1", "Sifat 2", "Sifat 3"],
   "narasiKarakter": "Paragraf narasi komprehensif, hangat, dan mendalam tentang dinamika kepribadian dan perkembangan anak ini untuk dibaca wali kelas dan orang tua.",
@@ -284,15 +286,16 @@ Berdasarkan data di atas dan referensi psikologi pendidikan anak (Big Five, Holl
     throw new Error('Respon dari API LLM kosong.')
   }
 
+  const fallback = synthesizePsychologicalProfile(namaSiswa, absensiRecords, nilaiRecords, catatanRecords)
   const parsed = cleanAndParseJSON<any>(content)
   const result: AnalisisPsikologis = {
     id: generateId(),
     siswaId: '',
     updatedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-    karakterUtama: parsed.karakterUtama || ['Kreatif', 'Empatis', 'Eksploratif'],
-    narasiKarakter: parsed.narasiKarakter || '',
-    saranPendekatan: parsed.saranPendekatan || '',
-    rekomendasiBakat: parsed.rekomendasiBakat || '',
+    karakterUtama: (Array.isArray(parsed.karakterUtama) && parsed.karakterUtama.length > 0) ? parsed.karakterUtama : fallback.karakterUtama,
+    narasiKarakter: parsed.narasiKarakter || parsed.narasi || parsed.profile || parsed.deskripsi || fallback.narasiKarakter,
+    saranPendekatan: parsed.saranPendekatan || parsed.saran || parsed.pendekatan || fallback.saranPendekatan,
+    rekomendasiBakat: parsed.rekomendasiBakat || parsed.bakat || parsed.ekstrakurikuler || fallback.rekomendasiBakat,
   }
 
   return result
