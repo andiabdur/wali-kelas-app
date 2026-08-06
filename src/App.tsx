@@ -7,6 +7,7 @@ import { SiswaDetail } from './pages/SiswaDetail'
 import { Absensi } from './pages/Absensi'
 import { Akademis } from './pages/Akademis'
 import { Laporan } from './pages/Laporan'
+import { DenahBangku } from './pages/DenahBangku'
 import { Pengaturan } from './pages/Pengaturan'
 
 function App() {
@@ -26,6 +27,8 @@ function App() {
       case 'absensi':
       case 'absensi-rekap':
         return <Absensi />
+      case 'denah-bangku':
+        return <DenahBangku />
       case 'akademis':
         return <Akademis />
       case 'laporan':

@@ -1,10 +1,11 @@
-import { BarChart3, BookOpen, CalendarCheck, FileText, GraduationCap, Settings, Users } from 'lucide-react'
+import { BarChart3, BookOpen, CalendarCheck, FileText, GraduationCap, Settings, Users, Dices } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 const primaryItems = [
   { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
   { id: 'siswa', label: 'Siswa', icon: Users },
   { id: 'absensi', label: 'Absensi', icon: CalendarCheck },
+  { id: 'denah-bangku', label: 'Denah Bangku', icon: Dices },
   { id: 'akademis', label: 'Akademis', icon: BookOpen },
   { id: 'laporan', label: 'Laporan', icon: FileText },
 ] as const
@@ -66,7 +67,7 @@ export function MobileNavigation() {
   const { currentPage, navigate } = useStore()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-5 border-t border-[var(--border)] bg-[var(--surface)] px-2 pb-safe pt-1 lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t border-[var(--border)] bg-[var(--surface)] px-1 pb-safe pt-1 lg:hidden">
       {mobileItems.map((item) => {
         const active = currentPage === item.id || (item.id === 'siswa' && currentPage === 'siswa-detail')
         const Icon = item.icon

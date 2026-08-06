@@ -5,7 +5,7 @@ import type { Kelas } from '../db/database'
 
 import type { ToastMessage } from '../components/Toast'
 
-type Page = 'dashboard' | 'siswa' | 'siswa-detail' | 'absensi' | 'absensi-rekap' | 'akademis' | 'laporan' | 'pengaturan'
+type Page = 'dashboard' | 'siswa' | 'siswa-detail' | 'absensi' | 'absensi-rekap' | 'akademis' | 'laporan' | 'denah-bangku' | 'pengaturan'
 
 interface AppState {
   currentPage: Page

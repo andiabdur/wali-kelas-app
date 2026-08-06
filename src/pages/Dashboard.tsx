@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { AlertTriangle, CalendarCheck, ClipboardList, TrendingUp, Users } from 'lucide-react'
+import { AlertTriangle, CalendarCheck, ClipboardList, TrendingUp, Users, Dices } from 'lucide-react'
 import { db, KATEGORI_POTENSI } from '../db/database'
 import { getActiveStudents } from '../db/queries'
 import { useStore } from '../store/useStore'
@@ -68,12 +68,20 @@ export function Dashboard() {
             Pantau kondisi kelas hari ini dengan cepat dan rapi.
           </p>
         </div>
-        <button
-          onClick={() => navigate('absensi')}
-          className="min-h-11 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5"
-        >
-          Isi Absensi Hari Ini
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => navigate('denah-bangku')}
+            className="flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-200"
+          >
+            <Dices size={18} className="text-primary" /> Denah Bangku
+          </button>
+          <button
+            onClick={() => navigate('absensi')}
+            className="min-h-11 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5"
+          >
+            Isi Absensi Hari Ini
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
