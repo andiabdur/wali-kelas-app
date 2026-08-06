@@ -122,7 +122,7 @@ export function DenahBangku() {
     if (!isRolling) {
       // Start rolling dice animation
       setIsRolling(true)
-      notify('Kocok dadu dimulai! Ketuk tombol lagi untuk berhenti & menetapkan denah.', 'info')
+      notify('Pengacakan tempat duduk dimulai! Ketuk tombol lagi untuk berhenti & menetapkan denah.', 'info')
     } else {
       // Stop rolling dice animation & shuffle final seating
       setIsRolling(false)
@@ -192,7 +192,7 @@ export function DenahBangku() {
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Denah Bangku Interaktif</p>
           <h1 className="mt-2 font-heading text-3xl font-bold">Denah Tempat Duduk Kelas</h1>
           <p className="mt-1 text-[var(--text-muted)]">
-            Kocok & acak bangku siswa setiap minggu. Mengatur pasangan sesama gender ({counts.l} Laki-laki & {counts.p} Perempuan).
+            Pengacakan denah tempat duduk siswa secara periodik dengan aturan pasangan sesama gender ({counts.l} Laki-laki & {counts.p} Perempuan).
           </p>
         </div>
 
@@ -211,7 +211,7 @@ export function DenahBangku() {
             >
               <Dices size={20} />
             </motion.div>
-            <span>{isRolling ? 'Kocok Berjalan... (Ketuk Lagi untuk Berhenti)' : 'Kocok Tempat Duduk (Dadu)'}</span>
+            <span>{isRolling ? 'Pengacakan Berjalan... (Ketuk Lagi untuk Berhenti)' : 'Acak Tempat Duduk (Dadu)'}</span>
           </motion.button>
 
           <motion.button
@@ -245,17 +245,17 @@ export function DenahBangku() {
                 </motion.div>
                 <div>
                   <h3 className="font-heading text-lg font-bold text-amber-900 dark:text-amber-200">
-                    Sedang Mengocok Bangku Siswa...
+                    Sedang Menyusun Ulang Tempat Duduk Siswa...
                   </h3>
                   <p className="text-xs text-amber-800 dark:text-amber-300">
-                    Sistem sedang mengacak pasangan tempat duduk sesama gender. Ketuk tombol <strong className="underline">Kocok Berjalan</strong> di atas untuk menetapkan denah!
+                    Sistem sedang mengacak pasangan tempat duduk sesama gender. Ketuk tombol <strong className="underline">Pengacakan Berjalan</strong> di atas untuk menetapkan denah!
                   </p>
                 </div>
               </div>
 
               <div className="hidden sm:flex items-center gap-2 font-mono text-xl font-bold text-amber-700 dark:text-amber-300">
                 <Sparkles size={20} className="animate-spin" />
-                <span>KOCOK #{tickerCount}</span>
+                <span>ACAK #{tickerCount}</span>
               </div>
             </div>
           </motion.div>

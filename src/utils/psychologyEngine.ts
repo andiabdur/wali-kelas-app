@@ -85,7 +85,7 @@ export const CURRICULUM_PERTANYAAN_HARIAN: PertanyaanItem[] = [
     dimensi: 'Impulsivity vs Deliberation',
     pilihan: [
       { label: 'Langsung Membukanya dengan Cepat', makna: 'Spontan, berani mengambil risiko, penuh rasa penasaran', sifat: 'Spontan' },
-      { label: 'Mengocok Kotak & Menebak Isinya', makna: 'Suka berteori, kritis, mengumpulkan bukti terlebih dahulu', sifat: 'Kritis' },
+      { label: 'Menebak-nebak Isi Kotak Hadiah', makna: 'Suka berteori, kritis, mengumpulkan bukti terlebih dahulu', sifat: 'Kritis' },
       { label: 'Bertanya Siapa Pengirimnya', makna: 'Menghargai hubungan antarmanusia dan etika bersosialisasi', sifat: 'Sosial' },
       { label: 'Membuka dengan Rapi & Hati-hati', makna: 'Sangat teliti, menghargai barang, berhati-hati dalam bertindak', sifat: 'Metodis' },
     ],
