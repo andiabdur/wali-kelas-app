@@ -66,6 +66,23 @@ export function SiswaDetail() {
     setNote('')
   }
 
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
+  const [editingNoteText, setEditingNoteText] = useState('')
+
+  async function saveEditedNote(id: string) {
+    if (!editingNoteText.trim()) return
+    await db.catatan.update(id, { isi: editingNoteText.trim() })
+    notify('Catatan perkembangan berhasil diperbarui.')
+    setEditingNoteId(null)
+    setEditingNoteText('')
+  }
+
+  async function deleteNote(id: string) {
+    if (!confirm('Apakah Anda yakin ingin menghapus catatan ini?')) return
+    await db.catatan.delete(id)
+    notify('Catatan berhasil dihapus.', 'info')
+  }
+
   return (
     <section className="space-y-5">
       <motion.button whileHover={{ x: -2 }} whileTap={{ scale: 0.95 }} onClick={() => navigate('siswa')} className="flex min-h-11 items-center gap-2 rounded-xl px-2 text-sm font-semibold text-[var(--text-muted)] hover:text-primary transition">
@@ -258,7 +275,68 @@ export function SiswaDetail() {
             <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Tulis catatan perkembangan siswa..." className="min-h-28 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-base outline-none focus:ring-2 focus:ring-primary/20" />
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={addNote} className="mt-3 flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 font-semibold text-white shadow-md"><Plus size={18} /> Tambah Catatan</motion.button>
           </div>
-          {catatan.map((c) => <div key={c.id} className="rounded-2xl border border-[var(--border)] bg-white/70 p-4 dark:bg-dark-surface-2"><p className="text-sm text-[var(--text-muted)]">{c.tanggal}</p><p className="mt-2">{c.isi}</p></div>)}
+          
+          <div className="space-y-3">
+            {catatan.map((c) => (
+              <div key={c.id} className="rounded-2xl border border-[var(--border)] bg-white/70 p-4 dark:bg-dark-surface-2 transition hover:shadow-sm">
+                {editingNoteId === c.id ? (
+                  <div className="space-y-3">
+                    <textarea
+                      value={editingNoteText}
+                      onChange={(e) => setEditingNoteText(e.target.value)}
+                      className="min-h-24 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                    />
+                    <div className="flex gap-2">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => saveEditedNote(c.id)}
+                        className="flex min-h-9 items-center gap-1.5 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-sm"
+                      >
+                        Simpan Perubahan
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setEditingNoteId(null)}
+                        className="flex min-h-9 items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-dark-surface-1"
+                      >
+                        Batal
+                      </motion.button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-semibold text-[var(--text-muted)]">{c.tanggal}</p>
+                      <div className="flex items-center gap-1">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => { setEditingNoteId(c.id); setEditingNoteText(c.isi); }}
+                          title="Edit Catatan"
+                          className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-primary dark:hover:bg-dark-surface-1 transition"
+                        >
+                          <Pencil size={15} />
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => deleteNote(c.id)}
+                          title="Hapus Catatan"
+                          className="rounded-lg p-1 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 transition"
+                        >
+                          <Trash2 size={15} />
+                        </motion.button>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-sm leading-relaxed">{c.isi}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+            {!catatan.length && <Empty text="Belum ada catatan perkembangan." />}
+          </div>
         </div>
       )}
     </section>
