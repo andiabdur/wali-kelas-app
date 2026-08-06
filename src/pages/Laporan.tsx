@@ -60,8 +60,8 @@ export function Laporan() {
       </div>
 
       <div className="grid gap-4 rounded-2xl border border-[var(--border)] bg-white/70 p-4 dark:bg-dark-surface-2 sm:grid-cols-2">
-        <label><span className="text-sm font-semibold">Bulan</span><input type="month" value={bulan} onChange={(e) => setBulan(e.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base" /></label>
-        <label><span className="text-sm font-semibold">Siswa</span><select value={selected?.id || siswaId} onChange={(e) => setSiswaId(e.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base">{siswa.map((item) => <option key={item.id} value={item.id}>{item.nama}</option>)}</select></label>
+        <label><span className="text-sm font-semibold">Bulan</span><input type="month" value={bulan} onChange={(e) => setBulan(e.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base dark:bg-dark-surface-1 dark:text-gray-100" /></label>
+        <label><span className="text-sm font-semibold">Siswa</span><select value={selected?.id || siswaId} onChange={(e) => setSiswaId(e.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base dark:bg-dark-surface-1 dark:text-gray-100">{siswa.map((item) => <option key={item.id} value={item.id} className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">{item.nama}</option>)}</select></label>
       </div>
 
       {!selected ? <Empty /> : (

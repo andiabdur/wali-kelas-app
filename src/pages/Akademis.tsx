@@ -195,17 +195,17 @@ export function Akademis() {
         <article className="rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm dark:bg-dark-surface-2">
           <h2 className="font-heading text-xl font-bold">Input Nilai Batch</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <select value={selectedMapel} onChange={(e) => setSelectedMapel(e.target.value)} className="min-h-12 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20">
-              <option value="">Pilih mapel</option>
-              {mapel.map((item) => <option key={item.id} value={item.id}>{item.nama}</option>)}
+            <select value={selectedMapel} onChange={(e) => setSelectedMapel(e.target.value)} className="min-h-12 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100">
+              <option value="" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Pilih mapel</option>
+              {mapel.map((item) => <option key={item.id} value={item.id} className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">{item.nama}</option>)}
             </select>
-            <select value={jenis} onChange={(e) => setJenis(e.target.value as Nilai['jenis'])} className="min-h-12 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20">
-              <option value="kuis">Kuis</option>
-              <option value="latihan">Latihan</option>
-              <option value="ulangan">Ulangan</option>
-              <option value="tugas">Tugas</option>
+            <select value={jenis} onChange={(e) => setJenis(e.target.value as Nilai['jenis'])} className="min-h-12 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100">
+              <option value="kuis" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Kuis</option>
+              <option value="latihan" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Latihan</option>
+              <option value="ulangan" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Ulangan</option>
+              <option value="tugas" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Tugas</option>
             </select>
-            <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} className="min-h-12 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20" />
+            <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} className="min-h-12 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100" />
           </div>
           <div className="mt-4 max-h-[460px] space-y-2 overflow-auto pr-1">
             {siswa.map((anak) => (
@@ -299,11 +299,11 @@ export function Akademis() {
           <select
             value={filterSiswa}
             onChange={(e) => setFilterSiswa(e.target.value)}
-            className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100"
           >
-            <option value="">Semua Siswa ({siswa.length})</option>
+            <option value="" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Semua Siswa ({siswa.length})</option>
             {siswa.map((s) => (
-              <option key={s.id} value={s.id}>
+              <option key={s.id} value={s.id} className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">
                 {s.nomorAbsen}. {s.nama}
               </option>
             ))}
@@ -312,11 +312,11 @@ export function Akademis() {
           <select
             value={filterMapel}
             onChange={(e) => setFilterMapel(e.target.value)}
-            className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100"
           >
-            <option value="">Semua Mapel ({mapel.length})</option>
+            <option value="" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Semua Mapel ({mapel.length})</option>
             {mapel.map((m) => (
-              <option key={m.id} value={m.id}>
+              <option key={m.id} value={m.id} className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">
                 {m.nama}
               </option>
             ))}
@@ -325,13 +325,13 @@ export function Akademis() {
           <select
             value={filterJenis}
             onChange={(e) => setFilterJenis(e.target.value)}
-            className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 capitalize"
+            className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 capitalize dark:bg-dark-surface-1 dark:text-gray-100"
           >
-            <option value="">Semua Kategori Nilai</option>
-            <option value="kuis">Kuis</option>
-            <option value="latihan">Latihan</option>
-            <option value="ulangan">Ulangan</option>
-            <option value="tugas">Tugas</option>
+            <option value="" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Semua Kategori Nilai</option>
+            <option value="kuis" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Kuis</option>
+            <option value="latihan" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Latihan</option>
+            <option value="ulangan" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Ulangan</option>
+            <option value="tugas" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Tugas</option>
           </select>
         </div>
 

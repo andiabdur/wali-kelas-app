@@ -127,7 +127,7 @@ export function Pengaturan() {
               type="submit"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
-              className="flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 text-sm"
+              className="flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-100 dark:hover:bg-dark-surface-2 text-sm"
             >
               <Save size={16} /> Simpan Konfigurasi AI
             </motion.button>
@@ -156,14 +156,14 @@ export function Pengaturan() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
               onClick={exportData}
-              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-100 dark:hover:bg-dark-surface-2"
             >
               <Download size={18} /> Export JSON
             </motion.button>
             <motion.label
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
-              className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1"
+              className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-100 dark:hover:bg-dark-surface-2"
             >
               <Upload size={18} /> Import JSON
               <input type="file" accept="application/json" className="hidden" onChange={(e) => handleImport(e.target.files?.[0])} />
@@ -178,7 +178,7 @@ export function Pengaturan() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
               onClick={toggleDarkMode}
-              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-100 dark:hover:bg-dark-surface-2"
             >
               <Moon size={18} /> {darkMode ? 'Mode Terang' : 'Mode Gelap'}
             </motion.button>
@@ -186,7 +186,7 @@ export function Pengaturan() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setConfirmReset(true)}
-              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50/50 px-4 font-semibold text-red-600 shadow-sm hover:bg-red-100/50"
+              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50/50 px-4 font-semibold text-red-600 shadow-sm hover:bg-red-100/50 dark:bg-red-950/40 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-900/50"
             >
               <RotateCcw size={18} /> Reset Data
             </motion.button>
@@ -194,11 +194,11 @@ export function Pengaturan() {
         </article>
       </div>
 
-      {confirmReset && <div className="fixed inset-0 z-[60] flex items-end bg-black/30 p-4 sm:items-center sm:justify-center"><div className="w-full max-w-md rounded-3xl bg-[var(--surface)] p-5 shadow-lg"><h2 className="font-heading text-2xl font-bold">Hapus semua data?</h2><p className="mt-2 text-[var(--text-muted)]">Tindakan ini menghapus siswa, absensi, nilai, catatan, dan mapel dari browser ini.</p><div className="mt-6 flex gap-3"><button onClick={() => setConfirmReset(false)} className="min-h-11 flex-1 rounded-xl border border-[var(--border)] font-semibold">Batal</button><button onClick={doReset} className="min-h-11 flex-1 rounded-xl bg-red-600 font-semibold text-white">Ya, Hapus</button></div></div></div>}
+      {confirmReset && <div className="fixed inset-0 z-[60] flex items-end bg-black/30 p-4 sm:items-center sm:justify-center"><div className="w-full max-w-md rounded-3xl bg-[var(--surface)] p-5 shadow-lg"><h2 className="font-heading text-2xl font-bold">Hapus semua data?</h2><p className="mt-2 text-[var(--text-muted)]">Tindakan ini menghapus siswa, absensi, nilai, catatan, dan mapel dari browser ini.</p><div className="mt-6 flex gap-3"><button onClick={() => setConfirmReset(false)} className="min-h-11 flex-1 rounded-xl border border-[var(--border)] font-semibold dark:text-gray-100">Batal</button><button onClick={doReset} className="min-h-11 flex-1 rounded-xl bg-red-600 font-semibold text-white">Ya, Hapus</button></div></div></div>}
     </section>
   )
 }
 
 function Input({ label, value, placeholder, onChange, type = 'text', autoComplete }: { label: string; value: string; placeholder?: string; onChange: (value: string) => void; type?: string; autoComplete?: string }) {
-  return <label className="block"><span className="text-sm font-semibold">{label}</span><input type={type} autoComplete={autoComplete} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-gray-400 dark:placeholder:text-gray-600" /></label>
+  return <label className="block"><span className="text-sm font-semibold">{label}</span><input type={type} autoComplete={autoComplete} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-gray-400 dark:bg-dark-surface-1 dark:text-gray-100 dark:placeholder:text-gray-500" /></label>
 }

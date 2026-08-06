@@ -218,7 +218,7 @@ export function DenahBangku() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.95 }}
             onClick={handlePrint}
-            className="flex min-h-12 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1"
+            className="flex min-h-12 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-100 dark:hover:bg-dark-surface-2"
           >
             <Printer size={18} /> Cetak Denah
           </motion.button>

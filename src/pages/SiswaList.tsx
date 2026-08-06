@@ -74,7 +74,7 @@ export function SiswaList() {
                 <div className="mt-3 flex flex-wrap gap-2">
                   {item.potensi.slice(0, 2).map((potensi) => {
                     const meta = KATEGORI_POTENSI.find((k) => k.id === potensi)
-                    return <span key={potensi} className="rounded-full bg-accent-50 px-2.5 py-1 text-xs font-semibold text-amber-800">{meta?.label}</span>
+                    return <span key={potensi} className="rounded-full bg-accent-50 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">{meta?.label}</span>
                   })}
                   {!item.potensi.length && <span className="text-xs text-[var(--text-muted)]">Belum ada potensi</span>}
                 </div>
@@ -87,7 +87,7 @@ export function SiswaList() {
                 whileTap={{ scale: 0.9 }}
                 onClick={(e) => { e.stopPropagation(); setEditingSiswa(item); setShowForm(true); }}
                 title="Edit Siswa"
-                className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-primary dark:hover:bg-dark-surface-1 transition"
+                className="rounded-lg p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 hover:text-primary dark:hover:bg-dark-surface-1 dark:hover:text-primary transition"
               >
                 <Pencil size={16} />
               </motion.button>
@@ -96,7 +96,7 @@ export function SiswaList() {
                 whileTap={{ scale: 0.9 }}
                 onClick={(e) => { e.stopPropagation(); setDeletingSiswa(item); }}
                 title="Hapus Siswa"
-                className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 transition"
+                className="rounded-lg p-2 text-gray-400 dark:text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition"
               >
                 <Trash2 size={16} />
               </motion.button>
@@ -219,9 +219,9 @@ export function StudentForm({
             <Input label="Nomor Absen *" type="number" value={String(form.nomorAbsen)} onChange={(nomorAbsen) => setForm({ ...form, nomorAbsen: Number(nomorAbsen) })} />
             <label className="block">
               <span className="text-sm font-semibold">Jenis Kelamin</span>
-              <select value={form.jenisKelamin} onChange={(e) => setForm({ ...form, jenisKelamin: e.target.value as 'L' | 'P' })} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-2">
-                <option value="L">Laki-laki</option>
-                <option value="P">Perempuan</option>
+              <select value={form.jenisKelamin} onChange={(e) => setForm({ ...form, jenisKelamin: e.target.value as 'L' | 'P' })} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-2 dark:text-gray-100">
+                <option value="L" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Laki-laki</option>
+                <option value="P" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Perempuan</option>
               </select>
             </label>
           </div>
@@ -236,7 +236,7 @@ export function StudentForm({
         </div>
 
         <div className="mt-6 flex gap-3">
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={onClose} className="min-h-11 flex-1 rounded-xl border border-[var(--border)] font-semibold hover:bg-gray-50 dark:hover:bg-dark-surface-1">Batal</motion.button>
+          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={onClose} className="min-h-11 flex-1 rounded-xl border border-[var(--border)] font-semibold hover:bg-gray-50 dark:hover:bg-dark-surface-1 dark:text-gray-100">Batal</motion.button>
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={save} className="min-h-11 flex-1 rounded-xl bg-primary font-semibold text-white shadow-md">{initialData ? 'Simpan Perubahan' : 'Tambah Siswa'}</motion.button>
         </div>
       </motion.div>
