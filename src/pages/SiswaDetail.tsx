@@ -22,13 +22,15 @@ export function SiswaDetail() {
   const [activeTab, setActiveTab] = useState<TabId>('akademis')
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [note, setNote] = useState('')
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
+  const [editingNoteText, setEditingNoteText] = useState('')
 
   const siswa = useLiveQuery(() => selectedSiswaId ? db.siswa.get(selectedSiswaId) : undefined, [selectedSiswaId])
   const nilai = useLiveQuery(() => selectedSiswaId ? db.nilai.where('siswaId').equals(selectedSiswaId).toArray() : [], [selectedSiswaId]) ?? []
   const mapel = useLiveQuery(() => db.mataPelajaran.orderBy('urutan').toArray(), []) ?? []
   const absensi = useLiveQuery(() => selectedSiswaId ? db.absensi.where('siswaId').equals(selectedSiswaId).toArray() : [], [selectedSiswaId]) ?? []
   const catatan = useLiveQuery(() => selectedSiswaId ? db.catatan.where('siswaId').equals(selectedSiswaId).reverse().sortBy('tanggal') : [], [selectedSiswaId]) ?? []
-  const [note, setNote] = useState('')
 
   // Synthesize AI Psychological Narrative Profile
   const profileAI = useMemo(() => {
@@ -65,9 +67,6 @@ export function SiswaDetail() {
     notify('Catatan perkembangan berhasil ditambahkan.')
     setNote('')
   }
-
-  const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
-  const [editingNoteText, setEditingNoteText] = useState('')
 
   async function saveEditedNote(id: string) {
     if (!editingNoteText.trim()) return
