@@ -91,3 +91,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Agent rules & local configurations
+AGENTS.md
+.agents/
