@@ -45,6 +45,38 @@ export function setLLMConfig(config: Partial<LLMConfig>) {
 }
 
 /**
+ * Helper to clean markdown code blocks and parse JSON safely (with repair for truncated arrays)
+ */
+function cleanAndParseJSON<T>(rawText: string): T {
+  let cleaned = rawText.trim()
+
+  // Remove markdown fences like ```json ... ```
+  cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+
+  // Extract array or object
+  const arrayMatch = cleaned.match(/\[[\s\S]*\]/)
+  const objectMatch = cleaned.match(/\{[\s\S]*\}/)
+
+  const candidate = arrayMatch ? arrayMatch[0] : (objectMatch ? objectMatch[0] : cleaned)
+
+  try {
+    return JSON.parse(candidate)
+  } catch (firstErr) {
+    // Attempt auto-repair for truncated array
+    if (candidate.startsWith('[')) {
+      const lastObjIndex = candidate.lastIndexOf('}')
+      if (lastObjIndex > 0) {
+        try {
+          const repaired = candidate.substring(0, lastObjIndex + 1) + ']'
+          return JSON.parse(repaired)
+        } catch {}
+      }
+    }
+    throw new Error(`Respon AI tidak dapat di-parse sebagai JSON valid. Pastikan model AI mendukung format JSON. Raw: ${candidate.slice(0, 150)}...`)
+  }
+}
+
+/**
  * Generate 30 Daily Interactive Presensi Questions using OpenAI LLM API
  */
 export async function generate30PresensiQuestionsAI(): Promise<PertanyaanItem[]> {
@@ -54,23 +86,24 @@ export async function generate30PresensiQuestionsAI(): Promise<PertanyaanItem[]>
     throw new Error('API Key LLM belum dikonfigurasi. Harap isi API Key di Pengaturan atau file .env.')
   }
 
-  const systemPrompt = `Anda adalah seorang psikolog anak dan ahli pendidikan dasar profesional.
-Tugas Anda adalah menghasilkan 30 pertanyaan presensi harian yang seru, mudah, dan menyenangkan untuk siswa SD (Sekolah Dasar).
-Setiap pertanyaan harus memiliki makna psikologis yang dapat mencerminkan preferensi emosional, gaya belajar, kecerdasan ganda (Multiple Intelligences), atau orientasi sosial anak.
+  const systemPrompt = `Anda adalah psikolog anak dan pakar pendidikan SD.
+Buat 30 pertanyaan presensi harian interaktif dan seru untuk siswa SD (1 bulan penuh).
+Setiap pertanyaan memiliki 4 pilihan jawaban yang secara ringkas mencerminkan sifat/karakter emosional anak.
 
-Keluarkan respon HANYA dalam format JSON Array valid yang memuat 30 objek dengan skema sebagai berikut:
+PENTING: Berikan balasan HANYA dalam format JSON Array tanpa teks pengantar atau markdown tambahan.
+Skema JSON:
 [
   {
     "id": "p1",
     "hariKe": 1,
-    "pertanyaan": "String pertanyaan seru",
-    "kategori": "String kategori psikologis",
-    "dimensi": "String dimensi psikologis",
+    "pertanyaan": "Pertanyaan seru untuk anak",
+    "kategori": "Kategori Psikologis",
+    "dimensi": "Dimensi Psikologis",
     "pilihan": [
-      { "label": "Opsi A", "makna": "Makna psikologis opsi A", "sifat": "Sifat/Trait" },
-      { "label": "Opsi B", "makna": "Makna psikologis opsi B", "sifat": "Sifat/Trait" },
-      { "label": "Opsi C", "makna": "Makna psikologis opsi C", "sifat": "Sifat/Trait" },
-      { "label": "Opsi D", "makna": "Makna psikologis opsi D", "sifat": "Sifat/Trait" }
+      { "label": "Opsi A", "makna": "Makna ringkas psikologis A", "sifat": "Sifat A" },
+      { "label": "Opsi B", "makna": "Makna ringkas psikologis B", "sifat": "Sifat B" },
+      { "label": "Opsi C", "makna": "Makna ringkas psikologis C", "sifat": "Sifat C" },
+      { "label": "Opsi D", "makna": "Makna ringkas psikologis D", "sifat": "Sifat D" }
     ]
   }
 ]`
@@ -85,27 +118,31 @@ Keluarkan respon HANYA dalam format JSON Array valid yang memuat 30 objek dengan
       model: config.model,
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: 'Tolong buatkan 30 pertanyaan presensi harian interaktif psikologis anak untuk 1 bulan penuh.' },
+        { role: 'user', content: 'Hasilkan 30 pertanyaan presensi harian interaktif psikologis anak dalam format JSON Array.' },
       ],
       temperature: 0.7,
+      max_tokens: 4000,
     }),
   })
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.error?.message || `Gagal menghubungi API LLM (Status: ${response.status})`)
+    throw new Error(errorData.error?.message || `Gagal menghubungi API LLM (HTTP Status: ${response.status})`)
   }
 
   const data = await response.json()
   const content = data.choices?.[0]?.message?.content || ''
 
-  // Parse JSON response
-  const jsonMatch = content.match(/\[[\s\S]*\]/)
-  if (!jsonMatch) {
-    throw new Error('Respon AI tidak memuat format JSON array yang valid.')
+  if (!content.trim()) {
+    throw new Error('Respon dari API LLM kosong.')
   }
 
-  const items: PertanyaanItem[] = JSON.parse(jsonMatch[0])
+  const items = cleanAndParseJSON<PertanyaanItem[]>(content)
+  
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error('Hasil JSON dari AI tidak memuat daftar pertanyaan yang valid.')
+  }
+
   // Save generated questions to localStorage
   localStorage.setItem('AI_GENERATED_QUESTIONS', JSON.stringify(items))
   return items
@@ -172,28 +209,28 @@ Berdasarkan data di atas dan referensi psikologi pendidikan anak (Big Five, Holl
       messages: [
         {
           role: 'system',
-          content: 'Anda adalah seorang Psikolog Pendidikan Anak yang hangat, empatis, dan berpengalaman. Buatlah analisis psikologis perkembangan anak dalam format JSON yang valid.',
+          content: 'Anda adalah seorang Psikolog Pendidikan Anak yang hangat, empatis, dan berpengalaman. Hasilkan respon HANYA dalam format JSON yang valid.',
         },
         { role: 'user', content: userPrompt },
       ],
       temperature: 0.7,
+      max_tokens: 2000,
     }),
   })
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.error?.message || `Gagal menghubungi API LLM (Status: ${response.status})`)
+    throw new Error(errorData.error?.message || `Gagal menghubungi API LLM (HTTP Status: ${response.status})`)
   }
 
   const data = await response.json()
   const content = data.choices?.[0]?.message?.content || ''
 
-  const jsonMatch = content.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
-    throw new Error('Respon AI tidak memuat format JSON objek yang valid.')
+  if (!content.trim()) {
+    throw new Error('Respon dari API LLM kosong.')
   }
 
-  const parsed = JSON.parse(jsonMatch[0])
+  const parsed = cleanAndParseJSON<any>(content)
   const result: AnalisisPsikologis = {
     id: generateId(),
     siswaId: '',
