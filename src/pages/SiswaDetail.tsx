@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ArrowLeft, BookOpen, CalendarDays, Lightbulb, MessageSquare, Plus, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, CalendarDays, Lightbulb, MessageSquare, Plus, Pencil, Trash2, Brain, Sparkles, UserCheck, Compass, Award } from 'lucide-react'
 import { db, generateId, KATEGORI_POTENSI } from '../db/database'
 import { useStore } from '../store/useStore'
 import { Avatar, StudentForm, ConfirmDeleteModal } from './SiswaList'
+import { synthesizePsychologicalProfile } from '../utils/psychologyEngine'
 
 const tabs = [
   { id: 'akademis', label: 'Akademis', icon: BookOpen },
   { id: 'absensi', label: 'Absensi', icon: CalendarDays },
+  { id: 'psikologis', label: 'Karakter AI', icon: Brain },
   { id: 'potensi', label: 'Potensi', icon: Lightbulb },
   { id: 'catatan', label: 'Catatan', icon: MessageSquare },
 ] as const
@@ -27,6 +29,12 @@ export function SiswaDetail() {
   const absensi = useLiveQuery(() => selectedSiswaId ? db.absensi.where('siswaId').equals(selectedSiswaId).toArray() : [], [selectedSiswaId]) ?? []
   const catatan = useLiveQuery(() => selectedSiswaId ? db.catatan.where('siswaId').equals(selectedSiswaId).reverse().sortBy('tanggal') : [], [selectedSiswaId]) ?? []
   const [note, setNote] = useState('')
+
+  // Synthesize AI Psychological Narrative Profile
+  const profileAI = useMemo(() => {
+    if (!siswa) return null
+    return synthesizePsychologicalProfile(siswa.nama, absensi, nilai, catatan)
+  }, [siswa, absensi, nilai, catatan])
 
   if (!siswa) {
     return <div className="rounded-2xl border border-[var(--border)] bg-white/70 p-6 dark:bg-dark-surface-2">Siswa tidak ditemukan.</div>
@@ -144,8 +152,95 @@ export function SiswaDetail() {
       )}
 
       {activeTab === 'absensi' && (
-        <div className="grid gap-3 sm:grid-cols-4">
-          {(['H', 'I', 'S', 'A'] as const).map((status) => <Stat key={status} label={status} value={absensi.filter((a) => a.status === status).length} />)}
+        <div className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-4">
+            {(['H', 'I', 'S', 'A'] as const).map((status) => <Stat key={status} label={status} value={absensi.filter((a) => a.status === status).length} />)}
+          </div>
+
+          <div className="rounded-2xl border border-[var(--border)] bg-white/70 p-4 dark:bg-dark-surface-2">
+            <h3 className="font-heading text-base font-bold mb-3">Riwayat Presensi & Respon Pertanyaan Harian</h3>
+            <div className="space-y-2 max-h-[300px] overflow-auto pr-1">
+              {absensi.map((a) => (
+                <div key={a.id} className="flex flex-col gap-1 rounded-xl border border-[var(--border)] p-3 bg-[var(--surface)] text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">{a.tanggal}</span>
+                    <span className="font-bold text-xs px-2.5 py-0.5 rounded-full bg-primary-50 text-primary">Status: {a.status}</span>
+                  </div>
+                  {a.pertanyaanHariIni && (
+                    <p className="text-xs text-[var(--text-muted)] italic">Pertanyaan: "{a.pertanyaanHariIni}"</p>
+                  )}
+                  {a.jawabanSiswa && (
+                    <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Jawaban: "{a.jawabanSiswa}"</p>
+                  )}
+                </div>
+              ))}
+              {!absensi.length && <p className="text-xs text-[var(--text-muted)]">Belum ada riwayat absensi.</p>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'psikologis' && profileAI && (
+        <div className="space-y-4">
+          {/* AI Narrative Banner */}
+          <div className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary-50/60 via-white/80 to-accent-50/30 p-6 shadow-sm dark:bg-dark-surface-2 dark:from-dark-surface-2 dark:to-dark-surface-1">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-md">
+                  <Brain size={20} />
+                </div>
+                <div>
+                  <h2 className="font-heading text-xl font-bold">Analisis Karakteristik Psikologis AI</h2>
+                  <p className="text-xs text-[var(--text-muted)]">Diperbarui: {profileAI.updatedAt} • Berdasarkan {profileAI.totalRespon} presensi interaktif</p>
+                </div>
+              </div>
+
+              <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary-100 px-3 py-1.5 rounded-full">
+                <Sparkles size={14} /> AI Synthesis Engine
+              </span>
+            </div>
+
+            {/* Dominant Traits Badges */}
+            <div className="mb-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-2">Karakter Dominan Siswa:</p>
+              <div className="flex flex-wrap gap-2">
+                {profileAI.karakterUtama.map((trait) => (
+                  <span key={trait} className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 text-emerald-800 px-3.5 py-1.5 text-xs font-bold shadow-sm dark:bg-emerald-950 dark:text-emerald-300">
+                    <UserCheck size={14} /> {trait}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Narrative Story */}
+            <div className="rounded-2xl bg-white/90 p-5 shadow-inner border border-[var(--border)] dark:bg-dark-surface-1">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-2">Profil Dynamics & Gambaran Karakter:</h3>
+              <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                {profileAI.narasiKarakter}
+              </p>
+            </div>
+
+            {/* Recommendation Cards */}
+            <div className="grid gap-4 sm:grid-cols-2 mt-4">
+              <div className="rounded-2xl bg-white/80 p-4 border border-[var(--border)] dark:bg-dark-surface-1">
+                <div className="flex items-center gap-2 text-primary font-bold text-sm mb-1.5">
+                  <Compass size={16} /> Saran Pendekatan Pembelajaran:
+                </div>
+                <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                  {profileAI.saranPendekatan}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white/80 p-4 border border-[var(--border)] dark:bg-dark-surface-1">
+                <div className="flex items-center gap-2 text-amber-600 font-bold text-sm mb-1.5">
+                  <Award size={16} /> Rekomendasi Pengembangan Bakat:
+                </div>
+                <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed">
+                  {profileAI.rekomendasiBakat}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

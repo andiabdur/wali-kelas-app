@@ -6,6 +6,7 @@ import { db, KATEGORI_POTENSI } from '../db/database'
 import { getActiveStudents } from '../db/queries'
 import { useStore } from '../store/useStore'
 import { downloadElementAsPdf } from '../utils/pdfGenerator'
+import { synthesizePsychologicalProfile } from '../utils/psychologyEngine'
 
 export function Laporan() {
   const { kelasInfo, notify } = useStore()
@@ -97,8 +98,38 @@ export function Laporan() {
             </Section>
 
             <Section title="Potensi & Bakat Siswa">
-              <p className="text-gray-800">{selected.potensi.map((id) => KATEGORI_POTENSI.find((p) => p.id === id)?.label).filter(Boolean).join(', ') || 'Belum ditandai'}</p>
+              <p className="text-gray-800 font-medium">{selected.potensi.map((id) => KATEGORI_POTENSI.find((p) => p.id === id)?.label).filter(Boolean).join(', ') || 'Belum ditandai'}</p>
             </Section>
+
+            {/* AI Psychological Narrative Profile */}
+            {(() => {
+              const profileAI = synthesizePsychologicalProfile(selected.nama, absensi, nilai, catatan)
+              return (
+                <Section title="Analisis & Profil Karakteristik Psikologis Siswa (AI Generated)">
+                  <div className="rounded-lg border border-gray-300 bg-gray-50/70 p-4 text-xs space-y-2">
+                    <div className="flex items-center gap-2 font-bold text-gray-900">
+                      <span>Karakter Dominan:</span>
+                      <span className="font-extrabold text-blue-800 bg-blue-100 px-2 py-0.5 rounded">
+                        {profileAI.karakterUtama.join(' • ')}
+                      </span>
+                    </div>
+                    <p className="leading-relaxed text-gray-800 text-justify">
+                      {profileAI.narasiKarakter}
+                    </p>
+                    <div className="pt-2 border-t border-gray-200 grid grid-cols-2 gap-2 text-[11px]">
+                      <div>
+                        <span className="font-bold block text-gray-900">Saran Pendekatan Belajar:</span>
+                        <span className="text-gray-700">{profileAI.saranPendekatan}</span>
+                      </div>
+                      <div>
+                        <span className="font-bold block text-gray-900">Rekomendasi Bakat:</span>
+                        <span className="text-gray-700">{profileAI.rekomendasiBakat}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Section>
+              )
+            })()}
 
             <Section title="Catatan Perkembangan Wali Kelas">
               {catatanBulan.length ? catatanBulan.map((c) => <p key={c.id} className="mb-1.5 text-gray-800">• {c.isi}</p>) : <p className="text-gray-500 italic">- Tidak ada catatan khusus -</p>}

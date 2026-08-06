@@ -35,6 +35,19 @@ export interface Absensi {
   tanggal: string
   status: 'H' | 'I' | 'S' | 'A'
   keterangan?: string
+  pertanyaanHariIni?: string
+  jawabanSiswa?: string
+  dimensiPsikologis?: string
+}
+
+export interface AnalisisPsikologis {
+  id: string
+  siswaId: string
+  updatedAt: string
+  karakterUtama: string[]
+  narasiKarakter: string
+  saranPendekatan: string
+  rekomendasiBakat: string
 }
 
 export interface MataPelajaran {
@@ -81,6 +94,7 @@ export class WaliKelasDB extends Dexie {
   mataPelajaran!: Table<MataPelajaran>
   nilai!: Table<Nilai>
   catatan!: Table<Catatan>
+  analisisPsikologis!: Table<AnalisisPsikologis>
 
   constructor() {
     super('WaliKelasDB')
@@ -91,6 +105,7 @@ export class WaliKelasDB extends Dexie {
       mataPelajaran: 'id, urutan',
       nilai: 'id, siswaId, mapelId, tanggal, [siswaId+mapelId]',
       catatan: 'id, siswaId, tanggal',
+      analisisPsikologis: 'id, siswaId, updatedAt',
     })
   }
 }
