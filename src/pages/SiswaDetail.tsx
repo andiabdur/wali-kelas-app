@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ArrowLeft, BookOpen, CalendarDays, Lightbulb, MessageSquare, Plus, Pencil, Trash2, Brain, Sparkles, UserCheck, Compass, Award } from 'lucide-react'
-import { db, generateId, KATEGORI_POTENSI } from '../db/database'
+import { ArrowLeft, BookOpen, CalendarDays, Lightbulb, MessageSquare, Plus, Pencil, Trash2, Brain, Sparkles, UserCheck, Compass, Award, Loader2, RefreshCw } from 'lucide-react'
+import { db, generateId, KATEGORI_POTENSI, type AnalisisPsikologis } from '../db/database'
 import { useStore } from '../store/useStore'
 import { Avatar, StudentForm, ConfirmDeleteModal } from './SiswaList'
 import { synthesizePsychologicalProfile } from '../utils/psychologyEngine'
+import { generateStudentPsychologicalProfileAI } from '../utils/aiService'
 
 const tabs = [
   { id: 'akademis', label: 'Akademis', icon: BookOpen },
@@ -25,18 +26,58 @@ export function SiswaDetail() {
   const [note, setNote] = useState('')
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
   const [editingNoteText, setEditingNoteText] = useState('')
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false)
 
   const siswa = useLiveQuery(() => selectedSiswaId ? db.siswa.get(selectedSiswaId) : undefined, [selectedSiswaId])
   const nilai = useLiveQuery(() => selectedSiswaId ? db.nilai.where('siswaId').equals(selectedSiswaId).toArray() : [], [selectedSiswaId]) ?? []
   const mapel = useLiveQuery(() => db.mataPelajaran.orderBy('urutan').toArray(), []) ?? []
   const absensi = useLiveQuery(() => selectedSiswaId ? db.absensi.where('siswaId').equals(selectedSiswaId).toArray() : [], [selectedSiswaId]) ?? []
   const catatan = useLiveQuery(() => selectedSiswaId ? db.catatan.where('siswaId').equals(selectedSiswaId).reverse().sortBy('tanggal') : [], [selectedSiswaId]) ?? []
+  const savedAI = useLiveQuery(() => selectedSiswaId ? db.analisisPsikologis.where('siswaId').equals(selectedSiswaId).first() : undefined, [selectedSiswaId])
 
   // Synthesize AI Psychological Narrative Profile
   const profileAI = useMemo(() => {
     if (!siswa) return null
+    if (savedAI) {
+      return {
+        karakterUtama: savedAI.karakterUtama,
+        narasiKarakter: savedAI.narasiKarakter,
+        saranPendekatan: savedAI.saranPendekatan,
+        rekomendasiBakat: savedAI.rekomendasiBakat,
+        totalRespon: absensi.filter((a) => a.jawabanSiswa).length,
+        updatedAt: savedAI.updatedAt,
+      }
+    }
     return synthesizePsychologicalProfile(siswa.nama, absensi, nilai, catatan)
-  }, [siswa, absensi, nilai, catatan])
+  }, [siswa, absensi, nilai, catatan, savedAI])
+
+  async function handleGenerateAI() {
+    if (!siswa) return
+    setIsGeneratingAI(true)
+    notify('Menghubungi AI untuk menganalisis karakteristik siswa...', 'info')
+    try {
+      const generated = await generateStudentPsychologicalProfileAI(siswa.nama, absensi, nilai, catatan)
+      generated.siswaId = siswa.id
+      
+      const existing = await db.analisisPsikologis.where('siswaId').equals(siswa.id).first()
+      if (existing) {
+        await db.analisisPsikologis.update(existing.id, {
+          karakterUtama: generated.karakterUtama,
+          narasiKarakter: generated.narasiKarakter,
+          saranPendekatan: generated.saranPendekatan,
+          rekomendasiBakat: generated.rekomendasiBakat,
+          updatedAt: generated.updatedAt,
+        })
+      } else {
+        await db.analisisPsikologis.add(generated)
+      }
+      notify(`Analisis karakteristik AI untuk ${siswa.nama} berhasil diproses!`, 'success')
+    } catch (err: any) {
+      notify(err.message || 'Gagal memproses analisis AI.', 'error')
+    } finally {
+      setIsGeneratingAI(false)
+    }
+  }
 
   if (!siswa) {
     return <div className="rounded-2xl border border-[var(--border)] bg-white/70 p-6 dark:bg-dark-surface-2">Siswa tidak ditemukan.</div>
@@ -200,10 +241,10 @@ export function SiswaDetail() {
         <div className="space-y-4">
           {/* AI Narrative Banner */}
           <div className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary-50/60 via-white/80 to-accent-50/30 p-6 shadow-sm dark:bg-dark-surface-2 dark:from-dark-surface-2 dark:to-dark-surface-1">
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <div className="flex items-center gap-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-md">
-                  <Brain size={20} />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-md">
+                  <Brain size={22} />
                 </div>
                 <div>
                   <h2 className="font-heading text-xl font-bold">Analisis Karakteristik Psikologis AI</h2>
@@ -211,9 +252,16 @@ export function SiswaDetail() {
                 </div>
               </div>
 
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary-100 px-3 py-1.5 rounded-full">
-                <Sparkles size={14} /> AI Synthesis Engine
-              </span>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleGenerateAI}
+                disabled={isGeneratingAI}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-xs font-semibold text-white shadow-md disabled:opacity-50"
+              >
+                {isGeneratingAI ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                {isGeneratingAI ? 'Menyintesis AI...' : 'Generate / Refresh Analisis AI'}
+              </motion.button>
             </div>
 
             {/* Dominant Traits Badges */}

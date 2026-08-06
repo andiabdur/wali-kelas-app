@@ -144,12 +144,23 @@ export const CURRICULUM_PERTANYAAN_HARIAN: PertanyaanItem[] = [
   },
 ]
 
+export function getActiveCurriculum(): PertanyaanItem[] {
+  try {
+    const saved = localStorage.getItem('AI_GENERATED_QUESTIONS')
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    }
+  } catch {}
+  return CURRICULUM_PERTANYAAN_HARIAN
+}
+
 export function getPertanyaanForDay(dateStr: string): PertanyaanItem {
-  // Compute day index from date string
+  const curriculum = getActiveCurriculum()
   const date = new Date(dateStr)
   const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24))
-  const index = (dayOfYear - 1) % CURRICULUM_PERTANYAAN_HARIAN.length
-  return CURRICULUM_PERTANYAAN_HARIAN[index] || CURRICULUM_PERTANYAAN_HARIAN[0]
+  const index = (dayOfYear - 1) % curriculum.length
+  return curriculum[index] || curriculum[0]
 }
 
 export function synthesizePsychologicalProfile(
