@@ -149,7 +149,7 @@ export function SiswaDetail() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsEditing(true)}
-              className="flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1"
+              className="flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-100 dark:hover:bg-dark-surface-2"
             >
               <Pencil size={16} /> Edit Data
             </motion.button>
@@ -157,7 +157,7 @@ export function SiswaDetail() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsDeleting(true)}
-              className="flex min-h-11 items-center gap-2 rounded-xl border border-red-200 bg-red-50/50 px-4 text-sm font-semibold text-red-600 shadow-sm hover:bg-red-100/50"
+              className="flex min-h-11 items-center gap-2 rounded-xl border border-red-200 bg-red-50/50 px-4 text-sm font-semibold text-red-600 shadow-sm hover:bg-red-100/50 dark:bg-red-950/40 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-900/50"
             >
               <Trash2 size={16} /> Hapus
             </motion.button>
@@ -331,7 +331,7 @@ export function SiswaDetail() {
                     <textarea
                       value={editingNoteText}
                       onChange={(e) => setEditingNoteText(e.target.value)}
-                      className="min-h-24 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                      className="min-h-24 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100"
                     />
                     <div className="flex gap-2">
                       <motion.button
@@ -346,7 +346,7 @@ export function SiswaDetail() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setEditingNoteId(null)}
-                        className="flex min-h-9 items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-dark-surface-1"
+                        className="flex min-h-9 items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-dark-surface-1 dark:text-gray-100"
                       >
                         Batal
                       </motion.button>
@@ -362,7 +362,7 @@ export function SiswaDetail() {
                           whileTap={{ scale: 0.9 }}
                           onClick={() => { setEditingNoteId(c.id); setEditingNoteText(c.isi); }}
                           title="Edit Catatan"
-                          className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-primary dark:hover:bg-dark-surface-1 transition"
+                          className="rounded-lg p-1 text-gray-400 dark:text-gray-400 hover:bg-gray-100 hover:text-primary dark:hover:bg-dark-surface-1 dark:hover:text-primary transition"
                         >
                           <Pencil size={15} />
                         </motion.button>
@@ -371,7 +371,7 @@ export function SiswaDetail() {
                           whileTap={{ scale: 0.9 }}
                           onClick={() => deleteNote(c.id)}
                           title="Hapus Catatan"
-                          className="rounded-lg p-1 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 transition"
+                          className="rounded-lg p-1 text-gray-400 dark:text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition"
                         >
                           <Trash2 size={15} />
                         </motion.button>

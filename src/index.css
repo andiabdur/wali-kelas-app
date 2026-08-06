@@ -22,12 +22,24 @@
   }
 
   .dark {
-    --surface: #1A1A18;
-    --surface-2: #242422;
-    --surface-3: #2E2E2C;
-    --border: #3A3A38;
-    --text-primary: #E5E5E3;
+    --surface: #121316;
+    --surface-2: #1E2025;
+    --surface-3: #2A2D35;
+    --border: #333742;
+    --text-primary: #F3F4F6;
     --text-muted: #9CA3AF;
+    --text-subtle: #6B7280;
+  }
+
+  .dark input,
+  .dark select,
+  .dark textarea {
+    color-scheme: dark;
+  }
+
+  .dark select option {
+    background-color: #1E2025;
+    color: #F3F4F6;
   }
 
   html {
