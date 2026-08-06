@@ -34,6 +34,7 @@ export function Pengaturan() {
     try {
       setLLMConfig(llmForm)
       const items = await generate30PresensiQuestionsAI()
+      window.dispatchEvent(new Event('storage'))
       notify(`Berhasil menggenerasi ${items.length} pertanyaan presensi interaktif baru dari AI!`, 'success')
     } catch (err: any) {
       notify(err.message || 'Gagal menggenerasi pertanyaan dari AI.', 'error')

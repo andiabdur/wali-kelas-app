@@ -176,7 +176,7 @@ export function synthesizePsychologicalProfile(
   const keywords: string[] = []
 
   answeredList.forEach((a) => {
-    const matchedPilihan = CURRICULUM_PERTANYAAN_HARIAN.flatMap((q) => q.pilihan).find(
+    const matchedPilihan = getActiveCurriculum().flatMap((q) => q.pilihan).find(
       (p) => p.label.toLowerCase() === a.jawabanSiswa?.toLowerCase()
     )
     if (matchedPilihan) {

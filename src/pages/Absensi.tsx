@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Calendar, CheckCircle2, CheckCheck, HelpCircle, Sparkles, MessageSquare } from 'lucide-react'
 import { db, generateId, type Absensi as AbsensiRecord } from '../db/database'
 import { useStore } from '../store/useStore'
-import { CURRICULUM_PERTANYAAN_HARIAN, getPertanyaanForDay, type PertanyaanItem } from '../utils/psychologyEngine'
+import { getActiveCurriculum, getPertanyaanForDay, type PertanyaanItem } from '../utils/psychologyEngine'
 
 type Status = AbsensiRecord['status']
 
@@ -25,9 +25,24 @@ export function Absensi() {
   const siswa = useLiveQuery(() => db.siswa.toArray(), [])?.filter((item) => item.aktif).sort((a, b) => a.nomorAbsen - b.nomorAbsen) ?? []
   const records = useLiveQuery(() => db.absensi.where('tanggal').equals(tanggal).toArray(), [tanggal]) ?? []
   
-  const defaultQuestion = useMemo(() => getPertanyaanForDay(tanggal), [tanggal])
-  const [selectedQuestion, setSelectedQuestion] = useState<PertanyaanItem>(defaultQuestion)
+  const [curriculumVersion, setCurriculumVersion] = useState(0)
+
+  useEffect(() => {
+    function handleUpdate() {
+      setCurriculumVersion((v) => v + 1)
+    }
+    window.addEventListener('storage', handleUpdate)
+    return () => window.removeEventListener('storage', handleUpdate)
+  }, [])
+
+  const activeCurriculum = useMemo(() => getActiveCurriculum(), [tanggal, curriculumVersion])
+  const defaultQuestion = useMemo(() => getPertanyaanForDay(tanggal), [tanggal, curriculumVersion])
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string>('')
   const [customQuestionText, setCustomQuestionText] = useState('')
+
+  const selectedQuestion = useMemo(() => {
+    return activeCurriculum.find((q) => q.id === selectedQuestionId) || defaultQuestion
+  }, [activeCurriculum, selectedQuestionId, defaultQuestion])
 
   const [draftStatus, setDraftStatus] = useState<Record<string, Status>>({})
   const [draftJawaban, setDraftJawaban] = useState<Record<string, string>>({})
@@ -130,15 +145,12 @@ export function Absensi() {
             <select
               value={selectedQuestion.id}
               onChange={(e) => {
-                const found = CURRICULUM_PERTANYAAN_HARIAN.find((q) => q.id === e.target.value)
-                if (found) {
-                  setSelectedQuestion(found)
-                  setCustomQuestionText('')
-                }
+                setSelectedQuestionId(e.target.value)
+                setCustomQuestionText('')
               }}
               className="min-h-11 rounded-xl border border-[var(--border)] bg-white px-3 text-xs font-semibold shadow-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1"
             >
-              {CURRICULUM_PERTANYAAN_HARIAN.map((q) => (
+              {activeCurriculum.map((q) => (
                 <option key={q.id} value={q.id}>
                   Hari {q.hariKe}: {q.pertanyaan.slice(0, 45)}...
                 </option>
