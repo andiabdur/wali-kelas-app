@@ -8,6 +8,20 @@ export interface LLMConfig {
   model: string
 }
 
+export function normalizeApiUrl(url: string): string {
+  let trimmed = url.trim()
+  if (!trimmed) return 'https://api.openai.com/v1/chat/completions'
+  trimmed = trimmed.replace(/\/+$/, '')
+
+  if (trimmed.endsWith('/chat/completions')) {
+    return trimmed
+  }
+  if (trimmed.endsWith('/v1')) {
+    return `${trimmed}/chat/completions`
+  }
+  return `${trimmed}/v1/chat/completions`
+}
+
 export function getLLMConfig(): LLMConfig {
   const localUrl = localStorage.getItem('LLM_API_URL')
   const localKey = localStorage.getItem('LLM_API_KEY')
@@ -15,15 +29,17 @@ export function getLLMConfig(): LLMConfig {
 
   const metaEnv = (import.meta as any).env || {}
 
+  const rawUrl = localUrl || metaEnv.VITE_OPENAI_API_URL || 'https://api.openai.com/v1/chat/completions'
+
   return {
-    apiUrl: localUrl || metaEnv.VITE_OPENAI_API_URL || 'https://api.openai.com/v1/chat/completions',
+    apiUrl: normalizeApiUrl(rawUrl),
     apiKey: localKey || metaEnv.VITE_OPENAI_API_KEY || '',
     model: localModel || metaEnv.VITE_OPENAI_MODEL || 'gpt-4o-mini',
   }
 }
 
 export function setLLMConfig(config: Partial<LLMConfig>) {
-  if (config.apiUrl !== undefined) localStorage.setItem('LLM_API_URL', config.apiUrl)
+  if (config.apiUrl !== undefined) localStorage.setItem('LLM_API_URL', normalizeApiUrl(config.apiUrl))
   if (config.apiKey !== undefined) localStorage.setItem('LLM_API_KEY', config.apiKey)
   if (config.model !== undefined) localStorage.setItem('LLM_MODEL', config.model)
 }

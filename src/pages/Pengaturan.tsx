@@ -103,45 +103,48 @@ export function Pengaturan() {
       </article>
 
       {/* AI LLM Integration Section */}
-      <article className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary-50/50 via-white/80 to-accent-50/30 p-5 shadow-sm dark:bg-dark-surface-2 dark:from-dark-surface-2 dark:to-dark-surface-1">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
-            <Bot size={18} />
+      <form onSubmit={(e) => { e.preventDefault(); saveLLM(); }}>
+        <article className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary-50/50 via-white/80 to-accent-50/30 p-5 shadow-sm dark:bg-dark-surface-2 dark:from-dark-surface-2 dark:to-dark-surface-1">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
+              <Bot size={18} />
+            </div>
+            <div>
+              <h2 className="font-heading text-xl font-bold">Konfigurasi AI LLM & Pertanyaan Presensi</h2>
+              <p className="text-xs text-[var(--text-muted)]">Mendukung OpenAI API standard (`VITE_OPENAI_API_URL`, `VITE_OPENAI_API_KEY`, `VITE_OPENAI_MODEL` di file `.env` atau form di bawah).</p>
+            </div>
           </div>
-          <div>
-            <h2 className="font-heading text-xl font-bold">Konfigurasi AI LLM & Pertanyaan Presensi</h2>
-            <p className="text-xs text-[var(--text-muted)]">Mendukung OpenAI API standard (`VITE_OPENAI_API_URL`, `VITE_OPENAI_API_KEY`, `VITE_OPENAI_MODEL` di file `.env` atau form di bawah).</p>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <Input label="API URL (OpenAI Compatible)" value={llmForm.apiUrl} placeholder="https://api.openai.com/v1/chat/completions" onChange={(apiUrl) => setLlmForm({ ...llmForm, apiUrl })} />
+            <Input label="API Key LLM" type="password" autoComplete="off" value={llmForm.apiKey} placeholder="sk-..." onChange={(apiKey) => setLlmForm({ ...llmForm, apiKey })} />
+            <Input label="Model AI" value={llmForm.model} placeholder="gpt-4o-mini" onChange={(model) => setLlmForm({ ...llmForm, model })} />
           </div>
-        </div>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <Input label="API URL (OpenAI Compatible)" value={llmForm.apiUrl} placeholder="https://api.openai.com/v1/chat/completions" onChange={(apiUrl) => setLlmForm({ ...llmForm, apiUrl })} />
-          <Input label="API Key LLM" type="password" value={llmForm.apiKey} placeholder="sk-..." onChange={(apiKey) => setLlmForm({ ...llmForm, apiKey })} />
-          <Input label="Model AI" value={llmForm.model} placeholder="gpt-4o-mini" onChange={(model) => setLlmForm({ ...llmForm, model })} />
-        </div>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <motion.button
+              type="submit"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 text-sm"
+            >
+              <Save size={16} /> Simpan Konfigurasi AI
+            </motion.button>
 
-        <div className="mt-5 flex flex-wrap gap-3">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={saveLLM}
-            className="flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 text-sm"
-          >
-            <Save size={16} /> Simpan Konfigurasi AI
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleGenerateQuestions}
-            disabled={isGeneratingQuestions}
-            className="flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 font-semibold text-white shadow-md disabled:opacity-50 text-sm"
-          >
-            {isGeneratingQuestions ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-            {isGeneratingQuestions ? 'Menggenerasi dari AI...' : 'Generate 30 Pertanyaan Presensi AI'}
-          </motion.button>
-        </div>
-      </article>
+            <motion.button
+              type="button"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleGenerateQuestions}
+              disabled={isGeneratingQuestions}
+              className="flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 font-semibold text-white shadow-md disabled:opacity-50 text-sm"
+            >
+              {isGeneratingQuestions ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+              {isGeneratingQuestions ? 'Menggenerasi dari AI...' : 'Generate 30 Pertanyaan Presensi AI'}
+            </motion.button>
+          </div>
+        </article>
+      </form>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <article className="rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm dark:bg-dark-surface-2">
@@ -195,6 +198,6 @@ export function Pengaturan() {
   )
 }
 
-function Input({ label, value, placeholder, onChange, type = 'text' }: { label: string; value: string; placeholder?: string; onChange: (value: string) => void; type?: string }) {
-  return <label className="block"><span className="text-sm font-semibold">{label}</span><input type={type} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-gray-400 dark:placeholder:text-gray-600" /></label>
+function Input({ label, value, placeholder, onChange, type = 'text', autoComplete }: { label: string; value: string; placeholder?: string; onChange: (value: string) => void; type?: string; autoComplete?: string }) {
+  return <label className="block"><span className="text-sm font-semibold">{label}</span><input type={type} autoComplete={autoComplete} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-gray-400 dark:placeholder:text-gray-600" /></label>
 }
