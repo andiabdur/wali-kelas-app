@@ -77,6 +77,52 @@ function cleanAndParseJSON<T>(rawText: string): T {
 }
 
 /**
+ * Extract content from response supporting both standard JSON and SSE streaming format (data: {...})
+ */
+async function extractContentFromResponse(response: Response): Promise<string> {
+  const text = await response.text()
+
+  // 1. Try standard JSON parse
+  try {
+    const data = JSON.parse(text)
+    if (data.choices?.[0]?.message?.content) {
+      return data.choices[0].message.content
+    }
+    if (data.choices?.[0]?.text) {
+      return data.choices[0].text
+    }
+    if (data.output?.text) {
+      return data.output.text
+    }
+  } catch {}
+
+  // 2. Try parsing Server-Sent Events (SSE) streaming format ("data: {...}")
+  if (text.includes('data:')) {
+    const lines = text.split('\n')
+    let accumulatedContent = ''
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (trimmed.startsWith('data:') && !trimmed.includes('[DONE]')) {
+        const jsonStr = trimmed.slice(5).trim()
+        try {
+          const parsed = JSON.parse(jsonStr)
+          const deltaContent =
+            parsed.choices?.[0]?.delta?.content ||
+            parsed.choices?.[0]?.message?.content ||
+            ''
+          accumulatedContent += deltaContent
+        } catch {}
+      }
+    }
+    if (accumulatedContent.trim()) {
+      return accumulatedContent.trim()
+    }
+  }
+
+  return text.trim()
+}
+
+/**
  * Generate 30 Daily Interactive Presensi Questions using OpenAI LLM API
  */
 export async function generate30PresensiQuestionsAI(): Promise<PertanyaanItem[]> {
@@ -100,10 +146,10 @@ Skema JSON:
     "kategori": "Kategori Psikologis",
     "dimensi": "Dimensi Psikologis",
     "pilihan": [
-      { "label": "Opsi A", "makna": "Makna ringkas psikologis A", "sifat": "Sifat A" },
-      { "label": "Opsi B", "makna": "Makna ringkas psikologis B", "sifat": "Sifat B" },
-      { "label": "Opsi C", "makna": "Makna ringkas psikologis C", "sifat": "Sifat C" },
-      { "label": "Opsi D", "makna": "Makna ringkas psikologis D", "sifat": "Sifat D" }
+      { "label": "Opsi A", "makna": "Makna ringkas A", "sifat": "Sifat A" },
+      { "label": "Opsi B", "makna": "Makna ringkas B", "sifat": "Sifat B" },
+      { "label": "Opsi C", "makna": "Makna ringkas C", "sifat": "Sifat C" },
+      { "label": "Opsi D", "makna": "Makna ringkas D", "sifat": "Sifat D" }
     ]
   }
 ]`
@@ -121,17 +167,21 @@ Skema JSON:
         { role: 'user', content: 'Hasilkan 30 pertanyaan presensi harian interaktif psikologis anak dalam format JSON Array.' },
       ],
       temperature: 0.7,
-      max_tokens: 4000,
+      max_tokens: 3500,
     }),
   })
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.error?.message || `Gagal menghubungi API LLM (HTTP Status: ${response.status})`)
+    const errorText = await response.text().catch(() => '')
+    let msg = `Gagal menghubungi API LLM (HTTP Status: ${response.status})`
+    try {
+      const errJson = JSON.parse(errorText)
+      if (errJson.error?.message) msg = errJson.error.message
+    } catch {}
+    throw new Error(msg)
   }
 
-  const data = await response.json()
-  const content = data.choices?.[0]?.message?.content || ''
+  const content = await extractContentFromResponse(response)
 
   if (!content.trim()) {
     throw new Error('Respon dari API LLM kosong.')
@@ -219,12 +269,16 @@ Berdasarkan data di atas dan referensi psikologi pendidikan anak (Big Five, Holl
   })
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.error?.message || `Gagal menghubungi API LLM (HTTP Status: ${response.status})`)
+    const errorText = await response.text().catch(() => '')
+    let msg = `Gagal menghubungi API LLM (HTTP Status: ${response.status})`
+    try {
+      const errJson = JSON.parse(errorText)
+      if (errJson.error?.message) msg = errJson.error.message
+    } catch {}
+    throw new Error(msg)
   }
 
-  const data = await response.json()
-  const content = data.choices?.[0]?.message?.content || ''
+  const content = await extractContentFromResponse(response)
 
   if (!content.trim()) {
     throw new Error('Respon dari API LLM kosong.')

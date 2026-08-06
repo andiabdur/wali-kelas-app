@@ -118,18 +118,12 @@ export function Absensi() {
           <div className="space-y-1.5 flex-1">
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-full bg-primary-100 px-3 py-1 text-xs font-bold text-primary">
-                <Sparkles size={14} /> Pertanyaan Presensi Harian AI
-              </span>
-              <span className="text-xs font-semibold text-[var(--text-muted)]">
-                Dimensi: {selectedQuestion.dimensi}
+                <Sparkles size={14} /> Pertanyaan Presensi Harian
               </span>
             </div>
             <h2 className="font-heading text-xl font-bold text-gray-900 dark:text-gray-100">
               "{activeQuestionText}"
             </h2>
-            <p className="text-xs text-[var(--text-muted)]">
-              Kategori: {selectedQuestion.kategori} • Tanyakan pertanyaan ini saat memanggil nama siswa.
-            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

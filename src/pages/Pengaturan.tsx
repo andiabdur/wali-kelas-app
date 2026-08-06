@@ -111,7 +111,7 @@ export function Pengaturan() {
             </div>
             <div>
               <h2 className="font-heading text-xl font-bold">Konfigurasi AI LLM & Pertanyaan Presensi</h2>
-              <p className="text-xs text-[var(--text-muted)]">Mendukung OpenAI API standard (`VITE_OPENAI_API_URL`, `VITE_OPENAI_API_KEY`, `VITE_OPENAI_MODEL` di file `.env` atau form di bawah).</p>
+              <p className="text-xs text-[var(--text-muted)]">Integrasi API LLM untuk generasi otomatis pertanyaan presensi dan analisis psikologis siswa.</p>
             </div>
           </div>
 
