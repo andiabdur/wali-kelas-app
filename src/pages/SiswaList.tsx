@@ -275,7 +275,7 @@ export function ConfirmDeleteModal({
         </p>
 
         <div className="mt-6 flex gap-3">
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={onClose} className="min-h-11 flex-1 rounded-xl border border-[var(--border)] font-semibold hover:bg-gray-50 dark:hover:bg-dark-surface-1">Batal</motion.button>
+          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={onClose} className="min-h-11 flex-1 rounded-xl border border-[var(--border)] font-semibold hover:bg-gray-50 dark:hover:bg-dark-surface-1 dark:text-gray-100">Batal</motion.button>
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={onConfirm} className="min-h-11 flex-1 rounded-xl bg-red-600 font-semibold text-white shadow-md hover:bg-red-700">Ya, Hapus</motion.button>
         </div>
       </motion.div>

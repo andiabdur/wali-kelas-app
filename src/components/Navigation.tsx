@@ -37,7 +37,7 @@ export function DesktopNavigation() {
               onClick={() => navigate(item.id)}
               className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${
                 active
-                  ? 'bg-primary-50 text-primary shadow-sm'
+                  ? 'bg-primary-50 text-primary dark:bg-primary-950/70 dark:text-primary-300 shadow-sm'
                   : 'text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -52,7 +52,7 @@ export function DesktopNavigation() {
         onClick={() => navigate('pengaturan')}
         className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
           currentPage === 'pengaturan'
-            ? 'bg-primary-50 text-primary shadow-sm'
+            ? 'bg-primary-50 text-primary dark:bg-primary-950/70 dark:text-primary-300 shadow-sm'
             : 'text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]'
         }`}
       >

@@ -148,10 +148,10 @@ export function Absensi() {
                 setSelectedQuestionId(e.target.value)
                 setCustomQuestionText('')
               }}
-              className="min-h-11 rounded-xl border border-[var(--border)] bg-white px-3 text-xs font-semibold shadow-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1"
+              className="min-h-11 rounded-xl border border-[var(--border)] bg-white px-3 text-xs font-semibold shadow-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100 dark:border-gray-700"
             >
               {activeCurriculum.map((q) => (
-                <option key={q.id} value={q.id}>
+                <option key={q.id} value={q.id} className="bg-white text-gray-900 dark:bg-[#1E2025] dark:text-gray-100">
                   Hari {q.hariKe}: {q.pertanyaan.slice(0, 45)}...
                 </option>
               ))}
@@ -169,7 +169,7 @@ export function Absensi() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.95 }}
               onClick={setAllHadir}
-              className="flex min-h-11 items-center gap-1.5 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold hover:bg-gray-50 dark:bg-dark-surface-1"
+              className="flex min-h-11 items-center gap-1.5 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-100 dark:hover:bg-dark-surface-2 dark:border-gray-700"
             >
               <CheckCheck size={16} className="text-emerald-600" /> Tandai Semua Hadir
             </motion.button>
@@ -199,7 +199,7 @@ export function Absensi() {
                   <p className="font-heading text-lg font-bold">{item.nama}</p>
                   <p className="text-sm text-[var(--text-muted)]">No. Absen {item.nomorAbsen}</p>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-xs font-bold ${currentStatus ? 'bg-primary-50 text-primary' : 'bg-gray-100 text-gray-500'}`}>
+                <span className={`rounded-full px-3 py-1 text-xs font-bold ${currentStatus ? 'bg-primary-50 text-primary dark:bg-primary-950/70 dark:text-primary-300' : 'bg-gray-100 text-gray-500 dark:bg-dark-surface-1 dark:text-gray-400'}`}>
                   {currentStatus ? statusMeta[currentStatus].label : 'Belum Absen'}
                 </span>
               </div>
@@ -214,7 +214,7 @@ export function Absensi() {
                     className={`min-h-11 rounded-xl border text-sm font-extrabold transition-all ${
                       currentStatus === status
                         ? statusMeta[status].className
-                        : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)] hover:border-gray-300'
+                        : 'border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-muted)] hover:border-gray-300 dark:hover:bg-dark-surface-1 dark:text-gray-300'
                     }`}
                   >
                     {status}
@@ -225,7 +225,7 @@ export function Absensi() {
               {/* Interactive Student Answer Section (Visible when Hadir) */}
               {isHadir && (
                 <div className="mt-3.5 pt-3 border-t border-dashed border-[var(--border)] space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-primary">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-primary dark:text-primary-300">
                     <MessageSquare size={14} /> Jawaban Siswa untuk Pertanyaan Hari Ini:
                   </div>
 
@@ -240,7 +240,7 @@ export function Absensi() {
                           className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
                             isSelected
                               ? 'border-primary bg-primary text-white shadow-sm'
-                              : 'border-[var(--border)] bg-white text-[var(--text-primary)] hover:border-gray-300 dark:bg-dark-surface-1'
+                              : 'border-[var(--border)] bg-white text-[var(--text-primary)] hover:border-gray-300 dark:bg-dark-surface-1 dark:text-gray-200 dark:hover:bg-dark-surface-2 dark:border-gray-700'
                           }`}
                         >
                           {p.label}
@@ -254,7 +254,7 @@ export function Absensi() {
                       value={currentJawaban}
                       onChange={(e) => setJawaban(item.id, e.target.value)}
                       placeholder="Atau ketik jawaban khusus siswa..."
-                      className="min-h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-xs outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1"
+                      className="min-h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-xs outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100 dark:border-gray-700 dark:placeholder:text-gray-500"
                     />
                   </div>
                 </div>
