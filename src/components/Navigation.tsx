@@ -67,7 +67,7 @@ export function MobileNavigation() {
   const { currentPage, navigate } = useStore()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t border-[var(--border)] bg-[var(--surface)] px-1 pb-safe pt-1 lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md px-0.5 pb-safe pt-1 lg:hidden shadow-lg">
       {mobileItems.map((item) => {
         const active = currentPage === item.id || (item.id === 'siswa' && currentPage === 'siswa-detail')
         const Icon = item.icon
@@ -75,23 +75,23 @@ export function MobileNavigation() {
           <button
             key={item.id}
             onClick={() => navigate(item.id)}
-            className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-semibold transition ${
+            className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 py-1 text-[10px] font-semibold transition ${
               active ? 'text-primary' : 'text-[var(--text-muted)]'
             }`}
           >
-            <Icon size={21} strokeWidth={active ? 2.4 : 2} />
-            <span>{item.label}</span>
+            <Icon size={20} strokeWidth={active ? 2.4 : 2} className="shrink-0" />
+            <span className="w-full text-center truncate tracking-tighter">{item.label}</span>
           </button>
         )
       })}
       <button
         onClick={() => navigate('pengaturan')}
-        className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-semibold transition ${
+        className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 py-1 text-[10px] font-semibold transition ${
           currentPage === 'pengaturan' ? 'text-primary' : 'text-[var(--text-muted)]'
         }`}
       >
-        <Settings size={21} />
-        <span>Setelan</span>
+        <Settings size={20} className="shrink-0" />
+        <span className="w-full text-center truncate tracking-tighter">Setelan</span>
       </button>
     </nav>
   )

@@ -405,7 +405,7 @@ function SeatCard({
     <motion.div
       whileHover={{ scale: 1.03 }}
       onClick={onSwapSelect}
-      className={`relative flex min-h-[90px] flex-col items-center justify-center rounded-2xl border p-2.5 text-center cursor-pointer transition-all shadow-2xs ${
+      className={`relative flex min-h-[85px] sm:min-h-[90px] flex-col items-center justify-center rounded-2xl border p-2 sm:p-2.5 text-center cursor-pointer transition-all shadow-2xs ${
         isSwapSelected
           ? 'border-primary ring-2 ring-primary bg-primary-50 dark:bg-primary-950/50'
           : isBoy
@@ -415,7 +415,7 @@ function SeatCard({
     >
       {/* Gender Badge Tag */}
       <span
-        className={`absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase ${
+        className={`absolute top-1 right-1 sm:top-1.5 sm:right-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase ${
           isBoy ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200'
         }`}
       >
