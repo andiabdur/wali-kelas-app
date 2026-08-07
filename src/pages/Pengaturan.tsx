@@ -141,7 +141,7 @@ export function Pengaturan() {
               className="flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 font-semibold text-white shadow-md disabled:opacity-50 text-sm"
             >
               {isGeneratingQuestions ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-              {isGeneratingQuestions ? 'Menggenerasi dari AI...' : 'Generate 30 Pertanyaan Presensi AI'}
+              {isGeneratingQuestions ? 'Menggenerasi Pertanyaan...' : 'Generate 30 Pertanyaan Presensi'}
             </motion.button>
           </div>
         </article>

@@ -11,7 +11,7 @@ import { generateStudentPsychologicalProfileAI } from '../utils/aiService'
 const tabs = [
   { id: 'akademis', label: 'Akademis', icon: BookOpen },
   { id: 'absensi', label: 'Absensi', icon: CalendarDays },
-  { id: 'psikologis', label: 'Karakter AI', icon: Brain },
+  { id: 'psikologis', label: 'Karakter', icon: Brain },
   { id: 'potensi', label: 'Potensi', icon: Lightbulb },
   { id: 'catatan', label: 'Catatan', icon: MessageSquare },
 ] as const
@@ -62,7 +62,7 @@ export function SiswaDetail() {
   async function handleGenerateAI() {
     if (!siswa) return
     setIsGeneratingAI(true)
-    notify('Menghubungi AI untuk menganalisis karakteristik siswa...', 'info')
+    notify('Menganalisis data karakteristik siswa...', 'info')
     try {
       const generated = await generateStudentPsychologicalProfileAI(siswa.nama, absensi, nilai, catatan)
       generated.siswaId = siswa.id
@@ -79,9 +79,9 @@ export function SiswaDetail() {
       } else {
         await db.analisisPsikologis.add(generated)
       }
-      notify(`Analisis karakteristik AI untuk ${siswa.nama} berhasil diproses!`, 'success')
+      notify(`Analisis karakteristik ${siswa.nama} berhasil diproses!`, 'success')
     } catch (err: any) {
-      notify(err.message || 'Gagal memproses analisis AI.', 'error')
+      notify(err.message || 'Gagal memproses analisis karakteristik.', 'error')
     } finally {
       setIsGeneratingAI(false)
     }
@@ -471,7 +471,7 @@ export function SiswaDetail() {
                   <Brain size={22} />
                 </div>
                 <div>
-                  <h2 className="font-heading text-xl font-bold">Analisis Karakteristik Siswa AI</h2>
+                  <h2 className="font-heading text-xl font-bold">Analisis Karakteristik Siswa</h2>
                   <p className="text-xs text-[var(--text-muted)]">Diperbarui: {profileAI.updatedAt} • Berdasarkan {profileAI.totalRespon} presensi interaktif</p>
                 </div>
               </div>
@@ -484,7 +484,7 @@ export function SiswaDetail() {
                 className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-xs font-semibold text-white shadow-md disabled:opacity-50"
               >
                 {isGeneratingAI ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-                {isGeneratingAI ? 'Menyintesis AI...' : 'Generate / Refresh Analisis AI'}
+                {isGeneratingAI ? 'Menyusun Analisis...' : 'Analisis Ulang Karakteristik'}
               </motion.button>
             </div>
 
