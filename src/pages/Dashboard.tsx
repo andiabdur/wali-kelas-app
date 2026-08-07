@@ -4,6 +4,7 @@ import { db, KATEGORI_POTENSI } from '../db/database'
 import { getActiveStudents } from '../db/queries'
 import { useStore } from '../store/useStore'
 import { AttendanceBarChart, PotentialBars } from '../components/DashboardCharts'
+import { TabelDetailKehadiran } from '../components/TabelDetailKehadiran'
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10)
@@ -113,6 +114,13 @@ export function Dashboard() {
           {potentialData.length ? <PotentialBars data={potentialData} /> : <Empty text="Belum ada potensi yang dicatat." />}
         </article>
       </div>
+
+      {/* Matriks Detail Kehadiran Siswa (Format Tabel Mendetail) */}
+      <TabelDetailKehadiran
+        siswa={siswa}
+        absensi={absensi}
+        onSelectSiswa={(id) => navigate('siswa-detail', id)}
+      />
 
       <article className="rounded-2xl border border-[var(--border)] bg-white/60 p-5 shadow-sm dark:bg-dark-surface-2">
         <div className="mb-4 flex items-center gap-2">
