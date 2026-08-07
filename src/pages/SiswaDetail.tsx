@@ -28,6 +28,14 @@ export function SiswaDetail() {
   const [editingNoteText, setEditingNoteText] = useState('')
   const [isGeneratingAI, setIsGeneratingAI] = useState(false)
 
+  // Absensi Editing States
+  const [editingAbsensiId, setEditingAbsensiId] = useState<string | null>(null)
+  const [editingAbsensiJawaban, setEditingAbsensiJawaban] = useState('')
+  const [isAddingAbsensi, setIsAddingAbsensi] = useState(false)
+  const [newAbsensiDate, setNewAbsensiDate] = useState(new Date().toISOString().slice(0, 10))
+  const [newAbsensiStatus, setNewAbsensiStatus] = useState<'H' | 'I' | 'S' | 'A'>('H')
+  const [newAbsensiJawaban, setNewAbsensiJawaban] = useState('')
+
   const siswa = useLiveQuery(() => selectedSiswaId ? db.siswa.get(selectedSiswaId) : undefined, [selectedSiswaId])
   const nilai = useLiveQuery(() => selectedSiswaId ? db.nilai.where('siswaId').equals(selectedSiswaId).toArray() : [], [selectedSiswaId]) ?? []
   const mapel = useLiveQuery(() => db.mataPelajaran.orderBy('urutan').toArray(), []) ?? []
@@ -123,6 +131,52 @@ export function SiswaDetail() {
     notify('Catatan berhasil dihapus.', 'info')
   }
 
+  // Absensi Handler Functions
+  async function updateAbsensiStatus(id: string, newStatus: 'H' | 'I' | 'S' | 'A') {
+    await db.absensi.update(id, { status: newStatus })
+    notify(`Status presensi diperbarui menjadi ${newStatus}.`, 'success')
+  }
+
+  async function saveEditedAbsensiJawaban(id: string) {
+    await db.absensi.update(id, { jawabanSiswa: editingAbsensiJawaban.trim() || undefined })
+    notify('Respon presensi siswa berhasil diperbarui.', 'success')
+    setEditingAbsensiId(null)
+    setEditingAbsensiJawaban('')
+  }
+
+  async function deleteAbsensiRecord(id: string) {
+    if (!confirm('Apakah Anda yakin ingin menghapus presensi tanggal ini?')) return
+    await db.absensi.delete(id)
+    notify('Presensi tanggal ini berhasil dihapus.', 'info')
+  }
+
+  async function handleAddOrUpdateAbsensiDate() {
+    if (!newAbsensiDate) {
+      notify('Pilih tanggal presensi.', 'info')
+      return
+    }
+    const existing = absensi.find((a) => a.tanggal === newAbsensiDate)
+    if (existing) {
+      await db.absensi.update(existing.id, {
+        status: newAbsensiStatus,
+        jawabanSiswa: newAbsensiJawaban.trim() || undefined,
+      })
+      notify(`Presensi tanggal ${newAbsensiDate} berhasil diperbarui!`, 'success')
+    } else {
+      await db.absensi.add({
+        id: generateId(),
+        siswaId: siswa!.id,
+        tanggal: newAbsensiDate,
+        status: newAbsensiStatus,
+        jawabanSiswa: newAbsensiJawaban.trim() || undefined,
+        pertanyaanHariIni: 'Presensi Harian',
+      })
+      notify(`Presensi tanggal ${newAbsensiDate} berhasil ditambahkan!`, 'success')
+    }
+    setIsAddingAbsensi(false)
+    setNewAbsensiJawaban('')
+  }
+
   return (
     <section className="space-y-5">
       <motion.button whileHover={{ x: -2 }} whileTap={{ scale: 0.95 }} onClick={() => navigate('siswa')} className="flex min-h-11 items-center gap-2 rounded-xl px-2 text-sm font-semibold text-[var(--text-muted)] hover:text-primary transition">
@@ -211,24 +265,194 @@ export function SiswaDetail() {
       {activeTab === 'absensi' && (
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-4">
-            {(['H', 'I', 'S', 'A'] as const).map((status) => <Stat key={status} label={status} value={absensi.filter((a) => a.status === status).length} />)}
+            {(['H', 'I', 'S', 'A'] as const).map((status) => (
+              <Stat key={status} label={status} value={absensi.filter((a) => a.status === status).length} />
+            ))}
           </div>
 
-          <div className="rounded-2xl border border-[var(--border)] bg-white/70 p-4 dark:bg-dark-surface-2">
-            <h3 className="font-heading text-base font-bold mb-3">Riwayat Presensi & Respon Pertanyaan Harian</h3>
-            <div className="space-y-2 max-h-[300px] overflow-auto pr-1">
-              {absensi.map((a) => (
-                <div key={a.id} className="flex flex-col gap-1 rounded-xl border border-[var(--border)] p-3 bg-[var(--surface)] text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">{a.tanggal}</span>
-                    <span className="font-bold text-xs px-2.5 py-0.5 rounded-full bg-primary-50 text-primary">Status: {a.status}</span>
+          <div className="rounded-2xl border border-[var(--border)] bg-white/70 p-5 dark:bg-dark-surface-2 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="font-heading text-lg font-bold">Riwayat & Edit Presensi Siswa</h3>
+                <p className="text-xs text-[var(--text-muted)]">Ubah status presensi (H/I/S/A), sunting respon siswa, atau catat presensi baru.</p>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsAddingAbsensi(!isAddingAbsensi)}
+                className="flex min-h-10 items-center gap-1.5 rounded-xl bg-primary px-4 text-xs font-semibold text-white shadow-sm"
+              >
+                <Plus size={16} /> {isAddingAbsensi ? 'Batal Tambah' : 'Catat / Edit Tanggal'}
+              </motion.button>
+            </div>
+
+            {/* Add / Edit Date Presensi Form */}
+            {isAddingAbsensi && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="rounded-xl border border-primary/30 bg-primary-50/50 dark:bg-primary-950/40 p-4 space-y-3"
+              >
+                <p className="text-xs font-bold text-primary dark:text-primary-300">Catat atau Edit Presensi Manual per Tanggal:</p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Pilih Tanggal:</label>
+                    <input
+                      type="date"
+                      value={newAbsensiDate}
+                      onChange={(e) => setNewAbsensiDate(e.target.value)}
+                      className="w-full min-h-10 rounded-xl border border-[var(--border)] bg-white px-3 text-xs outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100"
+                    />
                   </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Status Presensi:</label>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {(['H', 'I', 'S', 'A'] as const).map((st) => (
+                        <button
+                          key={st}
+                          type="button"
+                          onClick={() => setNewAbsensiStatus(st)}
+                          className={`min-h-10 rounded-lg text-xs font-extrabold transition ${
+                            newAbsensiStatus === st
+                              ? st === 'H' ? 'bg-emerald-600 text-white' : st === 'I' ? 'bg-blue-600 text-white' : st === 'S' ? 'bg-amber-600 text-white' : 'bg-red-600 text-white'
+                              : 'bg-white border border-[var(--border)] text-gray-700 dark:bg-dark-surface-1 dark:text-gray-200'
+                          }`}
+                        >
+                          {st}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-[var(--text-muted)] block mb-1">Jawaban / Respon Siswa (Opsional):</label>
+                  <input
+                    type="text"
+                    value={newAbsensiJawaban}
+                    onChange={(e) => setNewAbsensiJawaban(e.target.value)}
+                    placeholder="Contoh: Pisang, Kaos Santai, Jepang..."
+                    className="w-full min-h-10 rounded-xl border border-[var(--border)] bg-white px-3 text-xs outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingAbsensi(false)}
+                    className="px-3 py-2 text-xs font-semibold rounded-lg border border-[var(--border)] bg-white dark:bg-dark-surface-1"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddOrUpdateAbsensiDate}
+                    className="px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-white shadow-sm"
+                  >
+                    Simpan Presensi
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Attendance History List with Inline Editing */}
+            <div className="space-y-2.5 max-h-[450px] overflow-auto pr-1">
+              {[...absensi].sort((a, b) => b.tanggal.localeCompare(a.tanggal)).map((a) => (
+                <div key={a.id} className="flex flex-col gap-2 rounded-xl border border-[var(--border)] p-3.5 bg-[var(--surface)] transition hover:shadow-sm text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 font-bold">
+                      <CalendarDays size={16} className="text-primary" />
+                      <span>{a.tanggal}</span>
+                    </div>
+
+                    {/* Quick Interactive Status Switcher (H, I, S, A) */}
+                    <div className="flex items-center gap-1">
+                      {(['H', 'I', 'S', 'A'] as const).map((st) => {
+                        const isActive = a.status === st
+                        let activeBg = 'bg-emerald-600 text-white font-extrabold shadow-sm'
+                        if (st === 'I') activeBg = 'bg-blue-600 text-white font-extrabold shadow-sm'
+                        if (st === 'S') activeBg = 'bg-amber-600 text-white font-extrabold shadow-sm'
+                        if (st === 'A') activeBg = 'bg-red-600 text-white font-extrabold shadow-sm'
+
+                        return (
+                          <button
+                            key={st}
+                            type="button"
+                            onClick={() => updateAbsensiStatus(a.id, st)}
+                            className={`h-7 w-7 rounded-md text-xs font-bold transition ${
+                              isActive
+                                ? activeBg
+                                : 'border border-[var(--border)] bg-white text-gray-500 hover:bg-gray-100 dark:bg-dark-surface-1 dark:text-gray-400 dark:hover:bg-dark-surface-2'
+                            }`}
+                            title={`Ubah status ke ${st}`}
+                          >
+                            {st}
+                          </button>
+                        )
+                      })}
+
+                      <button
+                        type="button"
+                        onClick={() => deleteAbsensiRecord(a.id)}
+                        className="ml-1 p-1 text-gray-400 hover:text-red-600 transition"
+                        title="Hapus presensi tanggal ini"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </div>
+
                   {a.pertanyaanHariIni && (
                     <p className="text-xs text-[var(--text-muted)] italic">Pertanyaan: "{a.pertanyaanHariIni}"</p>
                   )}
-                  {a.jawabanSiswa && (
-                    <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Jawaban: "{a.jawabanSiswa}"</p>
-                  )}
+
+                  {/* Respon Siswa Section */}
+                  <div className="pt-1">
+                    {editingAbsensiId === a.id ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        <input
+                          type="text"
+                          value={editingAbsensiJawaban}
+                          onChange={(e) => setEditingAbsensiJawaban(e.target.value)}
+                          className="min-h-9 flex-1 rounded-lg border border-[var(--border)] bg-white px-3 text-xs outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100"
+                          placeholder="Edit respon siswa..."
+                        />
+                        <button
+                          type="button"
+                          onClick={() => saveEditedAbsensiJawaban(a.id)}
+                          className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold shadow-sm"
+                        >
+                          Simpan
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingAbsensiId(null)}
+                          className="px-2 py-1.5 rounded-lg border border-[var(--border)] text-xs"
+                        >
+                          Batal
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                          Jawaban: "{a.jawabanSiswa || 'Belum ada respon'}"
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingAbsensiId(a.id)
+                            setEditingAbsensiJawaban(a.jawabanSiswa || '')
+                          }}
+                          className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+                        >
+                          <Pencil size={12} /> Edit Respon
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
               {!absensi.length && <p className="text-xs text-[var(--text-muted)]">Belum ada riwayat absensi.</p>}
