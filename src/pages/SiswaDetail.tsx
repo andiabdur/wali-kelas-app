@@ -247,7 +247,7 @@ export function SiswaDetail() {
                   <Brain size={22} />
                 </div>
                 <div>
-                  <h2 className="font-heading text-xl font-bold">Analisis Karakteristik Psikologis AI</h2>
+                  <h2 className="font-heading text-xl font-bold">Analisis Karakteristik Siswa AI</h2>
                   <p className="text-xs text-[var(--text-muted)]">Diperbarui: {profileAI.updatedAt} • Berdasarkan {profileAI.totalRespon} presensi interaktif</p>
                 </div>
               </div>

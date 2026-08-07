@@ -112,7 +112,7 @@ export function Pengaturan() {
             </div>
             <div>
               <h2 className="font-heading text-xl font-bold">Konfigurasi AI LLM & Pertanyaan Presensi</h2>
-              <p className="text-xs text-[var(--text-muted)]">Integrasi API LLM untuk generasi otomatis pertanyaan presensi dan analisis psikologis siswa.</p>
+              <p className="text-xs text-[var(--text-muted)]">Integrasi API LLM untuk generasi otomatis pertanyaan presensi harian dan analisis karakteristik siswa.</p>
             </div>
           </div>
 

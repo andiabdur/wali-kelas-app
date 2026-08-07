@@ -119,7 +119,7 @@ export function Absensi() {
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Absensi Interaktif</p>
           <h1 className="mt-2 font-heading text-3xl font-bold">Input Harian & Karakter Siswa</h1>
-          <p className="mt-1 text-[var(--text-muted)]">Absen siswa sambil menanyakan pertanyaan harian untuk analisis psikologis AI.</p>
+          <p className="mt-1 text-[var(--text-muted)]">Absen siswa sambil menanyakan pertanyaan harian yang seru untuk analisis karakteristik siswa.</p>
         </div>
         <label className="flex min-h-12 items-center gap-2 rounded-xl border border-[var(--border)] bg-white/70 px-4 dark:bg-dark-surface-2 focus-within:ring-2 focus-within:ring-primary/20 transition">
           <Calendar size={18} className="text-primary" />

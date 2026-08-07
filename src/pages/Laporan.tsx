@@ -105,7 +105,7 @@ export function Laporan() {
             {(() => {
               const profileAI = synthesizePsychologicalProfile(selected.nama, absensi, nilai, catatan)
               return (
-                <Section title="Analisis & Profil Karakteristik Psikologis Siswa (AI Generated)">
+                <Section title="Analisis & Profil Karakteristik Siswa (AI Generated)">
                   <div className="rounded-lg border border-gray-300 bg-gray-50/70 p-4 text-xs space-y-2">
                     <div className="flex items-center gap-2 font-bold text-gray-900">
                       <span>Karakter Dominan:</span>

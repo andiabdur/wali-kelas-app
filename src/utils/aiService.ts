@@ -132,9 +132,16 @@ export async function generate30PresensiQuestionsAI(): Promise<PertanyaanItem[]>
     throw new Error('API Key LLM belum dikonfigurasi. Harap isi API Key di Pengaturan atau file .env.')
   }
 
-  const systemPrompt = `Anda adalah psikolog anak dan pakar pendidikan SD.
-Buat 30 pertanyaan presensi harian interaktif dan seru untuk siswa SD (1 bulan penuh).
-Setiap pertanyaan memiliki 4 pilihan jawaban yang secara ringkas mencerminkan sifat/karakter emosional anak.
+  const systemPrompt = `Anda adalah seorang pendidik SD dan pengamat karakter anak yang ramah, kreatif, dan menyenangkan.
+Tugas Anda adalah membuat 30 pertanyaan presensi harian yang sangat simpel, seru, dan bernuansa 'gue banget' untuk siswa SD (1 bulan penuh).
+Contoh topik pertanyaan yang sangat dekat dengan dunia anak-anak:
+- Buah kesukaan (misal: Pisang, Apel, Jeruk, Semangka)
+- Model pakaian/baju favorit saat liburan (misal: Kaos Santai & Celana Pendek, Gaun/Kemeja Rapi, Baju Olahraga, Jaket Hype/Keren)
+- Negara/Tempat impian yang ingin dikunjungi (misal: Jepang, Arab Saudi, Korea, Disneyland/Luar Angkasa)
+- Hewan paling lucu (misal: Kucing, Anjing/Kelinci, Burung Warna-warni, Ikan Hias)
+- Makanan sarapan impian, minuman paling segar, kegiatan sore favorit, dll.
+
+Setiap pertanyaan memiliki 4 pilihan jawaban yang mudah dipilih siswa dan mencerminkan kecenderungan karakter anak secara positif.
 
 PENTING: Berikan balasan HANYA dalam format JSON Array tanpa teks pengantar atau markdown tambahan.
 Skema JSON:
@@ -142,14 +149,14 @@ Skema JSON:
   {
     "id": "p1",
     "hariKe": 1,
-    "pertanyaan": "Pertanyaan seru untuk anak",
-    "kategori": "Kategori Psikologis",
-    "dimensi": "Dimensi Psikologis",
+    "pertanyaan": "Kalau boleh milih, buah apa yang paling 'kamu banget'?",
+    "kategori": "Preferensi Diri",
+    "dimensi": "Minat & Karakter",
     "pilihan": [
-      { "label": "Opsi A", "makna": "Makna ringkas A", "sifat": "Sifat A" },
-      { "label": "Opsi B", "makna": "Makna ringkas B", "sifat": "Sifat B" },
-      { "label": "Opsi C", "makna": "Makna ringkas C", "sifat": "Sifat C" },
-      { "label": "Opsi D", "makna": "Makna ringkas D", "sifat": "Sifat D" }
+      { "label": "Pisang (Manis & Bikin Energi)", "makna": "Enerjik, aktif, dan penuh semangat", "sifat": "Enerjik" },
+      { "label": "Apel (Renyah & Segar)", "makna": "Praktis, jujur, dan terstruktur", "sifat": "Praktis" },
+      { "label": "Jeruk (Asam Manis Kejutan)", "makna": "Ceria, eksploratif, menyukai hal baru", "sifat": "Ceria" },
+      { "label": "Semangka (Segar & Berbagi)", "makna": "Empatis, ramah, dan suka berbagi", "sifat": "Empatis" }
     ]
   }
 ]`
@@ -164,7 +171,7 @@ Skema JSON:
       model: config.model,
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: 'Hasilkan 30 pertanyaan presensi harian interaktif psikologis anak dalam format JSON Array.' },
+        { role: 'user', content: 'Hasilkan 30 pertanyaan presensi harian interaktif dan ramah anak ("gue banget") dalam format JSON Array.' },
       ],
       temperature: 0.7,
       max_tokens: 3500,
@@ -199,7 +206,7 @@ Skema JSON:
 }
 
 /**
- * Generate Student Psychological Profile Narrative using OpenAI LLM API
+ * Generate Student Character Profile Narrative using OpenAI LLM API
  */
 export async function generateStudentPsychologicalProfileAI(
   namaSiswa: string,
@@ -231,7 +238,7 @@ export async function generateStudentPsychologicalProfileAI(
 
   const userPrompt = `Nama Siswa: ${namaSiswa}
 Jumlah Respon Presensi Interaktif: ${answeredList.length}
-Respon Presensi Harian Siswa (termasuk jawaban pilihan & jawaban bebas siswa):
+Respon Presensi Harian Siswa (termasuk pilihan 'gue banget' & jawaban bebas siswa):
 ${answeredList.map((a) => `- ${a.tanggal}: Pertanyaan "${a.pertanyaanHariIni}" -> Jawaban Siswa "${a.jawabanSiswa}"`).join('\n')}
 
 Data Akademis (Rata-rata nilai: ${avgNilai}):
@@ -240,12 +247,12 @@ ${nilaiRecords.map((n) => `- Nilai ${n.jenis}: ${n.nilai}`).join('\n')}
 Catatan Wali Kelas:
 ${catatanRecords.map((c) => `- ${c.isi}`).join('\n')}
 
-Catatan Penting: Siswa dapat memberikan jawaban bebas yang otentik. Analisis jawaban bebas tersebut secara psikologis untuk mengungkap karakter, imajinasi, dan bakat anak secara hangat dan mendalam.
+Catatan Penting: Siswa memberikan pilihan khas anak-anak dan jawaban bebas yang otentik. Rangkaian jawaban ini mengungkapkan karakter, minat alami, serta potensi kecerdasan anak secara hangat, positif, dan mendalam.
 
-Hasilkan analisis kepribadian anak dalam format JSON berikut:
+Hasilkan analisis karakteristik siswa dalam format JSON berikut:
 {
   "karakterUtama": ["Sifat 1", "Sifat 2", "Sifat 3"],
-  "narasiKarakter": "Paragraf narasi komprehensif, hangat, dan mendalam tentang dinamika kepribadian dan perkembangan anak ini untuk dibaca wali kelas dan orang tua.",
+  "narasiKarakter": "Paragraf narasi komprehensif, hangat, dan menginspirasi tentang dinamika karakteristik dan perkembangan anak ini untuk dibaca wali kelas dan orang tua.",
   "saranPendekatan": "Rekomendasi strategi pendekatan pembelajaran yang paling cocok untuk anak ini.",
   "rekomendasiBakat": "Rekomendasi ekstrakurikuler atau bidang pengembangan bakat yang sesuai."
 }`
@@ -261,7 +268,7 @@ Hasilkan analisis kepribadian anak dalam format JSON berikut:
       messages: [
         {
           role: 'system',
-          content: 'Anda adalah seorang Psikolog Pendidikan Anak yang hangat, empatis, dan berpengalaman. Hasilkan respon HANYA dalam format JSON yang valid.',
+          content: 'Anda adalah seorang Pendidik & Pengamat Karakteristik Anak yang hangat, empatis, dan berpengalaman. Hasilkan respon HANYA dalam format JSON yang valid.',
         },
         { role: 'user', content: userPrompt },
       ],
