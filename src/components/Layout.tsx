@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react'
 import { DesktopNavigation, MobileNavigation } from './Navigation'
 import { Toast } from './Toast'
+import { PWAInstallPrompt } from './PWAInstallPrompt'
 import { useStore } from '../store/useStore'
 
 export function Layout({ children }: { children: ReactNode }) {
@@ -13,6 +14,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="mx-auto max-w-7xl">{children}</div>
       </main>
       <MobileNavigation />
+      <PWAInstallPrompt />
       <Toast toast={toast} onClose={clearToast} />
     </div>
   )
