@@ -141,20 +141,23 @@ export function Absensi() {
             </h2>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="w-full sm:w-auto">
             <select
               value={selectedQuestion.id}
               onChange={(e) => {
                 setSelectedQuestionId(e.target.value)
                 setCustomQuestionText('')
               }}
-              className="min-h-11 rounded-xl border border-[var(--border)] bg-white px-3 text-xs font-semibold shadow-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100 dark:border-gray-700"
+              className="min-h-11 w-full max-w-full sm:w-72 rounded-xl border border-[var(--border)] bg-white px-3 text-xs font-semibold shadow-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100 dark:border-gray-700 truncate cursor-pointer"
             >
-              {activeCurriculum.map((q) => (
-                <option key={q.id} value={q.id} className="bg-white text-gray-900 dark:bg-[#1E2025] dark:text-gray-100">
-                  Hari {q.hariKe}: {q.pertanyaan.slice(0, 45)}...
-                </option>
-              ))}
+              {activeCurriculum.map((q) => {
+                const shortText = q.pertanyaan.length > 30 ? q.pertanyaan.slice(0, 30) + '...' : q.pertanyaan
+                return (
+                  <option key={q.id} value={q.id} className="bg-white text-gray-900 dark:bg-[#1E2025] dark:text-gray-100">
+                    Hari {q.hariKe}: {shortText}
+                  </option>
+                )
+              })}
             </select>
           </div>
         </div>

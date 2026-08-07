@@ -299,7 +299,7 @@ export function Akademis() {
           <select
             value={filterSiswa}
             onChange={(e) => setFilterSiswa(e.target.value)}
-            className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100"
+            className="min-h-11 w-full max-w-full truncate rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100"
           >
             <option value="" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Semua Siswa ({siswa.length})</option>
             {siswa.map((s) => (
@@ -312,7 +312,7 @@ export function Akademis() {
           <select
             value={filterMapel}
             onChange={(e) => setFilterMapel(e.target.value)}
-            className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100"
+            className="min-h-11 w-full max-w-full truncate rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100"
           >
             <option value="" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Semua Mapel ({mapel.length})</option>
             {mapel.map((m) => (
@@ -325,7 +325,7 @@ export function Akademis() {
           <select
             value={filterJenis}
             onChange={(e) => setFilterJenis(e.target.value)}
-            className="min-h-11 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 capitalize dark:bg-dark-surface-1 dark:text-gray-100"
+            className="min-h-11 w-full max-w-full truncate rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 capitalize dark:bg-dark-surface-1 dark:text-gray-100"
           >
             <option value="" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Semua Kategori Nilai</option>
             <option value="kuis" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Kuis</option>
