@@ -5,6 +5,7 @@ import { Plus, Search, Pencil, Trash2, AlertTriangle, X } from 'lucide-react'
 import { db, generateId, KATEGORI_POTENSI, type Siswa } from '../db/database'
 import { getActiveStudents } from '../db/queries'
 import { useStore } from '../store/useStore'
+import { formatTTL } from '../utils/formatters'
 
 export function SiswaList() {
   const { navigate, notify } = useStore()
@@ -66,6 +67,11 @@ export function SiswaList() {
               <div className="min-w-0 flex-1 pr-14">
                 <p className="font-heading text-lg font-bold group-hover:text-primary transition-colors">{item.nama}</p>
                 <p className="text-sm text-[var(--text-muted)]">No. {item.nomorAbsen} • {item.jenisKelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</p>
+                {(item.tempatLahir || item.tanggalLahir) && (
+                  <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+                    TTL: {formatTTL(item.tempatLahir, item.tanggalLahir)}
+                  </p>
+                )}
                 {(item.nisn || item.nis) && (
                   <p className="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">
                     {item.nisn ? `NISN: ${item.nisn}` : ''} {item.nisn && item.nis ? '• ' : ''} {item.nis ? `NIS: ${item.nis}` : ''}
@@ -146,6 +152,8 @@ export function StudentForm({
     nis: initialData?.nis || '',
     nomorAbsen: initialData?.nomorAbsen ?? nextNumber,
     jenisKelamin: (initialData?.jenisKelamin || 'L') as 'L' | 'P',
+    tempatLahir: initialData?.tempatLahir || '',
+    tanggalLahir: initialData?.tanggalLahir || '',
     teleponOrtu: initialData?.teleponOrtu || '',
     namaAyah: initialData?.namaAyah || '',
     namaIbu: initialData?.namaIbu || '',
@@ -161,6 +169,8 @@ export function StudentForm({
         nis: form.nis.trim() || undefined,
         nomorAbsen: Number(form.nomorAbsen),
         jenisKelamin: form.jenisKelamin,
+        tempatLahir: form.tempatLahir.trim() || undefined,
+        tanggalLahir: form.tanggalLahir || undefined,
         teleponOrtu: form.teleponOrtu.trim() || undefined,
         namaAyah: form.namaAyah.trim() || undefined,
         namaIbu: form.namaIbu.trim() || undefined,
@@ -175,6 +185,8 @@ export function StudentForm({
         nis: form.nis.trim() || undefined,
         nomorAbsen: Number(form.nomorAbsen),
         jenisKelamin: form.jenisKelamin,
+        tempatLahir: form.tempatLahir.trim() || undefined,
+        tanggalLahir: form.tanggalLahir || undefined,
         teleponOrtu: form.teleponOrtu.trim() || undefined,
         namaAyah: form.namaAyah.trim() || undefined,
         namaIbu: form.namaIbu.trim() || undefined,
@@ -212,10 +224,6 @@ export function StudentForm({
         <div className="mt-5 space-y-4">
           <Input label="Nama Lengkap *" value={form.nama} onChange={(nama) => setForm({ ...form, nama })} />
           <div className="grid grid-cols-2 gap-3">
-            <Input label="NISN" value={form.nisn} onChange={(nisn) => setForm({ ...form, nisn })} />
-            <Input label="NIS" value={form.nis} onChange={(nis) => setForm({ ...form, nis })} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
             <Input label="Nomor Absen *" type="number" value={String(form.nomorAbsen)} onChange={(nomorAbsen) => setForm({ ...form, nomorAbsen: Number(nomorAbsen) })} />
             <label className="block">
               <span className="text-sm font-semibold">Jenis Kelamin</span>
@@ -224,6 +232,16 @@ export function StudentForm({
                 <option value="P" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Perempuan</option>
               </select>
             </label>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Input label="Tempat Lahir" value={form.tempatLahir} onChange={(tempatLahir) => setForm({ ...form, tempatLahir })} placeholder="Contoh: Majalengka" />
+            <Input label="Tanggal Lahir" type="date" value={form.tanggalLahir} onChange={(tanggalLahir) => setForm({ ...form, tanggalLahir })} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Input label="NISN" value={form.nisn} onChange={(nisn) => setForm({ ...form, nisn })} />
+            <Input label="NIS" value={form.nis} onChange={(nis) => setForm({ ...form, nis })} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -283,11 +301,11 @@ export function ConfirmDeleteModal({
   )
 }
 
-function Input({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (value: string) => void; type?: string }) {
+function Input({ label, value, onChange, type = 'text', placeholder }: { label: string; value: string; onChange: (value: string) => void; type?: string; placeholder?: string }) {
   return (
     <label className="block">
       <span className="text-sm font-semibold">{label}</span>
-      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-2" />
+      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-2 dark:text-gray-100" />
     </label>
   )
 }

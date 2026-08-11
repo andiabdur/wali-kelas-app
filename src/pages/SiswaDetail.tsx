@@ -7,6 +7,7 @@ import { useStore } from '../store/useStore'
 import { Avatar, StudentForm, ConfirmDeleteModal } from './SiswaList'
 import { synthesizePsychologicalProfile } from '../utils/psychologyEngine'
 import { generateStudentPsychologicalProfileAI } from '../utils/aiService'
+import { formatTTL } from '../utils/formatters'
 
 const tabs = [
   { id: 'akademis', label: 'Akademis', icon: BookOpen },
@@ -190,6 +191,11 @@ export function SiswaDetail() {
             <div>
               <h1 className="font-heading text-3xl font-bold">{siswa.nama}</h1>
               <p className="mt-1 text-[var(--text-muted)]">No. absen {siswa.nomorAbsen} • {siswa.jenisKelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</p>
+              {(siswa.tempatLahir || siswa.tanggalLahir) && (
+                <p className="text-sm font-medium text-[var(--text-muted)] mt-0.5">
+                  TTL: {formatTTL(siswa.tempatLahir, siswa.tanggalLahir)}
+                </p>
+              )}
               <p className="text-sm font-medium text-primary mt-0.5">
                 {siswa.nisn ? `NISN: ${siswa.nisn}` : 'NISN: -'} &nbsp;•&nbsp; {siswa.nis ? `NIS: ${siswa.nis}` : 'NIS: -'}
               </p>

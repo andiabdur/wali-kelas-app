@@ -18,6 +18,7 @@ export interface Siswa {
   nis?: string
   nomorAbsen: number
   jenisKelamin: 'L' | 'P'
+  tempatLahir?: string
   tanggalLahir?: string
   alamat?: string
   namaAyah?: string

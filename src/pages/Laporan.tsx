@@ -7,6 +7,7 @@ import { getActiveStudents } from '../db/queries'
 import { useStore } from '../store/useStore'
 import { downloadElementAsPdf } from '../utils/pdfGenerator'
 import { synthesizePsychologicalProfile } from '../utils/psychologyEngine'
+import { formatTTL } from '../utils/formatters'
 
 export function Laporan() {
   const { kelasInfo, notify } = useStore()
@@ -82,8 +83,8 @@ export function Laporan() {
               <Info label="Nama Siswa" value={selected.nama} />
               <Info label="Nomor Absen" value={String(selected.nomorAbsen)} />
               <Info label="Jenis Kelamin" value={selected.jenisKelamin === 'L' ? 'Laki-laki' : 'Perempuan'} />
-              <Info label="NISN" value={selected.nisn || '-'} />
-              <Info label="NIS" value={selected.nis || '-'} />
+              <Info label="Tempat, Tgl Lahir" value={formatTTL(selected.tempatLahir, selected.tanggalLahir)} />
+              <Info label="NISN / NIS" value={`${selected.nisn || '-'} / ${selected.nis || '-'}`} />
               <Info label="Wali Kelas" value={kelasInfo?.namaWaliKelas || '-'} />
             </section>
 
