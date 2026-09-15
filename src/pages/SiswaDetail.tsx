@@ -24,6 +24,7 @@ import {
   updateSiswa,
   deleteSiswaCascade,
   saveAnalisisPsikologis,
+  deleteAnalisisPsikologis,
   addCatatan,
   updateCatatan,
   deleteCatatan,
@@ -122,6 +123,24 @@ export function SiswaDetail() {
       notify(err.message || 'Gagal memproses analisis AI.', 'error')
     } finally {
       setIsGeneratingAI(false)
+    }
+  }
+
+  const [isDeletingAI, setIsDeletingAI] = useState(false)
+
+  async function handleDeleteAI() {
+    if (!savedAI) return
+    if (!confirm(`Hapus hasil analisis karakter AI untuk ${siswa?.nama}? Anda dapat menjalankan analisis AI baru kapan saja.`)) {
+      return
+    }
+    setIsDeletingAI(true)
+    try {
+      await deleteAnalisisPsikologis(savedAI.id)
+      notify(`Hasil analisis AI untuk ${siswa?.nama} berhasil dihapus.`, 'info')
+    } catch (err: any) {
+      notify(err.message || 'Gagal menghapus hasil analisis AI.', 'error')
+    } finally {
+      setIsDeletingAI(false)
     }
   }
 
@@ -562,14 +581,28 @@ export function SiswaDetail() {
                   </div>
                 </div>
 
-                <button
-                  onClick={handleGenerateAI}
-                  disabled={isGeneratingAI}
-                  className="flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors disabled:opacity-50"
-                >
-                  {isGeneratingAI ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                  <span>{isGeneratingAI ? 'Menyusun Analisis...' : 'Analisis Ulang dengan AI'}</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDeleteAI}
+                    disabled={isDeletingAI || isGeneratingAI}
+                    className="flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/10 px-3 text-xs font-semibold text-red-600 hover:bg-red-500/20 dark:text-red-400 transition-colors disabled:opacity-50"
+                    title="Hapus hasil analisis AI"
+                  >
+                    {isDeletingAI ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                    <span>{isDeletingAI ? 'Menghapus...' : 'Hapus Analisis'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleGenerateAI}
+                    disabled={isGeneratingAI || isDeletingAI}
+                    className="flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors disabled:opacity-50"
+                  >
+                    {isGeneratingAI ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                    <span>{isGeneratingAI ? 'Menyusun Analisis...' : 'Analisis Ulang dengan AI'}</span>
+                  </button>
+                </div>
               </div>
 
               {/* Dominant Traits */}

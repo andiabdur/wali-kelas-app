@@ -459,6 +459,10 @@ export async function saveAnalisisPsikologis(analisis: AnalisisPsikologis) {
   await setDoc(doc(firestore, 'analisisPsikologis', analisis.id), analisis)
 }
 
+export async function deleteAnalisisPsikologis(id: string) {
+  await deleteDoc(doc(firestore, 'analisisPsikologis', id))
+}
+
 export async function exportAllKelasData(kelasId: string) {
   const [kelasSnap, siswaSnap, absensiSnap, mapelSnap, nilaiSnap, catatanSnap] = await Promise.all([
     getDocs(query(collection(firestore, 'kelas'), where('id', '==', kelasId))),

@@ -391,25 +391,28 @@ export async function generateStudentPsychologicalProfileAI(
     : 0
 
   const systemPrompt = `Anda adalah seorang Psikolog Pendidikan Anak dan Wali Kelas Sekolah Dasar (SD) yang sangat berpengalaman, empatis, dan berwawasan mendalam.
-Tugas Anda adalah melakukan ANALISIS PSIKOLOGIS, KARAKTERISTIK, DAN POTENSI SISWA SECARA MENDALAM, OTENTIK, DAN BEBAS DARI TEMPLATE KALIMAT KAKU berdasarkan data pengamatan nyata.
+Tugas Anda adalah melakukan ANALISIS PSIKOLOGIS, KARAKTERISTIK, DAN POTENSI SISWA SECARA PADAT, BERMAKNA, OTENTIK, DAN BEBAS TEMPLATE berdasarkan data pengamatan nyata.
 
 PANDUAN ANALISIS (MUTLAK & BEBAS TEMPLATE):
-1. BUKAN TEMPLATE: Dilarang keras menggunakan pola kalimat kaku yang berulang ("Dalam keseharian di kelas...", "Tingkat kehadirannya sangat baik...", "Di bidang pelajaran..."). Tulis analisis yang hidup, mengalir bebas, dan benar-benar personal untuk anak ini.
-2. TELAAH MAKNA JAWABAN SISWA: Analisis secara mendalam bagaimana pilihan-pilihan jawaban santai yang dipilih siswa saat presensi pagi (misal: pilihan buah, pakaian, hewan kesukaan, superhero impian, tempat liburan, dll) mencerminkan cara berpikir, kepekaan emosional, nilai hidup, serta interaksi sosialnya.
-3. KORELASIKAN DENGAN AKADEMIS & CATATAN GURU: Hubungkan kepribadian anak dengan performa akademisnya dan catatan interaksi guru di kelas. Ungkapkan bagaimana anak menghadapi tantangan belajar.
-4. GAYA PENULISAN: Bahasa Indonesia yang kaya, hangat, berjiwa pendidik, mengalir alami, dan berwawasan mendalam untuk dibaca wali kelas dan orang tua murid.
+1. PANJANG OPTIMAL & RINGKAS BERMAKNA (SANGAT PENTING):
+   - "narasiKarakter" HARUS PADAT, RINGKAS, DAN BERMAKNA. Panjang target: 280 sampai 380 karakter (sekitar 40-55 kata atau 2-3 kalimat padat).
+   - DILARANG menulis paragraf panjang bertele-tele (wall of text) agar muat proporsional di kartu rapor cetak A4.
+   - 2-3 kalimat tersebut harus langsung merangkum: (1) inti kepribadian & pembawaan di kelas, (2) makna dari pilihan presensi santainya, dan (3) gaya belajar serta kebiasaan akademisnya.
+2. BUKAN TEMPLATE: Dilarang keras menggunakan rumus kalimat kaku yang berulang ("Dalam keseharian di kelas...", "Tingkat kehadirannya sangat baik..."). Tulis ulasan yang mengalir alami, hidup, dan personal.
+3. TELAAH MAKNA JAWABAN SISWA: Kaitkan pilihan unik siswa saat presensi pagi (buah, pakaian, hewan kesukaan, superhero impian, tempat liburan, dll) dengan cara berpikir dan kecerdasan emosionalnya.
+4. GAYA PENULISAN: Bahasa Indonesia yang hangat, bersahabat, berjiwa pendidik, dan enak dibaca orang tua.
 5. STRICT RULES:
-   - Dilarang menggunakan tanda em dash (—).
+   - Dilarang menggunakan tanda baca em dash.
    - Dilarang menggunakan istilah birokratis kaku atau jargon AI klise.
-6. SARAN PENDEKATAN: Berikan panduan bimbingan yang taktis, personal, dan relevan dengan kepribadian anak ini (untuk diterapkan guru di kelas dan orang tua di rumah).
-7. REKOMENDASI BAKAT: Sebutkan 2 sampai 4 bidang minat, talenta, atau ekstrakurikuler SD yang paling sesuai untuk memfasilitasi potensinya.
+6. SARAN PENDEKATAN: Tulis 1-2 kalimat taktis dan konkret (maksimal 180 karakter) untuk bimbingan guru dan orang tua.
+7. REKOMENDASI BAKAT: Sebutkan 2 sampai 4 bidang kegiatan atau ekstrakurikuler SD yang konkret (maksimal 80 karakter).
 
 Format balasan HARUS JSON valid tanpa markdown pembungkus:
 {
   "karakterUtama": ["Sifat 1", "Sifat 2", "Sifat 3"],
-  "narasiKarakter": "Ulasan karakter dan psikologis siswa yang mendalam, kaya wawasan, mengalir alami, dan personal...",
-  "saranPendekatan": "Saran pendekatan pembelajaran dan pendampingan personal...",
-  "rekomendasiBakat": "Rekomendasi ekstrakurikuler atau bidang pengembangan bakat..."
+  "narasiKarakter": "2-3 kalimat padat bermakna (280-380 karakter) yang mengalir hangat dan personal...",
+  "saranPendekatan": "1-2 kalimat taktis praktis pendampingan...",
+  "rekomendasiBakat": "Daftar 2-4 ekskul/bidang minat..."
 }`
 
   const genderLabel = extra?.jenisKelamin === 'L' ? 'Laki-laki' : extra?.jenisKelamin === 'P' ? 'Perempuan' : ''
