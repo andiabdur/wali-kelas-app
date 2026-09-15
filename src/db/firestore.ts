@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { initializeApp, deleteApp } from 'firebase/app'
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import {
   collection,
   doc,
@@ -10,11 +12,12 @@ import {
   deleteDoc,
   writeBatch,
   getDocs,
+  getDoc,
 } from 'firebase/firestore'
-import { firestore } from '../lib/firebase'
-import type { Kelas } from '../types/auth'
+import { firestore, firebaseConfig } from '../lib/firebase'
+import type { Kelas, UserProfile } from '../types/auth'
 
-export type { Kelas }
+export type { Kelas, UserProfile }
 
 export interface Siswa {
   id: string
@@ -152,6 +155,83 @@ export function useAllKelas() {
   }, [])
 
   return { list, loading }
+}
+
+export function useTeachersList() {
+  const [teachers, setTeachers] = useState<UserProfile[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const q = query(collection(firestore, 'users'), where('role', '==', 'walikelas'))
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const items: UserProfile[] = []
+        snap.forEach((d) => items.push(d.data() as UserProfile))
+        items.sort((a, b) => a.nama.localeCompare(b.nama))
+        setTeachers(items)
+        setLoading(false)
+      },
+      (err) => {
+        console.error('Error fetching teachers:', err)
+        setLoading(false)
+      }
+    )
+    return () => unsub()
+  }, [])
+
+  return { teachers, loading }
+}
+
+export function useAllSiswaGlobal() {
+  const [allSiswa, setAllSiswa] = useState<Siswa[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const colRef = collection(firestore, 'siswa')
+    const unsub = onSnapshot(
+      colRef,
+      (snap) => {
+        const items: Siswa[] = []
+        snap.forEach((d) => items.push(d.data() as Siswa))
+        setAllSiswa(items)
+        setLoading(false)
+      },
+      (err) => {
+        console.error('Error fetching all siswa global:', err)
+        setLoading(false)
+      }
+    )
+    return () => unsub()
+  }, [])
+
+  return { allSiswa, loading }
+}
+
+export function useAllAbsensiToday(tanggal?: string) {
+  const [records, setRecords] = useState<Absensi[]>([])
+  const [loading, setLoading] = useState(true)
+  const targetDate = tanggal || new Date().toISOString().slice(0, 10)
+
+  useEffect(() => {
+    const q = query(collection(firestore, 'absensi'), where('tanggal', '==', targetDate))
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const items: Absensi[] = []
+        snap.forEach((d) => items.push(d.data() as Absensi))
+        setRecords(items)
+        setLoading(false)
+      },
+      (err) => {
+        console.error('Error fetching all absensi today:', err)
+        setLoading(false)
+      }
+    )
+    return () => unsub()
+  }, [targetDate])
+
+  return { records, loading }
 }
 
 export function useSiswaList(kelasId: string) {
@@ -335,11 +415,13 @@ export async function saveKelas(kelasData: Partial<Kelas> & { id: string }) {
 }
 
 export async function addSiswa(siswa: Siswa) {
-  await setDoc(doc(firestore, 'siswa', siswa.id), siswa)
+  const clean = Object.fromEntries(Object.entries(siswa).filter(([_, v]) => v !== undefined))
+  await setDoc(doc(firestore, 'siswa', siswa.id), clean)
 }
 
 export async function updateSiswa(id: string, data: Partial<Siswa>) {
-  await updateDoc(doc(firestore, 'siswa', id), data)
+  const clean = Object.fromEntries(Object.entries(data).filter(([_, v]) => v !== undefined))
+  await updateDoc(doc(firestore, 'siswa', id), clean)
 }
 
 export async function deleteSiswaCascade(siswaId: string, kelasId: string) {
@@ -535,4 +617,194 @@ export async function resetKelasData(kelasId: string) {
   catatanSnap.forEach((d) => batch.delete(d.ref))
   aiSnap.forEach((d) => batch.delete(d.ref))
   await batch.commit()
+}
+
+export interface CreateTeacherParams {
+  email: string
+  password: string
+  nama: string
+  nip?: string
+  kelasId: string
+  namaKelasBaru?: string
+  tahunAjaran?: string
+}
+
+export async function createTeacherAccount(params: CreateTeacherParams): Promise<{ uid: string; kelasId: string }> {
+  let targetKelasId = params.kelasId
+
+  // If creating a new class
+  if (params.kelasId === 'new_class' || params.namaKelasBaru) {
+    const rawName = params.namaKelasBaru?.trim() || 'Kelas Baru'
+    targetKelasId =
+      'kelas_' +
+      rawName
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '')
+    if (!targetKelasId || targetKelasId === 'kelas_') {
+      targetKelasId = 'kelas_' + generateId().slice(0, 8)
+    }
+
+    const kelasRef = doc(firestore, 'kelas', targetKelasId)
+    const kelasSnap = await getDoc(kelasRef)
+    if (!kelasSnap.exists()) {
+      await setDoc(kelasRef, {
+        id: targetKelasId,
+        nama: rawName,
+        tahunAjaran: params.tahunAjaran || '2026/2027',
+        namaWaliKelas: params.nama,
+        nipWaliKelas: params.nip || '',
+        namaSekolah: 'SDN Cijurey I',
+        logoDinas: '/logo-majalengka.png',
+        logoSekolah: '/logo-sekolah.png',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+    }
+  }
+
+  // Create user in Firebase Auth using a secondary Firebase App instance
+  // This completely prevents logging out the current admin user!
+  const secondaryAppName = `admin-create-user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+  const secondaryApp = initializeApp(firebaseConfig, secondaryAppName)
+  let uid = ''
+  try {
+    const secondaryAuth = getAuth(secondaryApp)
+    const cred = await createUserWithEmailAndPassword(secondaryAuth, params.email, params.password)
+    if (params.nama) {
+      await updateProfile(cred.user, { displayName: params.nama })
+    }
+    uid = cred.user.uid
+  } finally {
+    await deleteApp(secondaryApp)
+  }
+
+  // Save profile to Firestore users collection
+  const userRef = doc(firestore, 'users', uid)
+  await setDoc(userRef, {
+    uid,
+    email: params.email,
+    nama: params.nama,
+    nip: params.nip || '',
+    role: 'walikelas',
+    kelasId: targetKelasId,
+    createdAt: new Date().toISOString(),
+  })
+
+  // Update class document to link this teacher
+  if (targetKelasId) {
+    const kelasRef = doc(firestore, 'kelas', targetKelasId)
+    await setDoc(
+      kelasRef,
+      {
+        id: targetKelasId,
+        namaWaliKelas: params.nama,
+        nipWaliKelas: params.nip || '',
+        waliKelasUid: uid,
+        waliKelasEmail: params.email,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    )
+  }
+
+  return { uid, kelasId: targetKelasId }
+}
+
+export interface UpdateTeacherParams {
+  uid: string
+  nama: string
+  nip?: string
+  kelasId: string
+  previousKelasId?: string
+}
+
+export async function updateTeacherAccount(params: UpdateTeacherParams) {
+  const userRef = doc(firestore, 'users', params.uid)
+  await setDoc(
+    userRef,
+    {
+      nama: params.nama,
+      nip: params.nip || '',
+      kelasId: params.kelasId,
+      updatedAt: new Date().toISOString(),
+    },
+    { merge: true }
+  )
+
+  // If class changed, unlink previous class
+  if (params.previousKelasId && params.previousKelasId !== params.kelasId) {
+    const prevKelasRef = doc(firestore, 'kelas', params.previousKelasId)
+    await setDoc(
+      prevKelasRef,
+      {
+        waliKelasUid: '',
+        waliKelasEmail: '',
+        namaWaliKelas: '-',
+        nipWaliKelas: '',
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    )
+  }
+
+  // Link new class
+  if (params.kelasId) {
+    const newKelasRef = doc(firestore, 'kelas', params.kelasId)
+    await setDoc(
+      newKelasRef,
+      {
+        namaWaliKelas: params.nama,
+        nipWaliKelas: params.nip || '',
+        waliKelasUid: params.uid,
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    )
+  }
+}
+
+export async function deleteTeacherAccount(uid: string, kelasId?: string) {
+  await deleteDoc(doc(firestore, 'users', uid))
+
+  if (kelasId) {
+    const kelasRef = doc(firestore, 'kelas', kelasId)
+    await setDoc(
+      kelasRef,
+      {
+        waliKelasUid: '',
+        waliKelasEmail: '',
+        namaWaliKelas: '-',
+        nipWaliKelas: '',
+        updatedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    )
+  }
+}
+
+export async function createNewKelas(nama: string, tahunAjaran = '2026/2027') {
+  const rawId =
+    'kelas_' +
+    nama
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '')
+  const id = rawId && rawId !== 'kelas_' ? rawId : 'kelas_' + generateId().slice(0, 8)
+  const ref = doc(firestore, 'kelas', id)
+  await setDoc(ref, {
+    id,
+    nama,
+    tahunAjaran,
+    namaWaliKelas: '-',
+    nipWaliKelas: '',
+    namaSekolah: 'SDN Cijurey I',
+    logoDinas: '/logo-majalengka.png',
+    logoSekolah: '/logo-sekolah.png',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  })
+  return id
 }

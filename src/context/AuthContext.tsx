@@ -8,6 +8,7 @@ import {
 import { doc, getDoc, onSnapshot } from 'firebase/firestore'
 import { auth, firestore } from '../lib/firebase'
 import type { UserProfile } from '../types/auth'
+import { useStore } from '../store/useStore'
 
 interface AuthContextType {
   user: User | null
@@ -31,6 +32,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   })
 
   const setActiveKelasId = (id: string) => {
+    if (profile?.role === 'walikelas') {
+      if (profile.kelasId) {
+        setActiveKelasIdState(profile.kelasId)
+        localStorage.setItem('activeKelasId', profile.kelasId)
+      }
+      return
+    }
     setActiveKelasIdState(id)
     localStorage.setItem('activeKelasId', id)
   }
@@ -45,8 +53,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (snap.exists()) {
             const data = snap.data() as UserProfile
             setProfile(data)
-            if (data.role === 'walikelas' && data.kelasId) {
-              setActiveKelasId(data.kelasId)
+            if (data.role === 'walikelas') {
+              const assignedKelas = data.kelasId || ''
+              setActiveKelasIdState(assignedKelas)
+              localStorage.setItem('activeKelasId', assignedKelas)
             }
           } else {
             // Fallback profile if doc doesn't exist yet
@@ -81,13 +91,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (snap.exists()) {
       const data = snap.data() as UserProfile
       setProfile(data)
-      if (data.role === 'walikelas' && data.kelasId) {
-        setActiveKelasId(data.kelasId)
+      if (data.role === 'walikelas') {
+        const assignedKelas = data.kelasId || ''
+        setActiveKelasIdState(assignedKelas)
+        localStorage.setItem('activeKelasId', assignedKelas)
       }
     }
   }
 
   const logout = async () => {
+    useStore.getState().resetPage()
     await signOut(auth)
     setUser(null)
     setProfile(null)

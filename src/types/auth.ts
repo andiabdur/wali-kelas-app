@@ -6,7 +6,9 @@ export interface UserProfile {
   nama: string
   role: UserRole
   kelasId?: string
+  nip?: string
   createdAt?: string
+  updatedAt?: string
 }
 
 export interface Kelas {

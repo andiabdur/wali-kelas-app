@@ -10,22 +10,40 @@ import {
   LogOut,
   Shield,
   UserCheck,
+  UserPlus,
   ChevronDown,
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import { useAuth } from '../context/AuthContext'
 import { useAllKelas, useKelas } from '../db/firestore'
 
-const primaryItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-  { id: 'siswa', label: 'Siswa', icon: Users },
-  { id: 'absensi', label: 'Absensi', icon: CalendarCheck },
-  { id: 'denah-bangku', label: 'Denah Bangku', icon: Grid3X3 },
-  { id: 'akademis', label: 'Akademis', icon: BookOpen },
-  { id: 'laporan', label: 'Laporan', icon: FileText },
-] as const
+const teacherItems = [
+  { id: 'dashboard' as const, label: 'Dashboard', icon: BarChart3 },
+  { id: 'siswa' as const, label: 'Siswa', icon: Users },
+  { id: 'absensi' as const, label: 'Absensi', icon: CalendarCheck },
+  { id: 'denah-bangku' as const, label: 'Denah Bangku', icon: Grid3X3 },
+  { id: 'akademis' as const, label: 'Akademis', icon: BookOpen },
+  { id: 'laporan' as const, label: 'Laporan', icon: FileText },
+]
 
-const mobileItems = primaryItems.filter((item) => item.id !== 'akademis')
+const adminItems = [
+  { id: 'dashboard' as const, label: 'Dashboard', icon: BarChart3 },
+  { id: 'manajemen-guru' as const, label: 'Manajemen Guru', icon: UserPlus },
+  { id: 'siswa' as const, label: 'Siswa', icon: Users },
+  { id: 'absensi' as const, label: 'Absensi', icon: CalendarCheck },
+  { id: 'denah-bangku' as const, label: 'Denah Bangku', icon: Grid3X3 },
+  { id: 'akademis' as const, label: 'Akademis', icon: BookOpen },
+  { id: 'laporan' as const, label: 'Laporan', icon: FileText },
+]
+
+const teacherMobileItems = teacherItems.filter((item) => item.id !== 'akademis')
+const adminMobileItems = [
+  { id: 'dashboard' as const, label: 'Dashboard', icon: BarChart3 },
+  { id: 'manajemen-guru' as const, label: 'Guru', icon: UserPlus },
+  { id: 'siswa' as const, label: 'Siswa', icon: Users },
+  { id: 'absensi' as const, label: 'Absensi', icon: CalendarCheck },
+  { id: 'laporan' as const, label: 'Laporan', icon: FileText },
+]
 
 export function DesktopNavigation() {
   const { currentPage, navigate } = useStore()
@@ -33,16 +51,20 @@ export function DesktopNavigation() {
   const { data: kelas } = useKelas(activeKelasId)
   const { list: allKelas } = useAllKelas()
 
+  const navItems = role === 'admin' ? adminItems : teacherItems
+
   return (
     <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-64 flex-col border-r border-[var(--border)] bg-[var(--surface)] px-4 py-5">
       {/* Brand & Class Info */}
       <div className="mb-5 px-2">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white shadow-sm shrink-0">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white shadow-xs shrink-0">
             <GraduationCap size={22} strokeWidth={2} />
           </div>
           <div className="overflow-hidden">
-            <p className="font-heading text-sm font-bold text-[var(--text-primary)] truncate">Wali Kelas</p>
+            <p className="font-heading text-sm font-bold text-[var(--text-primary)] truncate">
+              {role === 'admin' ? 'Admin Sekolah' : 'Wali Kelas'}
+            </p>
             <p className="text-xs text-[var(--text-muted)] truncate">{kelas?.namaSekolah || 'SDN Cijurey I'}</p>
           </div>
         </div>
@@ -74,14 +96,16 @@ export function DesktopNavigation() {
 
       {/* Main Nav Items */}
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto pr-1 scrollbar-thin">
-        {primaryItems.map((item) => {
-          const active = currentPage === item.id || (item.id === 'siswa' && currentPage === 'siswa-detail')
+        {navItems.map((item) => {
+          const active =
+            currentPage === item.id ||
+            (item.id === 'siswa' && currentPage === 'siswa-detail')
           const Icon = item.icon
           return (
             <button
               key={item.id}
               onClick={() => navigate(item.id)}
-              className={`flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
+              className={`flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors cursor-pointer ${
                 active
                   ? 'bg-primary-50 text-primary dark:bg-primary-900/40 dark:text-primary-300 font-semibold'
                   : 'text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]'
@@ -98,7 +122,7 @@ export function DesktopNavigation() {
       <div className="border-t border-[var(--border)] pt-3 space-y-2">
         <button
           onClick={() => navigate('pengaturan')}
-          className={`flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+          className={`flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
             currentPage === 'pengaturan'
               ? 'bg-primary-50 text-primary dark:bg-primary-900/40 dark:text-primary-300 font-semibold'
               : 'text-[var(--text-muted)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]'
@@ -125,7 +149,7 @@ export function DesktopNavigation() {
           <button
             onClick={() => logout()}
             title="Keluar"
-            className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-muted)] hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 transition-colors shrink-0"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-muted)] hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 transition-colors shrink-0 cursor-pointer"
           >
             <LogOut size={16} />
           </button>
@@ -141,6 +165,8 @@ export function MobileNavigation() {
   const { list: allKelas } = useAllKelas()
   const { data: kelas } = useKelas(activeKelasId)
 
+  const mobileNav = role === 'admin' ? adminMobileItems : teacherMobileItems
+
   return (
     <>
       {/* Mobile Top Header */}
@@ -151,7 +177,7 @@ export function MobileNavigation() {
           </div>
           <div className="overflow-hidden">
             <p className="text-xs font-bold text-[var(--text-primary)] truncate leading-tight">
-              {kelas?.nama || 'Wali Kelas'}
+              {role === 'admin' ? 'Administrator' : (kelas?.nama || 'Wali Kelas')}
             </p>
             <p className="text-[10px] text-[var(--text-muted)] truncate">{profile?.nama || 'SDN Cijurey I'}</p>
           </div>
@@ -175,7 +201,7 @@ export function MobileNavigation() {
           <button
             onClick={() => logout()}
             title="Keluar"
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-red-600 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-red-600 transition-colors cursor-pointer"
           >
             <LogOut size={15} />
           </button>
@@ -184,14 +210,16 @@ export function MobileNavigation() {
 
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md px-1 pb-safe pt-1 lg:hidden shadow-sm">
-        {mobileItems.map((item) => {
-          const active = currentPage === item.id || (item.id === 'siswa' && currentPage === 'siswa-detail')
+        {mobileNav.map((item) => {
+          const active =
+            currentPage === item.id ||
+            (item.id === 'siswa' && currentPage === 'siswa-detail')
           const Icon = item.icon
           return (
             <button
               key={item.id}
               onClick={() => navigate(item.id)}
-              className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1 text-[10px] font-medium transition-colors ${
+              className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1 text-[10px] font-medium transition-colors cursor-pointer ${
                 active ? 'text-primary font-semibold' : 'text-[var(--text-muted)]'
               }`}
             >
@@ -202,7 +230,7 @@ export function MobileNavigation() {
         })}
         <button
           onClick={() => navigate('pengaturan')}
-          className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1 text-[10px] font-medium transition-colors ${
+          className={`flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-0.5 py-1 text-[10px] font-medium transition-colors cursor-pointer ${
             currentPage === 'pengaturan' ? 'text-primary font-semibold' : 'text-[var(--text-muted)]'
           }`}
         >

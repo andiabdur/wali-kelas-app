@@ -11,11 +11,12 @@ import { Akademis } from './pages/Akademis'
 import { Laporan } from './pages/Laporan'
 import { DenahBangku } from './pages/DenahBangku'
 import { Pengaturan } from './pages/Pengaturan'
+import { ManajemenGuru } from './pages/ManajemenGuru'
 import { Loader2 } from 'lucide-react'
 
 function AppContent() {
   const { currentPage, darkMode } = useStore()
-  const { user, loading } = useAuth()
+  const { user, loading, role } = useAuth()
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode)
@@ -55,6 +56,8 @@ function AppContent() {
         return <Laporan />
       case 'pengaturan':
         return <Pengaturan />
+      case 'manajemen-guru':
+        return role === 'admin' ? <ManajemenGuru /> : <Dashboard />
       default:
         return <Dashboard />
     }

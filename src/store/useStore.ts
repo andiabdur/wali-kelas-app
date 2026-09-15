@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { ToastMessage } from '../components/Toast'
 
-type Page = 'dashboard' | 'siswa' | 'siswa-detail' | 'absensi' | 'absensi-rekap' | 'akademis' | 'laporan' | 'denah-bangku' | 'pengaturan'
+type Page = 'dashboard' | 'siswa' | 'siswa-detail' | 'absensi' | 'absensi-rekap' | 'akademis' | 'laporan' | 'denah-bangku' | 'pengaturan' | 'manajemen-guru'
 
 interface AppState {
   currentPage: Page
@@ -11,6 +11,7 @@ interface AppState {
   toast: ToastMessage | null
 
   navigate: (page: Page, siswaId?: string) => void
+  resetPage: () => void
   toggleDarkMode: () => void
   notify: (title: string, type?: 'success' | 'error' | 'info') => void
   clearToast: () => void
@@ -38,6 +39,10 @@ export const useStore = create<AppState>()(
 
       navigate: (page, siswaId) => {
         set({ currentPage: page, selectedSiswaId: siswaId ?? null })
+      },
+
+      resetPage: () => {
+        set({ currentPage: 'dashboard', selectedSiswaId: null })
       },
 
       toggleDarkMode: () => {
