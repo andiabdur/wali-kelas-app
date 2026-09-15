@@ -18,6 +18,9 @@ import {
   Radio,
   FileCheck,
   X,
+  Wifi,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react'
 import {
   useKelas,
@@ -33,7 +36,10 @@ import {
   getLLMConfig,
   setLLMConfig,
   generate30PresensiQuestionsAI,
-  OMNIROUTE_DEFAULT_PRESET,
+  testLLMConnection,
+  fetchAvailableModels,
+  OMNIROUTE_CLOUD_PRESET,
+  OMNIROUTE_LOCAL_PRESET,
 } from '../utils/aiService'
 import {
   getActiveCurriculum,
@@ -65,6 +71,10 @@ export function Pengaturan() {
   const [llmForm, setLlmForm] = useState(initialLLM)
   const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false)
   const [showLLMConfig, setShowLLMConfig] = useState(false)
+  const [isTestingConnection, setIsTestingConnection] = useState(false)
+  const [connectionTestResult, setConnectionTestResult] = useState<{ ok: boolean; message: string } | null>(null)
+  const [isLoadingModels, setIsLoadingModels] = useState(false)
+  const [availableModels, setAvailableModels] = useState<string[]>([])
 
   // Questions / Curriculum State
   const [questions, setQuestions] = useState<PertanyaanItem[]>(() => getActiveCurriculum())
@@ -113,10 +123,47 @@ export function Pengaturan() {
     notify('Konfigurasi inferensi AI tersimpan.', 'success')
   }
 
-  function handleApplyOmniRoutePreset() {
-    setLlmForm(OMNIROUTE_DEFAULT_PRESET)
-    setLLMConfig(OMNIROUTE_DEFAULT_PRESET)
-    notify('Preset OmniRoute lokal berhasil dimuat.', 'info')
+  function handleApplyOmniRouteCloudPreset() {
+    setLlmForm(OMNIROUTE_CLOUD_PRESET)
+    setLLMConfig(OMNIROUTE_CLOUD_PRESET)
+    setConnectionTestResult(null)
+    notify('Preset OmniRoute Cloud (omni.senyap.web.id) dimuat.', 'info')
+  }
+
+  function handleApplyOmniRouteLocalPreset() {
+    setLlmForm(OMNIROUTE_LOCAL_PRESET)
+    setLLMConfig(OMNIROUTE_LOCAL_PRESET)
+    setConnectionTestResult(null)
+    notify('Preset OmniRoute Lokal (localhost:20128) dimuat.', 'info')
+  }
+
+  async function handleTestConnection() {
+    setIsTestingConnection(true)
+    setConnectionTestResult(null)
+    try {
+      const res = await testLLMConnection(llmForm)
+      setConnectionTestResult(res)
+      if (res.ok) {
+        notify(res.message, 'success')
+      } else {
+        notify(res.message, 'error')
+      }
+    } finally {
+      setIsTestingConnection(false)
+    }
+  }
+
+  async function handleLoadModels() {
+    setIsLoadingModels(true)
+    try {
+      const models = await fetchAvailableModels(llmForm)
+      setAvailableModels(models)
+      notify(`Berhasil memuat ${models.length} model dari endpoint.`, 'success')
+    } catch (err: any) {
+      notify(err.message || 'Gagal memuat model.', 'error')
+    } finally {
+      setIsLoadingModels(false)
+    }
   }
 
   async function handleGenerateQuestions() {
@@ -371,19 +418,32 @@ export function Pengaturan() {
 
         {/* Collapsible LLM Config Panel */}
         {showLLMConfig && (
-          <div className="mt-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="mt-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 space-y-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[var(--border)] pb-3">
               <span className="text-xs font-semibold text-[var(--text-primary)]">
                 Pengaturan Koneksi Model AI
               </span>
-              <button
-                type="button"
-                onClick={handleApplyOmniRoutePreset}
-                className="inline-flex items-center gap-1.5 rounded-md border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 transition-colors hover:bg-emerald-100 cursor-pointer"
-              >
-                <Radio size={12} className="text-emerald-600" />
-                <span>Gunakan OmniRoute Lokal</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] text-[var(--text-muted)] mr-1">Preset:</span>
+                <button
+                  type="button"
+                  onClick={handleApplyOmniRouteCloudPreset}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 transition-colors hover:bg-emerald-100 cursor-pointer"
+                  title="Gunakan tunnel HTTPS https://omni.senyap.web.id"
+                >
+                  <Radio size={12} className="text-emerald-600" />
+                  <span>OmniRoute Cloud</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApplyOmniRouteLocalPreset}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2.5 py-1 text-[11px] font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--text-primary)] hover:border-[var(--text-primary)] cursor-pointer"
+                  title="Gunakan localhost http://127.0.0.1:20128"
+                >
+                  <Radio size={12} />
+                  <span>OmniRoute Lokal</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
@@ -391,27 +451,110 @@ export function Pengaturan() {
                 <Input
                   label="API Endpoint URL"
                   value={llmForm.apiUrl}
-                  placeholder="http://127.0.0.1:20128/v1/chat/completions"
+                  placeholder="https://omni.senyap.web.id/v1/chat/completions"
                   onChange={(apiUrl) => setLlmForm({ ...llmForm, apiUrl })}
                 />
               </div>
-              <Input
-                label="Kredensial API Key"
-                type="password"
-                autoComplete="off"
-                value={llmForm.apiKey}
-                placeholder="sk-..."
-                onChange={(apiKey) => setLlmForm({ ...llmForm, apiKey })}
-              />
-              <Input
-                label="Nama Model"
-                value={llmForm.model}
-                placeholder="auto/best-fast atau gpt-4o-mini"
-                onChange={(model) => setLlmForm({ ...llmForm, model })}
-              />
+              <div className="sm:col-span-2">
+                <Input
+                  label="Kredensial API Key"
+                  type="password"
+                  autoComplete="off"
+                  value={llmForm.apiKey}
+                  placeholder="sk-..."
+                  onChange={(apiKey) => setLlmForm({ ...llmForm, apiKey })}
+                />
+              </div>
+
+              {/* Test Connection Button & Result Alert */}
+              <div className="sm:col-span-2 flex flex-col sm:flex-row sm:items-center gap-2 pt-0.5">
+                <button
+                  type="button"
+                  disabled={isTestingConnection}
+                  onClick={handleTestConnection}
+                  className="flex min-h-8 items-center justify-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:border-primary/50 transition-colors disabled:opacity-50 cursor-pointer shrink-0"
+                >
+                  {isTestingConnection ? <Loader2 size={13} className="animate-spin" /> : <Wifi size={13} className="text-primary" />}
+                  <span>{isTestingConnection ? 'Menguji Koneksi...' : 'Tes Koneksi Endpoint'}</span>
+                </button>
+
+                {connectionTestResult && (
+                  <div
+                    className={`flex items-start sm:items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium ${
+                      connectionTestResult.ok
+                        ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                        : 'bg-rose-50 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
+                    }`}
+                  >
+                    {connectionTestResult.ok ? (
+                      <CheckCircle2 size={14} className="shrink-0 mt-0.5 sm:mt-0 text-emerald-600" />
+                    ) : (
+                      <AlertCircle size={14} className="shrink-0 mt-0.5 sm:mt-0 text-rose-600" />
+                    )}
+                    <span>{connectionTestResult.message}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Model Selector & Fetch Models Button */}
+              <div className="sm:col-span-2 border-t border-[var(--border)] pt-3">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <span className="text-xs font-semibold text-[var(--text-primary)]">Nama Model</span>
+                  <button
+                    type="button"
+                    disabled={isLoadingModels}
+                    onClick={handleLoadModels}
+                    className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-semibold text-primary hover:bg-primary/10 transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    {isLoadingModels ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
+                    <span>{isLoadingModels ? 'Memuat Model...' : 'Muat Model dari API'}</span>
+                  </button>
+                </div>
+
+                {availableModels.length > 0 ? (
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <select
+                      value={llmForm.model}
+                      onChange={(e) => setLlmForm({ ...llmForm, model: e.target.value })}
+                      className="min-h-9 flex-1 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 text-xs outline-none focus:border-primary text-[var(--text-primary)] cursor-pointer"
+                    >
+                      {!availableModels.includes(llmForm.model) && (
+                        <option value={llmForm.model}>{llmForm.model} (Kustom)</option>
+                      )}
+                      {availableModels.map((m) => (
+                        <option key={m} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      value={llmForm.model}
+                      onChange={(e) => setLlmForm({ ...llmForm, model: e.target.value })}
+                      placeholder="Ketik manual jika perlu..."
+                      className="min-h-9 w-full sm:w-52 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 text-xs outline-none focus:border-primary text-[var(--text-primary)] placeholder:text-[var(--text-subtle)]"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={llmForm.model}
+                      onChange={(e) => setLlmForm({ ...llmForm, model: e.target.value })}
+                      placeholder="auto/best-fast atau gpt-4o-mini"
+                      className="min-h-9 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 text-xs outline-none focus:border-primary text-[var(--text-primary)] placeholder:text-[var(--text-subtle)]"
+                    />
+                  </div>
+                )}
+                {availableModels.length > 0 && (
+                  <p className="mt-1 text-[11px] text-[var(--text-muted)]">
+                    {availableModels.length} model terdeteksi dari endpoint ini.
+                  </p>
+                )}
+              </div>
             </div>
 
-            <div className="flex justify-end pt-1">
+            <div className="flex justify-end pt-2 border-t border-[var(--border)]">
               <button
                 type="button"
                 onClick={saveLLM}

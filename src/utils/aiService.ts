@@ -8,15 +8,23 @@ export interface LLMConfig {
   model: string
 }
 
-export const OMNIROUTE_DEFAULT_PRESET: LLMConfig = {
+export const OMNIROUTE_CLOUD_PRESET: LLMConfig = {
+  apiUrl: 'https://omni.senyap.web.id/v1/chat/completions',
+  apiKey: 'sk-25df769ef46500b5-22caec-85267272',
+  model: 'auto/best-fast',
+}
+
+export const OMNIROUTE_LOCAL_PRESET: LLMConfig = {
   apiUrl: 'http://127.0.0.1:20128/v1/chat/completions',
   apiKey: 'sk-25df769ef46500b5-22caec-85267272',
   model: 'auto/best-fast',
 }
 
+export const OMNIROUTE_DEFAULT_PRESET = OMNIROUTE_CLOUD_PRESET
+
 export function normalizeApiUrl(url: string): string {
   let trimmed = url.trim()
-  if (!trimmed) return OMNIROUTE_DEFAULT_PRESET.apiUrl
+  if (!trimmed) return OMNIROUTE_CLOUD_PRESET.apiUrl
   trimmed = trimmed.replace(/\/+$/, '')
 
   if (trimmed.endsWith('/chat/completions')) {
@@ -28,6 +36,20 @@ export function normalizeApiUrl(url: string): string {
   return `${trimmed}/v1/chat/completions`
 }
 
+export function deriveModelsUrl(apiUrl: string): string {
+  let trimmed = apiUrl.trim().replace(/\/+$/, '')
+  if (trimmed.endsWith('/chat/completions')) {
+    return trimmed.replace(/\/chat\/completions$/, '/models')
+  }
+  if (trimmed.endsWith('/v1')) {
+    return `${trimmed}/models`
+  }
+  if (trimmed.endsWith('/models')) {
+    return trimmed
+  }
+  return `${trimmed}/models`
+}
+
 export function getLLMConfig(): LLMConfig {
   const localUrl = localStorage.getItem('LLM_API_URL')
   const localKey = localStorage.getItem('LLM_API_KEY')
@@ -35,13 +57,98 @@ export function getLLMConfig(): LLMConfig {
 
   const metaEnv = (import.meta as any).env || {}
 
-  const rawUrl = localUrl || metaEnv.VITE_OPENAI_API_URL || OMNIROUTE_DEFAULT_PRESET.apiUrl
+  const rawUrl = localUrl || metaEnv.VITE_OPENAI_API_URL || OMNIROUTE_CLOUD_PRESET.apiUrl
 
   return {
     apiUrl: normalizeApiUrl(rawUrl),
-    apiKey: localKey !== null ? localKey : (metaEnv.VITE_OPENAI_API_KEY || OMNIROUTE_DEFAULT_PRESET.apiKey),
-    model: localModel || metaEnv.VITE_OPENAI_MODEL || OMNIROUTE_DEFAULT_PRESET.model,
+    apiKey: localKey !== null ? localKey : (metaEnv.VITE_OPENAI_API_KEY || OMNIROUTE_CLOUD_PRESET.apiKey),
+    model: localModel || metaEnv.VITE_OPENAI_MODEL || OMNIROUTE_CLOUD_PRESET.model,
   }
+}
+
+export async function testLLMConnection(config: LLMConfig): Promise<{ ok: boolean; message: string; modelsCount?: number }> {
+  if (!config.apiUrl.trim()) {
+    return { ok: false, message: 'URL Endpoint masih kosong.' }
+  }
+  if (!config.apiKey.trim()) {
+    return { ok: false, message: 'API Key masih kosong.' }
+  }
+
+  const modelsUrl = deriveModelsUrl(config.apiUrl)
+
+  try {
+    const res = await fetch(modelsUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${config.apiKey.trim()}`,
+      },
+    })
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '')
+      let errorMsg = `HTTP ${res.status} ${res.statusText}`
+      try {
+        const json = JSON.parse(text)
+        if (json.error?.message) errorMsg = json.error.message
+      } catch {}
+      return { ok: false, message: `Koneksi ditolak: ${errorMsg}` }
+    }
+
+    const data = await res.json()
+    const modelsCount = Array.isArray(data.data) ? data.data.length : undefined
+    return {
+      ok: true,
+      message: `Koneksi berhasil! Endpoint merespon normal${modelsCount ? ` (${modelsCount} model terdeteksi)` : ''}.`,
+      modelsCount,
+    }
+  } catch (err: any) {
+    return {
+      ok: false,
+      message: `Gagal menghubungi endpoint: ${err.message}. Pastikan alamat host benar dan server mengizinkan akses (CORS).`,
+    }
+  }
+}
+
+export async function fetchAvailableModels(config: LLMConfig): Promise<string[]> {
+  if (!config.apiKey.trim()) {
+    throw new Error('API Key diperlukan untuk memuat daftar model.')
+  }
+  const modelsUrl = deriveModelsUrl(config.apiUrl)
+  const res = await fetch(modelsUrl, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${config.apiKey.trim()}`,
+    },
+  })
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    let errorMsg = `HTTP ${res.status}`
+    try {
+      const json = JSON.parse(text)
+      if (json.error?.message) errorMsg = json.error.message
+    } catch {}
+    throw new Error(`Gagal memuat model: ${errorMsg}`)
+  }
+
+  const data = await res.json()
+  if (!Array.isArray(data.data)) {
+    throw new Error('Respon endpoint tidak memuat daftar model yang valid.')
+  }
+
+  const ids: string[] = data.data
+    .map((m: any) => m.id)
+    .filter((id: any): id is string => typeof id === 'string' && id.trim().length > 0)
+
+  ids.sort((a, b) => {
+    const aAuto = a.startsWith('auto/')
+    const bAuto = b.startsWith('auto/')
+    if (aAuto && !bAuto) return -1
+    if (!aAuto && bAuto) return 1
+    return a.localeCompare(b)
+  })
+
+  return ids
 }
 
 export function setLLMConfig(config: Partial<LLMConfig>) {
