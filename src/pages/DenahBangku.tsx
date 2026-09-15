@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLiveQuery } from 'dexie-react-hooks'
 import { Dices, Printer, ArrowLeftRight, RefreshCw, Sparkles, UserCheck, Shield, Check, Monitor, LayoutGrid, AlertCircle } from 'lucide-react'
-import { db, type Siswa } from '../db/database'
+import { useKelas, useSiswaList, type Siswa } from '../db/firestore'
 import { useStore } from '../store/useStore'
+import { useAuth } from '../context/AuthContext'
 import { Avatar } from './SiswaList'
 
 export interface MejaPair {
@@ -22,8 +22,11 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 export function DenahBangku() {
-  const { kelasInfo, notify } = useStore()
-  const allSiswa = useLiveQuery(() => db.siswa.toArray(), [])?.filter((s) => s.aktif).sort((a, b) => a.nomorAbsen - b.nomorAbsen) ?? []
+  const { notify } = useStore()
+  const { activeKelasId } = useAuth()
+  const { data: kelasInfo } = useKelas(activeKelasId)
+  const { siswa: rawSiswa } = useSiswaList(activeKelasId)
+  const allSiswa = useMemo(() => rawSiswa.filter((s) => s.aktif), [rawSiswa])
 
   const [isRolling, setIsRolling] = useState(false)
   const [tickerCount, setTickerCount] = useState(0)

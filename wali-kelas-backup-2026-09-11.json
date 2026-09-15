@@ -1,0 +1,924 @@
+{
+  "kelas": [
+    {
+      "nama": "Kelas V",
+      "tahunAjaran": "2026/2027",
+      "namaWaliKelas": "Evi Purnamasari, S.pd",
+      "namaSekolah": "SDN Cijurey I",
+      "id": 1,
+      "nipWaliKelas": "23123213123123"
+    }
+  ],
+  "siswa": [
+    {
+      "id": "1eb3f428-d348-457b-9507-ed6222b18d14",
+      "nama": "Muhammad Zaki Nurbarok",
+      "nisn": "3168721561",
+      "nis": "222301005",
+      "nomorAbsen": 5,
+      "jenisKelamin": "L",
+      "namaAyah": "Didi Subki",
+      "namaIbu": "Iis Leni Yulianingsih",
+      "alamat": "Desa Cijurey",
+      "potensi": [],
+      "aktif": true,
+      "createdAt": "2026-08-10T15:22:38.875Z"
+    },
+    {
+      "id": "551b1001-bed9-4a50-8b25-face747d67e4",
+      "nama": "Nisa Damayanti",
+      "nisn": "3158936702",
+      "nis": "222301008",
+      "nomorAbsen": 7,
+      "jenisKelamin": "L",
+      "namaAyah": "Aminta",
+      "namaIbu": "Nuryani",
+      "alamat": "Desa Cijurey",
+      "potensi": [],
+      "aktif": true,
+      "createdAt": "2026-08-10T15:26:25.408Z"
+    },
+    {
+      "id": "5da0fa5f-25d4-4cba-9a06-6782c73bec49",
+      "nama": "Varisha Nabilla Rahman",
+      "nisn": "3152142752",
+      "nis": "222301010",
+      "nomorAbsen": 9,
+      "jenisKelamin": "P",
+      "namaAyah": "Ardika Rahman",
+      "namaIbu": "Dede Kurnia Hernawati",
+      "alamat": "Desa Cijurey",
+      "potensi": [],
+      "aktif": true,
+      "createdAt": "2026-08-10T15:30:14.611Z"
+    },
+    {
+      "id": "67a3da1b-30e8-4720-bb80-78b329c5b084",
+      "nama": "Muhammad Iqbal Assidiq",
+      "nisn": "3157991362",
+      "nis": "222301004",
+      "nomorAbsen": 4,
+      "jenisKelamin": "L",
+      "namaAyah": "Taufik Hidayat",
+      "namaIbu": "Heni Suheni",
+      "alamat": "Desa Cijurey",
+      "potensi": [],
+      "aktif": true,
+      "createdAt": "2026-08-10T15:20:14.152Z"
+    },
+    {
+      "id": "6dcd87c4-f859-4f56-9080-e6adf8af6d45",
+      "nama": "Yulia Ramawati",
+      "nisn": "3157883811",
+      "nis": "222301011",
+      "nomorAbsen": 10,
+      "jenisKelamin": "L",
+      "namaAyah": "Wawan Tirwan",
+      "namaIbu": "Eroh Saerah",
+      "alamat": "Desa Cijurey",
+      "potensi": [],
+      "aktif": true,
+      "createdAt": "2026-08-10T15:31:41.636Z"
+    },
+    {
+      "id": "7aa61747-94fa-4e52-af2e-27028781dbf7",
+      "nama": "Nindi Inriyani",
+      "nisn": "3171619029",
+      "nis": "222301007",
+      "nomorAbsen": 6,
+      "jenisKelamin": "P",
+      "namaAyah": "Nandi Sutisna",
+      "namaIbu": "Nina Nurjanah",
+      "alamat": "Desa Cijurey",
+      "potensi": [],
+      "aktif": true,
+      "createdAt": "2026-08-10T15:24:56.831Z"
+    },
+    {
+      "id": "7c4b6d67-74fe-4ac4-8451-a252c6c4c3a5",
+      "nama": "Rafly Al Fharizky",
+      "nisn": "3150946384",
+      "nis": "222301009",
+      "nomorAbsen": 8,
+      "jenisKelamin": "L",
+      "namaAyah": "Andi",
+      "namaIbu": "Lilis",
+      "alamat": "Desa Cijurey",
+      "potensi": [],
+      "aktif": true,
+      "createdAt": "2026-08-10T15:27:52.101Z"
+    },
+    {
+      "id": "cff6a6e8-be4a-4a65-a292-08d86171687a",
+      "nama": "Agniya Fahira Zahwa",
+      "nisn": "3151413802",
+      "nis": "222301001",
+      "nomorAbsen": 1,
+      "jenisKelamin": "P",
+      "namaAyah": "Endi Rohendi",
+      "namaIbu": "Mini Rusmini",
+      "alamat": "Desa Cijurey",
+      "potensi": [],
+      "aktif": true,
+      "createdAt": "2026-08-10T15:16:37.600Z",
+      "tempatLahir": "Majalengka"
+    },
+    {
+      "id": "d78f358c-befb-45bd-bb2e-6d7ed13430e5",
+      "nama": "Anindita Keisha Zahra",
+      "nomorAbsen": 2,
+      "jenisKelamin": "P",
+      "potensi": [],
+      "aktif": true,
+      "createdAt": "2026-08-06T13:47:30.193Z",
+      "nisn": "3155487812",
+      "nis": "222301002",
+      "namaAyah": "Cahyono Diana",
+      "namaIbu": "Iis Rismayanti",
+      "alamat": "Desa Cijurey"
+    },
+    {
+      "id": "dcf38ea9-b5f6-47c0-b5c7-cd9d7d30d0f2",
+      "nama": "Huda Iskandar",
+      "nisn": "3151090872",
+      "nis": "222301003",
+      "nomorAbsen": 3,
+      "jenisKelamin": "L",
+      "namaAyah": "Agus Tri Sutrisno",
+      "namaIbu": "Ria Aprilliani",
+      "alamat": "Desa Cijurey",
+      "potensi": [],
+      "aktif": true,
+      "createdAt": "2026-08-10T15:18:35.106Z"
+    }
+  ],
+  "absensi": [
+    {
+      "id": "022fbce8-38e5-417d-b83f-26d7ec62cae9",
+      "siswaId": "cff6a6e8-be4a-4a65-a292-08d86171687a",
+      "tanggal": "2026-09-10",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "05b632cc-d698-4a50-9fc2-bf732e490365",
+      "siswaId": "5da0fa5f-25d4-4cba-9a06-6782c73bec49",
+      "tanggal": "2026-08-19",
+      "status": "H",
+      "pertanyaanHariIni": "Hewan apa yang menurutmu paling lucu dan ingin kamu jadikan sahabat?",
+      "jawabanSiswa": "Kelinci / Anjing Setia",
+      "dimensiPsikologis": "Kepekaan Emosional"
+    },
+    {
+      "id": "06050381-0af4-4090-b509-a4ec3eb47b37",
+      "siswaId": "d78f358c-befb-45bd-bb2e-6d7ed13430e5",
+      "tanggal": "2026-08-26",
+      "status": "H",
+      "pertanyaanHariIni": "Aktivitas sore apa yang paling \"gue banget\" setelah pulang sekolah?",
+      "jawabanSiswa": "Main hape",
+      "dimensiPsikologis": "Intrinsic Motivation"
+    },
+    {
+      "id": "08243a7f-fe08-4ba7-ad82-cdf57a769aa7",
+      "siswaId": "d78f358c-befb-45bd-bb2e-6d7ed13430e5",
+      "tanggal": "2026-09-10",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "0b5d8674-e5c8-4b7b-9ff5-4f31bbd8099d",
+      "siswaId": "dcf38ea9-b5f6-47c0-b5c7-cd9d7d30d0f2",
+      "tanggal": "2026-08-19",
+      "status": "H",
+      "pertanyaanHariIni": "Hewan apa yang menurutmu paling lucu dan ingin kamu jadikan sahabat?",
+      "jawabanSiswa": "Kucing Lucu",
+      "dimensiPsikologis": "Kepekaan Emosional"
+    },
+    {
+      "id": "0c4bb58e-5574-49ac-a084-2f5cff3df7da",
+      "siswaId": "cff6a6e8-be4a-4a65-a292-08d86171687a",
+      "tanggal": "2026-08-24",
+      "status": "H",
+      "pertanyaanHariIni": "Jika kamu punya kekuatan superhero impian, mana yang kamu pilih?",
+      "jawabanSiswa": "Teleport ",
+      "dimensiPsikologis": "Self-Efficacy"
+    },
+    {
+      "id": "0e4b2f8a-3755-4cbf-b4be-012c5c07365e",
+      "siswaId": "1eb3f428-d348-457b-9507-ed6222b18d14",
+      "tanggal": "2026-08-19",
+      "status": "H",
+      "pertanyaanHariIni": "Hewan apa yang menurutmu paling lucu dan ingin kamu jadikan sahabat?",
+      "jawabanSiswa": "Kucing Lucu",
+      "dimensiPsikologis": "Kepekaan Emosional"
+    },
+    {
+      "id": "1389bfa6-93e2-43b7-b13f-35672af3e4b7",
+      "siswaId": "67a3da1b-30e8-4720-bb80-78b329c5b084",
+      "tanggal": "2026-09-10",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "1522272d-6411-4baa-a3be-8eb2c5186982",
+      "siswaId": "67a3da1b-30e8-4720-bb80-78b329c5b084",
+      "tanggal": "2026-08-18",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "jawabanSiswa": "Anggur",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "15fa22d2-bcec-49bc-bcc9-2c555d9eb46c",
+      "siswaId": "551b1001-bed9-4a50-8b25-face747d67e4",
+      "tanggal": "2026-09-10",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "16cc12f4-0ecb-408a-87cc-368ffdfa1e6e",
+      "siswaId": "dcf38ea9-b5f6-47c0-b5c7-cd9d7d30d0f2",
+      "tanggal": "2026-08-24",
+      "status": "H",
+      "pertanyaanHariIni": "Jika kamu punya kekuatan superhero impian, mana yang kamu pilih?",
+      "jawabanSiswa": "Bisa Terbang Bebas di Angkasa",
+      "dimensiPsikologis": "Self-Efficacy"
+    },
+    {
+      "id": "171179ef-9bf9-425f-b993-6d2698d58a46",
+      "siswaId": "dcf38ea9-b5f6-47c0-b5c7-cd9d7d30d0f2",
+      "tanggal": "2026-08-20",
+      "status": "H",
+      "pertanyaanHariIni": "Jika diberi tiket pesawat gratis, negara mana yang paling ingin kamu kunjungi?",
+      "jawabanSiswa": "Arab Saudi (Mekkah & Madinah)",
+      "dimensiPsikologis": "Eksplorasi Dunia"
+    },
+    {
+      "id": "19cc22e6-6a85-4cb4-8fbb-81da77e5e68d",
+      "siswaId": "7c4b6d67-74fe-4ac4-8451-a252c6c4c3a5",
+      "tanggal": "2026-08-19",
+      "status": "H",
+      "pertanyaanHariIni": "Hewan apa yang menurutmu paling lucu dan ingin kamu jadikan sahabat?",
+      "jawabanSiswa": "Ular",
+      "dimensiPsikologis": "Kepekaan Emosional"
+    },
+    {
+      "id": "22b7c79b-1f90-42ee-97da-70c9911ac05d",
+      "siswaId": "5da0fa5f-25d4-4cba-9a06-6782c73bec49",
+      "tanggal": "2026-08-31",
+      "status": "H",
+      "pertanyaanHariIni": "Tempat liburan keluarga mana yang paling bikin kamu bahagia?",
+      "jawabanSiswa": "Pegunungan & Udara Dingin Sejuk",
+      "dimensiPsikologis": "Environmental Comfort"
+    },
+    {
+      "id": "26cfd60a-2eec-49c3-9136-c004f1ffc05e",
+      "siswaId": "dcf38ea9-b5f6-47c0-b5c7-cd9d7d30d0f2",
+      "tanggal": "2026-08-18",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "jawabanSiswa": "Buah mangga",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "279ca758-a5ee-401c-a774-f4b42c77de82",
+      "siswaId": "5da0fa5f-25d4-4cba-9a06-6782c73bec49",
+      "tanggal": "2026-08-18",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "jawabanSiswa": "Duren",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "29164bc3-cd37-485e-b38d-88e8d948e762",
+      "siswaId": "d78f358c-befb-45bd-bb2e-6d7ed13430e5",
+      "tanggal": "2026-09-07",
+      "status": "H",
+      "pertanyaanHariIni": "Baju/pakaian seperti apa yang paling nyaman kamu pakai saat liburan?",
+      "jawabanSiswa": "Jaket / Hoodie Hype & Keren",
+      "dimensiPsikologis": "Ekspresi Diri"
+    },
+    {
+      "id": "29ccacc8-01f8-43a2-b977-31a84ec1b296",
+      "siswaId": "551b1001-bed9-4a50-8b25-face747d67e4",
+      "tanggal": "2026-08-24",
+      "status": "S",
+      "pertanyaanHariIni": "Jika kamu punya kekuatan superhero impian, mana yang kamu pilih?",
+      "dimensiPsikologis": "Self-Efficacy"
+    },
+    {
+      "id": "2d4690d4-7c43-4b07-ae3b-d6bfabb07acf",
+      "siswaId": "d78f358c-befb-45bd-bb2e-6d7ed13430e5",
+      "tanggal": "2026-08-18",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "jawabanSiswa": "Buah naga",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "343b017b-0b54-44cc-bd02-78ce3af66c82",
+      "siswaId": "1eb3f428-d348-457b-9507-ed6222b18d14",
+      "tanggal": "2026-09-10",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "37bb9f63-b596-4d71-9dbe-527d8c969801",
+      "siswaId": "dcf38ea9-b5f6-47c0-b5c7-cd9d7d30d0f2",
+      "tanggal": "2026-09-07",
+      "status": "H",
+      "pertanyaanHariIni": "Baju/pakaian seperti apa yang paling nyaman kamu pakai saat liburan?",
+      "jawabanSiswa": "Baju Olahraga / Jersey Tim",
+      "dimensiPsikologis": "Ekspresi Diri"
+    },
+    {
+      "id": "3a100383-1970-4de1-a6ab-c4a80009ac72",
+      "siswaId": "67a3da1b-30e8-4720-bb80-78b329c5b084",
+      "tanggal": "2026-08-19",
+      "status": "H",
+      "pertanyaanHariIni": "Hewan apa yang menurutmu paling lucu dan ingin kamu jadikan sahabat?",
+      "jawabanSiswa": "Berang-berang",
+      "dimensiPsikologis": "Kepekaan Emosional"
+    },
+    {
+      "id": "3af4fd49-bc4a-44c0-9b29-7cdf8a8d9978",
+      "siswaId": "6dcd87c4-f859-4f56-9080-e6adf8af6d45",
+      "tanggal": "2026-09-10",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "43eaeea7-ac6a-4fd1-8c61-80564b46b3e7",
+      "siswaId": "cff6a6e8-be4a-4a65-a292-08d86171687a",
+      "tanggal": "2026-08-18",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "jawabanSiswa": "Melon",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "452f2641-6ad5-4d12-ad7c-cb9e94e8cda5",
+      "siswaId": "6dcd87c4-f859-4f56-9080-e6adf8af6d45",
+      "tanggal": "2026-08-26",
+      "status": "H",
+      "pertanyaanHariIni": "Aktivitas sore apa yang paling \"gue banget\" setelah pulang sekolah?",
+      "jawabanSiswa": "Main hape",
+      "dimensiPsikologis": "Intrinsic Motivation"
+    },
+    {
+      "id": "458e00c1-433b-4ca6-af83-d1772bba9393",
+      "siswaId": "67a3da1b-30e8-4720-bb80-78b329c5b084",
+      "tanggal": "2026-08-24",
+      "status": "H",
+      "pertanyaanHariIni": "Jika kamu punya kekuatan superhero impian, mana yang kamu pilih?",
+      "jawabanSiswa": "Kekuatan Super Membantu Orang",
+      "dimensiPsikologis": "Self-Efficacy"
+    },
+    {
+      "id": "45a6f6e1-7f69-44d9-96b1-f5b1726fa3e7",
+      "siswaId": "1eb3f428-d348-457b-9507-ed6222b18d14",
+      "tanggal": "2026-08-20",
+      "status": "H",
+      "pertanyaanHariIni": "Jika diberi tiket pesawat gratis, negara mana yang paling ingin kamu kunjungi?",
+      "jawabanSiswa": "Arab Saudi (Mekkah & Madinah)",
+      "dimensiPsikologis": "Eksplorasi Dunia"
+    },
+    {
+      "id": "46caa37f-7fb6-4974-ac9a-416f7b247ba6",
+      "siswaId": "5da0fa5f-25d4-4cba-9a06-6782c73bec49",
+      "tanggal": "2026-08-26",
+      "status": "H",
+      "pertanyaanHariIni": "Aktivitas sore apa yang paling \"gue banget\" setelah pulang sekolah?",
+      "jawabanSiswa": "Main hape",
+      "dimensiPsikologis": "Intrinsic Motivation"
+    },
+    {
+      "id": "475a649c-e46c-4701-8994-6fbbf505a16e",
+      "siswaId": "67a3da1b-30e8-4720-bb80-78b329c5b084",
+      "tanggal": "2026-08-31",
+      "status": "H",
+      "pertanyaanHariIni": "Tempat liburan keluarga mana yang paling bikin kamu bahagia?",
+      "jawabanSiswa": "Pegunungan & Udara Dingin Sejuk",
+      "dimensiPsikologis": "Environmental Comfort"
+    },
+    {
+      "id": "4e329fe0-5347-4f85-b32b-b5734fa11a47",
+      "siswaId": "6dcd87c4-f859-4f56-9080-e6adf8af6d45",
+      "tanggal": "2026-08-31",
+      "status": "H",
+      "pertanyaanHariIni": "Tempat liburan keluarga mana yang paling bikin kamu bahagia?",
+      "jawabanSiswa": "Waduk jati gede",
+      "dimensiPsikologis": "Environmental Comfort"
+    },
+    {
+      "id": "4eb28f9b-1305-431d-9797-f0783c6b3a08",
+      "siswaId": "6dcd87c4-f859-4f56-9080-e6adf8af6d45",
+      "tanggal": "2026-08-24",
+      "status": "H",
+      "pertanyaanHariIni": "Jika kamu punya kekuatan superhero impian, mana yang kamu pilih?",
+      "jawabanSiswa": "Bisa Menjadi Tak Terlihat",
+      "dimensiPsikologis": "Self-Efficacy"
+    },
+    {
+      "id": "5668371a-08a8-4d5c-bea7-5556dddf6759",
+      "siswaId": "7aa61747-94fa-4e52-af2e-27028781dbf7",
+      "tanggal": "2026-09-10",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "5c82edbf-8f46-474b-bbab-31c04cf78247",
+      "siswaId": "6dcd87c4-f859-4f56-9080-e6adf8af6d45",
+      "tanggal": "2026-08-20",
+      "status": "H",
+      "pertanyaanHariIni": "Jika diberi tiket pesawat gratis, negara mana yang paling ingin kamu kunjungi?",
+      "jawabanSiswa": "Arab Saudi (Mekkah & Madinah)",
+      "dimensiPsikologis": "Eksplorasi Dunia"
+    },
+    {
+      "id": "6003224c-486c-4319-a70c-5b504bbb195a",
+      "siswaId": "551b1001-bed9-4a50-8b25-face747d67e4",
+      "tanggal": "2026-08-19",
+      "status": "H",
+      "pertanyaanHariIni": "Hewan apa yang menurutmu paling lucu dan ingin kamu jadikan sahabat?",
+      "jawabanSiswa": "Kelinci / Anjing Setia",
+      "dimensiPsikologis": "Kepekaan Emosional"
+    },
+    {
+      "id": "6243f5a8-aaff-4456-98e2-0c02d9ff5087",
+      "siswaId": "dcf38ea9-b5f6-47c0-b5c7-cd9d7d30d0f2",
+      "tanggal": "2026-08-31",
+      "status": "H",
+      "pertanyaanHariIni": "Tempat liburan keluarga mana yang paling bikin kamu bahagia?",
+      "jawabanSiswa": "Pantai & Bermain Pasir",
+      "dimensiPsikologis": "Environmental Comfort"
+    },
+    {
+      "id": "68ebf4d9-b8ba-40da-bbce-710e1842158a",
+      "siswaId": "551b1001-bed9-4a50-8b25-face747d67e4",
+      "tanggal": "2026-08-20",
+      "status": "H",
+      "pertanyaanHariIni": "Jika diberi tiket pesawat gratis, negara mana yang paling ingin kamu kunjungi?",
+      "jawabanSiswa": "Korea / Eropa (Negara Pemandangan Indah)",
+      "dimensiPsikologis": "Eksplorasi Dunia"
+    },
+    {
+      "id": "6e372e23-f7b3-4d3e-bea7-e956a643257d",
+      "siswaId": "d78f358c-befb-45bd-bb2e-6d7ed13430e5",
+      "tanggal": "2026-08-24",
+      "status": "S",
+      "pertanyaanHariIni": "Jika kamu punya kekuatan superhero impian, mana yang kamu pilih?",
+      "dimensiPsikologis": "Self-Efficacy"
+    },
+    {
+      "id": "725c9c21-41de-422f-9ae9-434d2201bf95",
+      "siswaId": "cff6a6e8-be4a-4a65-a292-08d86171687a",
+      "tanggal": "2026-09-07",
+      "status": "H",
+      "pertanyaanHariIni": "Baju/pakaian seperti apa yang paling nyaman kamu pakai saat liburan?",
+      "jawabanSiswa": "Gamis",
+      "dimensiPsikologis": "Ekspresi Diri"
+    },
+    {
+      "id": "74006873-d093-4517-89f0-98664d19495a",
+      "siswaId": "6dcd87c4-f859-4f56-9080-e6adf8af6d45",
+      "tanggal": "2026-09-07",
+      "status": "H",
+      "pertanyaanHariIni": "Baju/pakaian seperti apa yang paling nyaman kamu pakai saat liburan?",
+      "jawabanSiswa": "Kaos Santai & Celana Pendek",
+      "dimensiPsikologis": "Ekspresi Diri"
+    },
+    {
+      "id": "75133cf0-f5ca-4f36-a23d-41114243b4fb",
+      "siswaId": "7c4b6d67-74fe-4ac4-8451-a252c6c4c3a5",
+      "tanggal": "2026-08-24",
+      "status": "H",
+      "pertanyaanHariIni": "Jika kamu punya kekuatan superhero impian, mana yang kamu pilih?",
+      "jawabanSiswa": "Berubah jadi kecil",
+      "dimensiPsikologis": "Self-Efficacy"
+    },
+    {
+      "id": "75b3fbb3-a847-4039-8777-c8b2d5308bc5",
+      "siswaId": "d78f358c-befb-45bd-bb2e-6d7ed13430e5",
+      "tanggal": "2026-08-31",
+      "status": "H",
+      "pertanyaanHariIni": "Tempat liburan keluarga mana yang paling bikin kamu bahagia?",
+      "jawabanSiswa": "Pegunungan & Udara Dingin Sejuk",
+      "dimensiPsikologis": "Environmental Comfort"
+    },
+    {
+      "id": "77f56450-4290-43ba-aeef-64e1b4894f20",
+      "siswaId": "6dcd87c4-f859-4f56-9080-e6adf8af6d45",
+      "tanggal": "2026-08-19",
+      "status": "H",
+      "pertanyaanHariIni": "Hewan apa yang menurutmu paling lucu dan ingin kamu jadikan sahabat?",
+      "jawabanSiswa": "Kura-kura",
+      "dimensiPsikologis": "Kepekaan Emosional"
+    },
+    {
+      "id": "8101c7ef-e27a-47bb-85e0-35286f9b6630",
+      "siswaId": "7aa61747-94fa-4e52-af2e-27028781dbf7",
+      "tanggal": "2026-09-07",
+      "status": "H",
+      "pertanyaanHariIni": "Baju/pakaian seperti apa yang paling nyaman kamu pakai saat liburan?",
+      "jawabanSiswa": "Kaos Santai & Celana Pendek",
+      "dimensiPsikologis": "Ekspresi Diri"
+    },
+    {
+      "id": "8447acf0-a0c6-4a52-8f9e-6dfbf09bd975",
+      "siswaId": "1eb3f428-d348-457b-9507-ed6222b18d14",
+      "tanggal": "2026-08-31",
+      "status": "H",
+      "pertanyaanHariIni": "Tempat liburan keluarga mana yang paling bikin kamu bahagia?",
+      "jawabanSiswa": "Pantai & Bermain Pasir",
+      "dimensiPsikologis": "Environmental Comfort"
+    },
+    {
+      "id": "86eede98-0a6e-4b40-a921-6a3b99ce818f",
+      "siswaId": "cff6a6e8-be4a-4a65-a292-08d86171687a",
+      "tanggal": "2026-08-31",
+      "status": "H",
+      "pertanyaanHariIni": "Tempat liburan keluarga mana yang paling bikin kamu bahagia?",
+      "jawabanSiswa": "Waduk Jati Gede",
+      "dimensiPsikologis": "Environmental Comfort"
+    },
+    {
+      "id": "8d7c0f34-4810-49a6-bd89-a154664ec12b",
+      "siswaId": "1eb3f428-d348-457b-9507-ed6222b18d14",
+      "tanggal": "2026-08-24",
+      "status": "S",
+      "pertanyaanHariIni": "Jika kamu punya kekuatan superhero impian, mana yang kamu pilih?",
+      "dimensiPsikologis": "Self-Efficacy"
+    },
+    {
+      "id": "8e33dcfb-5a4c-4d21-ae08-22010bde0310",
+      "siswaId": "dcf38ea9-b5f6-47c0-b5c7-cd9d7d30d0f2",
+      "tanggal": "2026-09-10",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "91f46972-326d-4d6c-b7af-c4ef261aa782",
+      "siswaId": "7c4b6d67-74fe-4ac4-8451-a252c6c4c3a5",
+      "tanggal": "2026-09-07",
+      "status": "H",
+      "pertanyaanHariIni": "Baju/pakaian seperti apa yang paling nyaman kamu pakai saat liburan?",
+      "jawabanSiswa": "Kaos Santai & Celana Pendek",
+      "dimensiPsikologis": "Ekspresi Diri"
+    },
+    {
+      "id": "94c9f0c4-b4e0-481f-af4a-975f27b11dda",
+      "siswaId": "6dcd87c4-f859-4f56-9080-e6adf8af6d45",
+      "tanggal": "2026-08-18",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "jawabanSiswa": "Mangga harum manis",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "972ad08b-c8de-4b65-866f-010dfd362cc8",
+      "siswaId": "dcf38ea9-b5f6-47c0-b5c7-cd9d7d30d0f2",
+      "tanggal": "2026-08-26",
+      "status": "H",
+      "pertanyaanHariIni": "Aktivitas sore apa yang paling \"gue banget\" setelah pulang sekolah?",
+      "jawabanSiswa": "Bermain Sepeda / Olahraga di Lapangan",
+      "dimensiPsikologis": "Intrinsic Motivation"
+    },
+    {
+      "id": "9a868947-628b-4450-a2be-ecb68fbee4c2",
+      "siswaId": "551b1001-bed9-4a50-8b25-face747d67e4",
+      "tanggal": "2026-08-26",
+      "status": "H",
+      "pertanyaanHariIni": "Aktivitas sore apa yang paling \"gue banget\" setelah pulang sekolah?",
+      "jawabanSiswa": "Tidur",
+      "dimensiPsikologis": "Intrinsic Motivation"
+    },
+    {
+      "id": "9c26642e-b796-4661-9e1f-824a1c9f1bdc",
+      "siswaId": "7aa61747-94fa-4e52-af2e-27028781dbf7",
+      "tanggal": "2026-08-24",
+      "status": "S",
+      "pertanyaanHariIni": "Jika kamu punya kekuatan superhero impian, mana yang kamu pilih?",
+      "dimensiPsikologis": "Self-Efficacy"
+    },
+    {
+      "id": "9f2d903e-f642-4460-a506-dfce63d3202f",
+      "siswaId": "cff6a6e8-be4a-4a65-a292-08d86171687a",
+      "tanggal": "2026-08-20",
+      "status": "H",
+      "pertanyaanHariIni": "Jika diberi tiket pesawat gratis, negara mana yang paling ingin kamu kunjungi?",
+      "jawabanSiswa": "Rusia",
+      "dimensiPsikologis": "Eksplorasi Dunia"
+    },
+    {
+      "id": "a0a134c6-5db6-494f-838c-03d49162f3e0",
+      "siswaId": "7c4b6d67-74fe-4ac4-8451-a252c6c4c3a5",
+      "tanggal": "2026-08-20",
+      "status": "H",
+      "pertanyaanHariIni": "Jika diberi tiket pesawat gratis, negara mana yang paling ingin kamu kunjungi?",
+      "jawabanSiswa": "Arab Saudi (Mekkah & Madinah)",
+      "dimensiPsikologis": "Eksplorasi Dunia"
+    },
+    {
+      "id": "a4993d34-ef21-46bf-98a0-e33e1f775a39",
+      "siswaId": "7aa61747-94fa-4e52-af2e-27028781dbf7",
+      "tanggal": "2026-08-18",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "jawabanSiswa": "Mangga",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "ab14f105-cff6-421c-9520-d288bac5e776",
+      "siswaId": "1eb3f428-d348-457b-9507-ed6222b18d14",
+      "tanggal": "2026-08-26",
+      "status": "H",
+      "pertanyaanHariIni": "Aktivitas sore apa yang paling \"gue banget\" setelah pulang sekolah?",
+      "jawabanSiswa": "Main hape",
+      "dimensiPsikologis": "Intrinsic Motivation"
+    },
+    {
+      "id": "aef3ed2c-21e9-4102-85ff-b4d30b87a546",
+      "siswaId": "551b1001-bed9-4a50-8b25-face747d67e4",
+      "tanggal": "2026-08-18",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "jawabanSiswa": "Alpukat",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "af6fc9e9-deb8-447e-99c4-319e0f60b01d",
+      "siswaId": "1eb3f428-d348-457b-9507-ed6222b18d14",
+      "tanggal": "2026-09-07",
+      "status": "H",
+      "pertanyaanHariIni": "Baju/pakaian seperti apa yang paling nyaman kamu pakai saat liburan?",
+      "jawabanSiswa": "Baju Olahraga / Jersey Tim",
+      "dimensiPsikologis": "Ekspresi Diri"
+    },
+    {
+      "id": "b00d8ebe-ee48-425e-9a1e-d005b415f076",
+      "siswaId": "551b1001-bed9-4a50-8b25-face747d67e4",
+      "tanggal": "2026-08-31",
+      "status": "S",
+      "pertanyaanHariIni": "Tempat liburan keluarga mana yang paling bikin kamu bahagia?",
+      "dimensiPsikologis": "Environmental Comfort"
+    },
+    {
+      "id": "b3b04867-76f9-46af-b039-29d34ea27cea",
+      "siswaId": "7aa61747-94fa-4e52-af2e-27028781dbf7",
+      "tanggal": "2026-08-20",
+      "status": "H",
+      "pertanyaanHariIni": "Jika diberi tiket pesawat gratis, negara mana yang paling ingin kamu kunjungi?",
+      "jawabanSiswa": "Malaysia ",
+      "dimensiPsikologis": "Eksplorasi Dunia"
+    },
+    {
+      "id": "bf760c20-dd06-4273-99c4-9599cdf33179",
+      "siswaId": "7c4b6d67-74fe-4ac4-8451-a252c6c4c3a5",
+      "tanggal": "2026-08-26",
+      "status": "H",
+      "pertanyaanHariIni": "Aktivitas sore apa yang paling \"gue banget\" setelah pulang sekolah?",
+      "jawabanSiswa": "Main hape",
+      "dimensiPsikologis": "Intrinsic Motivation"
+    },
+    {
+      "id": "c77f0be7-9d1f-488a-b7a4-456855cb6fbd",
+      "siswaId": "cff6a6e8-be4a-4a65-a292-08d86171687a",
+      "tanggal": "2026-08-19",
+      "status": "H",
+      "pertanyaanHariIni": "Hewan apa yang menurutmu paling lucu dan ingin kamu jadikan sahabat?",
+      "jawabanSiswa": "Kucing Lucu",
+      "dimensiPsikologis": "Kepekaan Emosional"
+    },
+    {
+      "id": "cc680c16-4174-43a3-ab94-fd2d98653620",
+      "siswaId": "551b1001-bed9-4a50-8b25-face747d67e4",
+      "tanggal": "2026-09-07",
+      "status": "H",
+      "pertanyaanHariIni": "Baju/pakaian seperti apa yang paling nyaman kamu pakai saat liburan?",
+      "jawabanSiswa": "Gamis",
+      "dimensiPsikologis": "Ekspresi Diri"
+    },
+    {
+      "id": "cc86fc43-47f9-4a2e-a42b-8e15e1330718",
+      "siswaId": "7aa61747-94fa-4e52-af2e-27028781dbf7",
+      "tanggal": "2026-08-19",
+      "status": "H",
+      "pertanyaanHariIni": "Hewan apa yang menurutmu paling lucu dan ingin kamu jadikan sahabat?",
+      "jawabanSiswa": "Hamster",
+      "dimensiPsikologis": "Kepekaan Emosional"
+    },
+    {
+      "id": "d12b0296-9fdb-4889-9911-babe1578dbb0",
+      "siswaId": "5da0fa5f-25d4-4cba-9a06-6782c73bec49",
+      "tanggal": "2026-09-10",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "d36522c7-9cee-436a-ac4e-a855f0633394",
+      "siswaId": "cff6a6e8-be4a-4a65-a292-08d86171687a",
+      "tanggal": "2026-08-26",
+      "status": "H",
+      "pertanyaanHariIni": "Aktivitas sore apa yang paling \"gue banget\" setelah pulang sekolah?",
+      "jawabanSiswa": "Bermain Sepeda / Olahraga di Lapangan",
+      "dimensiPsikologis": "Intrinsic Motivation"
+    },
+    {
+      "id": "da78cdc1-564c-4b01-9ca1-0f11c4e51696",
+      "siswaId": "7c4b6d67-74fe-4ac4-8451-a252c6c4c3a5",
+      "tanggal": "2026-08-18",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "jawabanSiswa": "Mangga",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "dc608c50-e74e-4d79-bd86-edafef0a54bf",
+      "siswaId": "d78f358c-befb-45bd-bb2e-6d7ed13430e5",
+      "tanggal": "2026-08-19",
+      "status": "H",
+      "pertanyaanHariIni": "Hewan apa yang menurutmu paling lucu dan ingin kamu jadikan sahabat?",
+      "jawabanSiswa": "Kucing Lucu",
+      "dimensiPsikologis": "Kepekaan Emosional"
+    },
+    {
+      "id": "dec25d2e-585e-49c0-8d2e-78e90be53ea2",
+      "siswaId": "7aa61747-94fa-4e52-af2e-27028781dbf7",
+      "tanggal": "2026-08-31",
+      "status": "H",
+      "pertanyaanHariIni": "Tempat liburan keluarga mana yang paling bikin kamu bahagia?",
+      "jawabanSiswa": "Pegunungan & Udara Dingin Sejuk",
+      "dimensiPsikologis": "Environmental Comfort"
+    },
+    {
+      "id": "dffc9c54-ae84-43e1-bef9-9d7bf7d40ae7",
+      "siswaId": "7c4b6d67-74fe-4ac4-8451-a252c6c4c3a5",
+      "tanggal": "2026-09-10",
+      "status": "H",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "e01c6d24-7185-4788-b30e-6d1c70761157",
+      "siswaId": "d78f358c-befb-45bd-bb2e-6d7ed13430e5",
+      "tanggal": "2026-08-20",
+      "status": "S",
+      "pertanyaanHariIni": "Jika diberi tiket pesawat gratis, negara mana yang paling ingin kamu kunjungi?",
+      "dimensiPsikologis": "Eksplorasi Dunia"
+    },
+    {
+      "id": "e031cc0b-19e3-4766-b3d9-b1e140606de4",
+      "siswaId": "5da0fa5f-25d4-4cba-9a06-6782c73bec49",
+      "tanggal": "2026-08-20",
+      "status": "H",
+      "pertanyaanHariIni": "Jika diberi tiket pesawat gratis, negara mana yang paling ingin kamu kunjungi?",
+      "jawabanSiswa": "Jepang (Negara Teknologi & Anime)",
+      "dimensiPsikologis": "Eksplorasi Dunia"
+    },
+    {
+      "id": "f0828b51-d673-4c3f-9d84-6a91e3d6b554",
+      "siswaId": "5da0fa5f-25d4-4cba-9a06-6782c73bec49",
+      "tanggal": "2026-08-24",
+      "status": "H",
+      "pertanyaanHariIni": "Jika kamu punya kekuatan superhero impian, mana yang kamu pilih?",
+      "jawabanSiswa": "Bisa membaca hati orang",
+      "dimensiPsikologis": "Self-Efficacy"
+    },
+    {
+      "id": "f09c366a-f304-4008-b700-a469eabc5e0e",
+      "siswaId": "1eb3f428-d348-457b-9507-ed6222b18d14",
+      "tanggal": "2026-08-18",
+      "status": "S",
+      "pertanyaanHariIni": "Kalau boleh milih, buah apa yang paling \"kamu banget\"?",
+      "dimensiPsikologis": "Sensori & Karakter"
+    },
+    {
+      "id": "f0a8e185-df11-4ee7-a6fb-30ef246085d7",
+      "siswaId": "7c4b6d67-74fe-4ac4-8451-a252c6c4c3a5",
+      "tanggal": "2026-08-31",
+      "status": "H",
+      "pertanyaanHariIni": "Tempat liburan keluarga mana yang paling bikin kamu bahagia?",
+      "jawabanSiswa": "Pantai & Bermain Pasir",
+      "dimensiPsikologis": "Environmental Comfort"
+    },
+    {
+      "id": "f17772b6-9d73-411b-a927-0edb1818be9e",
+      "siswaId": "5da0fa5f-25d4-4cba-9a06-6782c73bec49",
+      "tanggal": "2026-09-07",
+      "status": "H",
+      "pertanyaanHariIni": "Baju/pakaian seperti apa yang paling nyaman kamu pakai saat liburan?",
+      "jawabanSiswa": "Baju Olahraga / Jersey Tim",
+      "dimensiPsikologis": "Ekspresi Diri"
+    },
+    {
+      "id": "f4af2809-ad72-4184-9c88-9fd3db5f0932",
+      "siswaId": "67a3da1b-30e8-4720-bb80-78b329c5b084",
+      "tanggal": "2026-09-07",
+      "status": "H",
+      "pertanyaanHariIni": "Baju/pakaian seperti apa yang paling nyaman kamu pakai saat liburan?",
+      "jawabanSiswa": "Kaos Santai & Celana Pendek",
+      "dimensiPsikologis": "Ekspresi Diri"
+    },
+    {
+      "id": "f663aecd-7f29-4fe9-b4c5-72f25afbd22e",
+      "siswaId": "67a3da1b-30e8-4720-bb80-78b329c5b084",
+      "tanggal": "2026-08-26",
+      "status": "H",
+      "pertanyaanHariIni": "Aktivitas sore apa yang paling \"gue banget\" setelah pulang sekolah?",
+      "jawabanSiswa": "Main kelereng",
+      "dimensiPsikologis": "Intrinsic Motivation"
+    },
+    {
+      "id": "f712b043-79d6-4fdc-98d5-53507512b1d0",
+      "siswaId": "7aa61747-94fa-4e52-af2e-27028781dbf7",
+      "tanggal": "2026-08-26",
+      "status": "S",
+      "pertanyaanHariIni": "Aktivitas sore apa yang paling \"gue banget\" setelah pulang sekolah?",
+      "dimensiPsikologis": "Intrinsic Motivation"
+    },
+    {
+      "id": "f9ac86e1-3956-4296-8728-080e28f0db10",
+      "siswaId": "67a3da1b-30e8-4720-bb80-78b329c5b084",
+      "tanggal": "2026-08-20",
+      "status": "H",
+      "pertanyaanHariIni": "Jika diberi tiket pesawat gratis, negara mana yang paling ingin kamu kunjungi?",
+      "jawabanSiswa": "Arab Saudi (Mekkah & Madinah)",
+      "dimensiPsikologis": "Eksplorasi Dunia"
+    }
+  ],
+  "mataPelajaran": [
+    {
+      "id": "234649cb-944a-433f-9527-c010c8ee6143",
+      "nama": "Seni Rupa",
+      "urutan": 6
+    },
+    {
+      "id": "27a2dd14-40a1-403c-a3df-0513cee93091",
+      "nama": "Basa Sunda",
+      "urutan": 3
+    },
+    {
+      "id": "43870965-fcf8-456e-8362-da34acf06980",
+      "nama": "Matematika",
+      "urutan": 1
+    },
+    {
+      "id": "6ad56795-72ba-4e86-82dc-faba240cb01a",
+      "nama": "Bahasa Indonesia",
+      "urutan": 2
+    },
+    {
+      "id": "966d1079-b2cc-4b95-91c5-3c485a7699f2",
+      "nama": "Pendidikan Pancasila",
+      "urutan": 7
+    },
+    {
+      "id": "ac2854fe-0b6e-414f-b7bb-1afb296c9cfd",
+      "nama": "Bahasa Inggris",
+      "urutan": 5
+    },
+    {
+      "id": "fafaa157-966d-43d6-8641-feaad2d9a1c5",
+      "nama": "IPAS",
+      "urutan": 4
+    }
+  ],
+  "nilai": [
+    {
+      "id": "23c6c409-0680-401e-b560-4e77d414689a",
+      "siswaId": "d78f358c-befb-45bd-bb2e-6d7ed13430e5",
+      "mapelId": "6ad56795-72ba-4e86-82dc-faba240cb01a",
+      "jenis": "latihan",
+      "tanggal": "2026-08-04",
+      "nilai": 70
+    },
+    {
+      "id": "827abf6a-a0db-4382-85ae-acdae263c9e4",
+      "siswaId": "d78f358c-befb-45bd-bb2e-6d7ed13430e5",
+      "mapelId": "27a2dd14-40a1-403c-a3df-0513cee93091",
+      "jenis": "kuis",
+      "tanggal": "2026-08-06",
+      "nilai": 90
+    },
+    {
+      "id": "cc89612b-ce50-4bb3-9835-ba32d133846c",
+      "siswaId": "d78f358c-befb-45bd-bb2e-6d7ed13430e5",
+      "mapelId": "ac2854fe-0b6e-414f-b7bb-1afb296c9cfd",
+      "jenis": "tugas",
+      "tanggal": "2026-08-04",
+      "nilai": 60
+    }
+  ],
+  "catatan": [],
+  "exportedAt": "2026-09-11T09:39:22.740Z"
+}

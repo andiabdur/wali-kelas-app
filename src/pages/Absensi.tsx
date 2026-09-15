@@ -1,9 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { useLiveQuery } from 'dexie-react-hooks'
 import { Calendar, CheckCircle2, CheckCheck, HelpCircle, Sparkles, MessageSquare } from 'lucide-react'
-import { db, generateId, type Absensi as AbsensiRecord } from '../db/database'
+import {
+  useSiswaList,
+  useAbsensiList,
+  batchSaveAbsensi,
+  type Absensi as AbsensiRecord,
+} from '../db/firestore'
 import { useStore } from '../store/useStore'
+import { useAuth } from '../context/AuthContext'
 import { getActiveCurriculum, getPertanyaanForDay, type PertanyaanItem } from '../utils/psychologyEngine'
 
 type Status = AbsensiRecord['status']
@@ -21,9 +26,11 @@ function todayISO() {
 
 export function Absensi() {
   const { notify } = useStore()
+  const { activeKelasId } = useAuth()
   const [tanggal, setTanggal] = useState(todayISO())
-  const siswa = useLiveQuery(() => db.siswa.toArray(), [])?.filter((item) => item.aktif).sort((a, b) => a.nomorAbsen - b.nomorAbsen) ?? []
-  const records = useLiveQuery(() => db.absensi.where('tanggal').equals(tanggal).toArray(), [tanggal]) ?? []
+  const { siswa: allSiswa } = useSiswaList(activeKelasId)
+  const siswa = allSiswa.filter((item) => item.aktif)
+  const { records } = useAbsensiList(activeKelasId, tanggal)
   
   const [curriculumVersion, setCurriculumVersion] = useState(0)
 
@@ -85,32 +92,14 @@ export function Absensi() {
         dimensiPsikologis: selectedQuestion.dimensi,
       }))
 
-    await db.transaction('rw', db.absensi, async () => {
-      for (const row of rows) {
-        const existing = records.find((item) => item.siswaId === row.siswaId)
-        if (existing) {
-          await db.absensi.update(existing.id, {
-            status: row.status,
-            pertanyaanHariIni: row.pertanyaanHariIni,
-            jawabanSiswa: row.jawabanSiswa,
-            dimensiPsikologis: row.dimensiPsikologis,
-          })
-        } else {
-          await db.absensi.add({
-            id: generateId(),
-            siswaId: row.siswaId,
-            tanggal,
-            status: row.status,
-            pertanyaanHariIni: row.pertanyaanHariIni,
-            jawabanSiswa: row.jawabanSiswa,
-            dimensiPsikologis: row.dimensiPsikologis,
-          })
-        }
-      }
-    })
-    notify(`Absensi & Respon Pertanyaan Harian tanggal ${tanggal} berhasil disimpan.`)
-    setDraftStatus({})
-    setDraftJawaban({})
+    try {
+      await batchSaveAbsensi(activeKelasId, rows, tanggal, records)
+      notify(`Absensi & Respon Pertanyaan Harian tanggal ${tanggal} berhasil disimpan.`)
+      setDraftStatus({})
+      setDraftJawaban({})
+    } catch (err: any) {
+      notify(err.message || 'Gagal menyimpan absensi.', 'error')
+    }
   }
 
   return (

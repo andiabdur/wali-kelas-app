@@ -1,9 +1,29 @@
 import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLiveQuery } from 'dexie-react-hooks'
 import { ArrowLeft, BookOpen, CalendarDays, Lightbulb, MessageSquare, Plus, Pencil, Trash2, Brain, Sparkles, UserCheck, Compass, Award, Loader2, RefreshCw } from 'lucide-react'
-import { db, generateId, KATEGORI_POTENSI, type AnalisisPsikologis } from '../db/database'
+import {
+  useSiswaList,
+  useNilaiList,
+  useMataPelajaranList,
+  useAbsensiList,
+  useCatatanList,
+  useAnalisisPsikologis,
+  updateSiswa,
+  deleteSiswaCascade,
+  saveAnalisisPsikologis,
+  addCatatan,
+  updateCatatan,
+  deleteCatatan,
+  updateAbsensiRecord,
+  addAbsensiRecord,
+  generateId,
+  KATEGORI_POTENSI,
+  type AnalisisPsikologis,
+} from '../db/firestore'
+import { deleteDoc, doc } from 'firebase/firestore'
+import { firestore } from '../lib/firebase'
 import { useStore } from '../store/useStore'
+import { useAuth } from '../context/AuthContext'
 import { Avatar, StudentForm, ConfirmDeleteModal } from './SiswaList'
 import { synthesizePsychologicalProfile } from '../utils/psychologyEngine'
 import { generateStudentPsychologicalProfileAI } from '../utils/aiService'
@@ -21,6 +41,7 @@ type TabId = (typeof tabs)[number]['id']
 
 export function SiswaDetail() {
   const { selectedSiswaId, navigate, notify } = useStore()
+  const { activeKelasId } = useAuth()
   const [activeTab, setActiveTab] = useState<TabId>('akademis')
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -37,12 +58,14 @@ export function SiswaDetail() {
   const [newAbsensiStatus, setNewAbsensiStatus] = useState<'H' | 'I' | 'S' | 'A'>('H')
   const [newAbsensiJawaban, setNewAbsensiJawaban] = useState('')
 
-  const siswa = useLiveQuery(() => selectedSiswaId ? db.siswa.get(selectedSiswaId) : undefined, [selectedSiswaId])
-  const nilai = useLiveQuery(() => selectedSiswaId ? db.nilai.where('siswaId').equals(selectedSiswaId).toArray() : [], [selectedSiswaId]) ?? []
-  const mapel = useLiveQuery(() => db.mataPelajaran.orderBy('urutan').toArray(), []) ?? []
-  const absensi = useLiveQuery(() => selectedSiswaId ? db.absensi.where('siswaId').equals(selectedSiswaId).toArray() : [], [selectedSiswaId]) ?? []
-  const catatan = useLiveQuery(() => selectedSiswaId ? db.catatan.where('siswaId').equals(selectedSiswaId).reverse().sortBy('tanggal') : [], [selectedSiswaId]) ?? []
-  const savedAI = useLiveQuery(() => selectedSiswaId ? db.analisisPsikologis.where('siswaId').equals(selectedSiswaId).first() : undefined, [selectedSiswaId])
+  const { siswa: allSiswa } = useSiswaList(activeKelasId)
+  const siswa = allSiswa.find((s) => s.id === selectedSiswaId)
+  const { nilai } = useNilaiList(activeKelasId, selectedSiswaId || undefined)
+  const { mapel } = useMataPelajaranList(activeKelasId)
+  const { records: allAbsensi } = useAbsensiList(activeKelasId)
+  const absensi = useMemo(() => allAbsensi.filter((a) => a.siswaId === selectedSiswaId), [allAbsensi, selectedSiswaId])
+  const { catatan } = useCatatanList(activeKelasId, selectedSiswaId || undefined)
+  const savedAI = useAnalisisPsikologis(activeKelasId, selectedSiswaId || undefined)
 
   // Synthesize AI Psychological Narrative Profile
   const profileAI = useMemo(() => {
@@ -66,20 +89,13 @@ export function SiswaDetail() {
     notify('Menganalisis data karakteristik siswa...', 'info')
     try {
       const generated = await generateStudentPsychologicalProfileAI(siswa.nama, absensi, nilai, catatan)
-      generated.siswaId = siswa.id
-      
-      const existing = await db.analisisPsikologis.where('siswaId').equals(siswa.id).first()
-      if (existing) {
-        await db.analisisPsikologis.update(existing.id, {
-          karakterUtama: generated.karakterUtama,
-          narasiKarakter: generated.narasiKarakter,
-          saranPendekatan: generated.saranPendekatan,
-          rekomendasiBakat: generated.rekomendasiBakat,
-          updatedAt: generated.updatedAt,
-        })
-      } else {
-        await db.analisisPsikologis.add(generated)
-      }
+      await saveAnalisisPsikologis({
+        ...generated,
+        id: savedAI?.id || generateId(),
+        kelasId: activeKelasId,
+        siswaId: siswa.id,
+        updatedAt: new Date().toISOString(),
+      })
       notify(`Analisis karakteristik ${siswa.nama} berhasil diproses!`, 'success')
     } catch (err: any) {
       notify(err.message || 'Gagal memproses analisis karakteristik.', 'error')
@@ -93,34 +109,39 @@ export function SiswaDetail() {
   }
 
   async function handleDelete() {
-    await db.transaction('rw', [db.siswa, db.absensi, db.nilai, db.catatan], async () => {
-      await db.siswa.delete(siswa!.id)
-      await db.absensi.where('siswaId').equals(siswa!.id).delete()
-      await db.nilai.where('siswaId').equals(siswa!.id).delete()
-      await db.catatan.where('siswaId').equals(siswa!.id).delete()
-    })
-    notify('Data siswa berhasil dihapus.', 'info')
-    navigate('siswa')
+    try {
+      await deleteSiswaCascade(siswa!.id, activeKelasId)
+      notify('Data siswa berhasil dihapus.', 'info')
+      navigate('siswa')
+    } catch (err: any) {
+      notify(err.message || 'Gagal menghapus siswa.', 'error')
+    }
   }
 
   async function togglePotensi(id: string) {
     const isRemove = siswa!.potensi.includes(id)
     const next = isRemove ? siswa!.potensi.filter((item) => item !== id) : [...siswa!.potensi, id]
-    await db.siswa.update(siswa!.id, { potensi: next })
+    await updateSiswa(siswa!.id, { potensi: next })
     const label = KATEGORI_POTENSI.find((k) => k.id === id)?.label
     notify(isRemove ? `Potensi "${label}" dihapus.` : `Potensi "${label}" ditandai.`, 'info')
   }
 
   async function addNote() {
     if (!note.trim()) return
-    await db.catatan.add({ id: generateId(), siswaId: siswa!.id, tanggal: new Date().toISOString().slice(0, 10), isi: note.trim() })
+    await addCatatan({
+      id: generateId(),
+      kelasId: activeKelasId,
+      siswaId: siswa!.id,
+      tanggal: new Date().toISOString().slice(0, 10),
+      isi: note.trim(),
+    })
     notify('Catatan perkembangan berhasil ditambahkan.')
     setNote('')
   }
 
   async function saveEditedNote(id: string) {
     if (!editingNoteText.trim()) return
-    await db.catatan.update(id, { isi: editingNoteText.trim() })
+    await updateCatatan(id, editingNoteText.trim())
     notify('Catatan perkembangan berhasil diperbarui.')
     setEditingNoteId(null)
     setEditingNoteText('')
@@ -128,18 +149,18 @@ export function SiswaDetail() {
 
   async function deleteNote(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus catatan ini?')) return
-    await db.catatan.delete(id)
+    await deleteCatatan(id)
     notify('Catatan berhasil dihapus.', 'info')
   }
 
   // Absensi Handler Functions
   async function updateAbsensiStatus(id: string, newStatus: 'H' | 'I' | 'S' | 'A') {
-    await db.absensi.update(id, { status: newStatus })
+    await updateAbsensiRecord(id, { status: newStatus })
     notify(`Status presensi diperbarui menjadi ${newStatus}.`, 'success')
   }
 
   async function saveEditedAbsensiJawaban(id: string) {
-    await db.absensi.update(id, { jawabanSiswa: editingAbsensiJawaban.trim() || undefined })
+    await updateAbsensiRecord(id, { jawabanSiswa: editingAbsensiJawaban.trim() || undefined })
     notify('Respon presensi siswa berhasil diperbarui.', 'success')
     setEditingAbsensiId(null)
     setEditingAbsensiJawaban('')
@@ -147,7 +168,7 @@ export function SiswaDetail() {
 
   async function deleteAbsensiRecord(id: string) {
     if (!confirm('Apakah Anda yakin ingin menghapus presensi tanggal ini?')) return
-    await db.absensi.delete(id)
+    await deleteDoc(doc(firestore, 'absensi', id))
     notify('Presensi tanggal ini berhasil dihapus.', 'info')
   }
 
@@ -158,14 +179,15 @@ export function SiswaDetail() {
     }
     const existing = absensi.find((a) => a.tanggal === newAbsensiDate)
     if (existing) {
-      await db.absensi.update(existing.id, {
+      await updateAbsensiRecord(existing.id, {
         status: newAbsensiStatus,
         jawabanSiswa: newAbsensiJawaban.trim() || undefined,
       })
       notify(`Presensi tanggal ${newAbsensiDate} berhasil diperbarui!`, 'success')
     } else {
-      await db.absensi.add({
+      await addAbsensiRecord({
         id: generateId(),
+        kelasId: activeKelasId,
         siswaId: siswa!.id,
         tanggal: newAbsensiDate,
         status: newAbsensiStatus,
@@ -228,10 +250,10 @@ export function SiswaDetail() {
       <AnimatePresence>
         {isEditing && (
           <StudentForm
+            kelasId={activeKelasId}
             initialData={siswa}
             onClose={() => setIsEditing(false)}
-            nextNumber={siswa.nomorAbsen}
-            notify={notify}
+            nextAbsenNumber={siswa.nomorAbsen}
           />
         )}
       </AnimatePresence>

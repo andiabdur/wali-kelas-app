@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLiveQuery } from 'dexie-react-hooks'
 import {
   BookPlus,
   Plus,
@@ -17,18 +16,30 @@ import {
   TrendingUp,
   BarChart2,
 } from 'lucide-react'
-import { db, generateId, type Nilai } from '../db/database'
-import { getActiveStudents } from '../db/queries'
+import {
+  useMataPelajaranList,
+  useSiswaList,
+  useNilaiList,
+  addMataPelajaran,
+  deleteMataPelajaranCascade,
+  batchSaveNilai,
+  deleteNilai as deleteNilaiFirestore,
+  generateId,
+  type Nilai,
+} from '../db/firestore'
 import { useStore } from '../store/useStore'
+import { useAuth } from '../context/AuthContext'
 
 type SortField = 'tanggal' | 'nilai' | 'siswa' | 'mapel'
 type SortOrder = 'asc' | 'desc'
 
 export function Akademis() {
   const { notify } = useStore()
-  const mapel = useLiveQuery(() => db.mataPelajaran.orderBy('urutan').toArray(), []) ?? []
-  const siswa = useLiveQuery(async () => getActiveStudents(await db.siswa.toArray()), []) ?? []
-  const nilai = useLiveQuery(() => db.nilai.toArray(), []) ?? []
+  const { activeKelasId } = useAuth()
+  const { mapel } = useMataPelajaranList(activeKelasId)
+  const { siswa: allSiswa } = useSiswaList(activeKelasId)
+  const siswa = allSiswa.filter((s) => s.aktif)
+  const { nilai } = useNilaiList(activeKelasId)
   
   // Input batch state
   const [namaMapel, setNamaMapel] = useState('')
@@ -47,32 +58,42 @@ export function Akademis() {
 
   async function addMapel() {
     if (!namaMapel.trim()) return
-    await db.mataPelajaran.add({ id: generateId(), nama: namaMapel.trim(), urutan: mapel.length + 1 })
+    await addMataPelajaran({
+      id: generateId(),
+      kelasId: activeKelasId,
+      nama: namaMapel.trim(),
+      urutan: mapel.length + 1,
+    })
     notify(`Mata pelajaran "${namaMapel.trim()}" ditambahkan.`)
     setNamaMapel('')
   }
 
   async function deleteMapel(id: string) {
     if (!confirm('Hapus mata pelajaran ini? Nilai terkait juga akan dihapus.')) return
-    await db.transaction('rw', [db.mataPelajaran, db.nilai], async () => {
-      await db.mataPelajaran.delete(id)
-      await db.nilai.where('mapelId').equals(id).delete()
-    })
+    await deleteMataPelajaranCascade(id, activeKelasId)
     notify('Mata pelajaran berhasil dihapus.', 'info')
   }
 
   async function deleteNilai(id: string) {
-    await db.nilai.delete(id)
+    await deleteNilaiFirestore(id)
     notify('Nilai berhasil dihapus.', 'info')
   }
 
   async function saveScores() {
     if (!selectedMapel) return notify('Pilih mata pelajaran terlebih dahulu.', 'error')
-    const rows = Object.entries(scores)
+    const rows: Nilai[] = Object.entries(scores)
       .filter(([, value]) => value !== '' && !Number.isNaN(Number(value)))
-      .map(([siswaId, value]) => ({ id: generateId(), siswaId, mapelId: selectedMapel, jenis, tanggal, nilai: Number(value) }))
+      .map(([siswaId, value]) => ({
+        id: generateId(),
+        kelasId: activeKelasId,
+        siswaId,
+        mapelId: selectedMapel,
+        jenis,
+        tanggal,
+        nilai: Number(value),
+      }))
     if (!rows.length) return notify('Isi minimal satu nilai.', 'error')
-    await db.nilai.bulkAdd(rows)
+    await batchSaveNilai(rows)
     notify(`Berhasil menyimpan ${rows.length} nilai siswa.`)
     setScores({})
   }

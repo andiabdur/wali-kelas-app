@@ -1,21 +1,31 @@
 import { useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { useLiveQuery } from 'dexie-react-hooks'
 import { Download, FileText, Loader2 } from 'lucide-react'
-import { db, KATEGORI_POTENSI } from '../db/database'
-import { getActiveStudents } from '../db/queries'
+import {
+  useKelas,
+  useSiswaList,
+  useAbsensiList,
+  useNilaiList,
+  useMataPelajaranList,
+  useCatatanList,
+  KATEGORI_POTENSI,
+} from '../db/firestore'
 import { useStore } from '../store/useStore'
+import { useAuth } from '../context/AuthContext'
 import { downloadElementAsPdf } from '../utils/pdfGenerator'
 import { synthesizePsychologicalProfile } from '../utils/psychologyEngine'
 import { formatTTL } from '../utils/formatters'
 
 export function Laporan() {
-  const { kelasInfo, notify } = useStore()
-  const siswa = useLiveQuery(async () => getActiveStudents(await db.siswa.toArray()), []) ?? []
-  const absensi = useLiveQuery(() => db.absensi.toArray(), []) ?? []
-  const nilai = useLiveQuery(() => db.nilai.toArray(), []) ?? []
-  const mapel = useLiveQuery(() => db.mataPelajaran.toArray(), []) ?? []
-  const catatan = useLiveQuery(() => db.catatan.toArray(), []) ?? []
+  const { notify } = useStore()
+  const { activeKelasId } = useAuth()
+  const { data: kelasInfo } = useKelas(activeKelasId)
+  const { siswa: allSiswa } = useSiswaList(activeKelasId)
+  const siswa = allSiswa.filter((item) => item.aktif)
+  const { records: absensi } = useAbsensiList(activeKelasId)
+  const { nilai } = useNilaiList(activeKelasId)
+  const { mapel } = useMataPelajaranList(activeKelasId)
+  const { catatan } = useCatatanList(activeKelasId)
   const [bulan, setBulan] = useState(new Date().toISOString().slice(0, 7))
   const [siswaId, setSiswaId] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)

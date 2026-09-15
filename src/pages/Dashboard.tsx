@@ -1,8 +1,7 @@
-import { useLiveQuery } from 'dexie-react-hooks'
 import { AlertTriangle, CalendarCheck, ClipboardList, TrendingUp, Users, Dices } from 'lucide-react'
-import { db, KATEGORI_POTENSI } from '../db/database'
-import { getActiveStudents } from '../db/queries'
+import { KATEGORI_POTENSI, useKelas, useSiswaList, useAbsensiList, useNilaiList } from '../db/firestore'
 import { useStore } from '../store/useStore'
+import { useAuth } from '../context/AuthContext'
 import { AttendanceBarChart, PotentialBars } from '../components/DashboardCharts'
 import { TabelDetailKehadiran } from '../components/TabelDetailKehadiran'
 
@@ -22,10 +21,13 @@ function lastDays(count: number) {
 }
 
 export function Dashboard() {
-  const { navigate, kelasInfo } = useStore()
-  const siswa = useLiveQuery(async () => getActiveStudents(await db.siswa.toArray()), []) ?? []
-  const absensi = useLiveQuery(() => db.absensi.toArray(), []) ?? []
-  const nilai = useLiveQuery(() => db.nilai.toArray(), []) ?? []
+  const { navigate } = useStore()
+  const { activeKelasId } = useAuth()
+  const { data: kelas } = useKelas(activeKelasId)
+  const { siswa: allSiswa } = useSiswaList(activeKelasId)
+  const siswa = allSiswa.filter((s) => s.aktif)
+  const { records: absensi } = useAbsensiList(activeKelasId)
+  const { nilai } = useNilaiList(activeKelasId)
 
   const hariIni = todayISO()
   const absensiHariIni = absensi.filter((a) => a.tanggal === hariIni)
@@ -63,10 +65,10 @@ export function Dashboard() {
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Dashboard</p>
           <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight sm:text-4xl">
-            {kelasInfo?.nama || 'Kelas SD'}
+            {kelas?.nama || 'Kelas SD'}
           </h1>
           <p className="mt-2 text-base text-[var(--text-muted)]">
-            Pantau kondisi kelas hari ini dengan cepat dan rapi.
+            Pantau kondisi kelas {kelas?.nama ? `(${kelas.nama})` : ''} hari ini dengan cepat dan rapi.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -115,7 +117,6 @@ export function Dashboard() {
         </article>
       </div>
 
-      {/* Matriks Detail Kehadiran Siswa (Format Tabel Mendetail) */}
       <TabelDetailKehadiran
         siswa={siswa}
         absensi={absensi}

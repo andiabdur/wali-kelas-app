@@ -95,3 +95,4 @@ dist-ssr
 # Agent rules & local configurations
 AGENTS.md
 .agents/
+memory

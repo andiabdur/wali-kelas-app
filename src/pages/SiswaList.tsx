@@ -1,15 +1,24 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLiveQuery } from 'dexie-react-hooks'
 import { Plus, Search, Pencil, Trash2, AlertTriangle, X } from 'lucide-react'
-import { db, generateId, KATEGORI_POTENSI, type Siswa } from '../db/database'
-import { getActiveStudents } from '../db/queries'
+import {
+  useSiswaList,
+  addSiswa,
+  updateSiswa,
+  deleteSiswaCascade,
+  generateId,
+  KATEGORI_POTENSI,
+  type Siswa,
+} from '../db/firestore'
 import { useStore } from '../store/useStore'
+import { useAuth } from '../context/AuthContext'
 import { formatTTL } from '../utils/formatters'
 
 export function SiswaList() {
   const { navigate, notify } = useStore()
-  const siswa = useLiveQuery(async () => getActiveStudents(await db.siswa.toArray()), []) ?? []
+  const { activeKelasId } = useAuth()
+  const { siswa: allSiswa } = useSiswaList(activeKelasId)
+  const siswa = allSiswa.filter((item) => item.aktif)
   const [query, setQuery] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editingSiswa, setEditingSiswa] = useState<Siswa | null>(null)
@@ -18,14 +27,14 @@ export function SiswaList() {
   const filtered = siswa.filter((item) => item.nama.toLowerCase().includes(query.toLowerCase()))
 
   async function handleDelete(siswaId: string) {
-    await db.transaction('rw', [db.siswa, db.absensi, db.nilai, db.catatan], async () => {
-      await db.siswa.delete(siswaId)
-      await db.absensi.where('siswaId').equals(siswaId).delete()
-      await db.nilai.where('siswaId').equals(siswaId).delete()
-      await db.catatan.where('siswaId').equals(siswaId).delete()
-    })
-    notify('Data siswa berhasil dihapus.', 'info')
-    setDeletingSiswa(null)
+    try {
+      await deleteSiswaCascade(siswaId, activeKelasId)
+      notify('Data siswa berhasil dihapus.', 'info')
+    } catch (err: any) {
+      notify(err.message || 'Gagal menghapus data siswa.', 'error')
+    } finally {
+      setDeletingSiswa(null)
+    }
   }
 
   return (
@@ -59,70 +68,102 @@ export function SiswaList() {
         {filtered.map((item) => (
           <motion.div
             key={item.id}
-            whileHover={{ y: -3 }}
-            className="group relative rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm transition hover:shadow-md dark:bg-dark-surface-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="group relative flex flex-col justify-between rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm transition hover:shadow-md dark:bg-dark-surface-2"
           >
-            <div className="flex items-start gap-4 cursor-pointer" onClick={() => navigate('siswa-detail', item.id)}>
-              <Avatar name={item.nama} />
-              <div className="min-w-0 flex-1 pr-14">
-                <p className="font-heading text-lg font-bold group-hover:text-primary transition-colors">{item.nama}</p>
-                <p className="text-sm text-[var(--text-muted)]">No. {item.nomorAbsen} • {item.jenisKelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</p>
-                {(item.tempatLahir || item.tanggalLahir) && (
-                  <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-                    TTL: {formatTTL(item.tempatLahir, item.tanggalLahir)}
-                  </p>
-                )}
-                {(item.nisn || item.nis) && (
-                  <p className="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-                    {item.nisn ? `NISN: ${item.nisn}` : ''} {item.nisn && item.nis ? '• ' : ''} {item.nis ? `NIS: ${item.nis}` : ''}
-                  </p>
-                )}
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {item.potensi.slice(0, 2).map((potensi) => {
-                    const meta = KATEGORI_POTENSI.find((k) => k.id === potensi)
-                    return <span key={potensi} className="rounded-full bg-accent-50 px-2.5 py-1 text-xs font-semibold text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">{meta?.label}</span>
-                  })}
-                  {!item.potensi.length && <span className="text-xs text-[var(--text-muted)]">Belum ada potensi</span>}
+            <div>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <Avatar name={item.nama} />
+                  <div>
+                    <h2
+                      onClick={() => navigate('siswa-detail', item.id)}
+                      className="font-heading text-lg font-bold hover:text-primary cursor-pointer transition line-clamp-1"
+                    >
+                      {item.nama}
+                    </h2>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Absen #{item.nomorAbsen} &bull; {item.jenisKelamin === 'L' ? 'Laki-laki' : 'Perempuan'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => { setEditingSiswa(item); setShowForm(true); }}
+                    className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-dark-surface-1"
+                    title="Edit Siswa"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    onClick={() => setDeletingSiswa(item)}
+                    className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                    title="Hapus Siswa"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               </div>
+
+              <div className="mt-4 space-y-1.5 border-t border-[var(--border)] pt-3 text-xs text-[var(--text-muted)]">
+                {item.tanggalLahir && (
+                  <p><span className="font-semibold text-[var(--text-primary)]">TTL:</span> {formatTTL(item.tempatLahir, item.tanggalLahir)}</p>
+                )}
+                {item.nisn && (
+                  <p><span className="font-semibold text-[var(--text-primary)]">NISN/NIS:</span> {item.nisn} {item.nis ? `(${item.nis})` : ''}</p>
+                )}
+                {item.teleponOrtu && (
+                  <p><span className="font-semibold text-[var(--text-primary)]">Kontak Ortu:</span> {item.teleponOrtu}</p>
+                )}
+              </div>
+
+              {item.potensi && item.potensi.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {item.potensi.slice(0, 3).map((pId) => {
+                    const cat = KATEGORI_POTENSI.find((k) => k.id === pId)
+                    return (
+                      <span key={pId} className="rounded-md bg-primary-50 px-2 py-0.5 text-[10px] font-semibold text-primary dark:bg-primary-950/60 dark:text-primary-300">
+                        {cat?.label || pId}
+                      </span>
+                    )
+                  })}
+                  {item.potensi.length > 3 && (
+                    <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-dark-surface-1 dark:text-gray-400">
+                      +{item.potensi.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div className="absolute top-4 right-4 flex items-center gap-1 opacity-90 transition-opacity">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => { e.stopPropagation(); setEditingSiswa(item); setShowForm(true); }}
-                title="Edit Siswa"
-                className="rounded-lg p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 hover:text-primary dark:hover:bg-dark-surface-1 dark:hover:text-primary transition"
-              >
-                <Pencil size={16} />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => { e.stopPropagation(); setDeletingSiswa(item); }}
-                title="Hapus Siswa"
-                className="rounded-lg p-2 text-gray-400 dark:text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition"
-              >
-                <Trash2 size={16} />
-              </motion.button>
-            </div>
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate('siswa-detail', item.id)}
+              className="mt-4 flex min-h-10 w-full items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-xs font-semibold text-[var(--text-primary)] hover:border-primary/50 transition"
+            >
+              Lihat Profil & Rapor Lengkap
+            </motion.button>
           </motion.div>
         ))}
       </div>
 
+      {filtered.length === 0 && (
+        <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-8 text-center text-sm text-[var(--text-muted)] dark:bg-dark-surface-2">
+          {query ? `Tidak ada siswa yang cocok dengan pencarian "${query}".` : 'Belum ada data siswa di kelas ini.'}
+        </div>
+      )}
+
       <AnimatePresence>
         {showForm && (
           <StudentForm
+            kelasId={activeKelasId}
             initialData={editingSiswa}
+            nextAbsenNumber={siswa.length + 1}
             onClose={() => { setShowForm(false); setEditingSiswa(null); }}
-            nextNumber={siswa.length + 1}
-            notify={notify}
           />
         )}
-      </AnimatePresence>
-
-      <AnimatePresence>
         {deletingSiswa && (
           <ConfirmDeleteModal
             studentName={deletingSiswa.nama}
@@ -136,41 +177,46 @@ export function SiswaList() {
 }
 
 export function StudentForm({
+  kelasId,
   initialData,
+  nextAbsenNumber,
   onClose,
-  nextNumber,
-  notify,
 }: {
+  kelasId: string
   initialData?: Siswa | null
+  nextAbsenNumber: number
   onClose: () => void
-  nextNumber: number
-  notify: (msg: string) => void
 }) {
+  const { notify } = useStore()
   const [form, setForm] = useState({
     nama: initialData?.nama || '',
-    nisn: initialData?.nisn || '',
-    nis: initialData?.nis || '',
-    nomorAbsen: initialData?.nomorAbsen ?? nextNumber,
-    jenisKelamin: (initialData?.jenisKelamin || 'L') as 'L' | 'P',
+    nomorAbsen: initialData?.nomorAbsen || nextAbsenNumber,
+    jenisKelamin: initialData?.jenisKelamin || 'L',
     tempatLahir: initialData?.tempatLahir || '',
     tanggalLahir: initialData?.tanggalLahir || '',
-    teleponOrtu: initialData?.teleponOrtu || '',
+    nisn: initialData?.nisn || '',
+    nis: initialData?.nis || '',
     namaAyah: initialData?.namaAyah || '',
     namaIbu: initialData?.namaIbu || '',
+    teleponOrtu: initialData?.teleponOrtu || '',
     alamat: initialData?.alamat || '',
   })
 
   async function save() {
-    if (!form.nama.trim()) return
+    if (!form.nama.trim()) {
+      notify('Nama lengkap wajib diisi.', 'error')
+      return
+    }
+
     if (initialData) {
-      await db.siswa.update(initialData.id, {
+      await updateSiswa(initialData.id, {
         nama: form.nama.trim(),
-        nisn: form.nisn.trim() || undefined,
-        nis: form.nis.trim() || undefined,
         nomorAbsen: Number(form.nomorAbsen),
-        jenisKelamin: form.jenisKelamin,
+        jenisKelamin: form.jenisKelamin as 'L' | 'P',
         tempatLahir: form.tempatLahir.trim() || undefined,
         tanggalLahir: form.tanggalLahir || undefined,
+        nisn: form.nisn.trim() || undefined,
+        nis: form.nis.trim() || undefined,
         teleponOrtu: form.teleponOrtu.trim() || undefined,
         namaAyah: form.namaAyah.trim() || undefined,
         namaIbu: form.namaIbu.trim() || undefined,
@@ -178,13 +224,14 @@ export function StudentForm({
       })
       notify(`Data siswa "${form.nama.trim()}" berhasil diperbarui.`)
     } else {
-      const siswa: Siswa = {
+      const newSiswa: Siswa = {
         id: generateId(),
+        kelasId: kelasId,
         nama: form.nama.trim(),
         nisn: form.nisn.trim() || undefined,
         nis: form.nis.trim() || undefined,
         nomorAbsen: Number(form.nomorAbsen),
-        jenisKelamin: form.jenisKelamin,
+        jenisKelamin: form.jenisKelamin as 'L' | 'P',
         tempatLahir: form.tempatLahir.trim() || undefined,
         tanggalLahir: form.tanggalLahir || undefined,
         teleponOrtu: form.teleponOrtu.trim() || undefined,
@@ -195,8 +242,8 @@ export function StudentForm({
         aktif: true,
         createdAt: new Date().toISOString(),
       }
-      await db.siswa.add(siswa)
-      notify(`Siswa "${siswa.nama}" berhasil ditambahkan.`)
+      await addSiswa(newSiswa)
+      notify(`Siswa "${newSiswa.nama}" berhasil ditambahkan.`)
     }
     onClose()
   }
