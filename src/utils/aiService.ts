@@ -331,73 +331,84 @@ Skema JSON:
 /**
  * Generate Student Character Profile Narrative using OpenAI LLM API
  */
+export interface ExtraStudentContext {
+  jenisKelamin?: 'L' | 'P'
+  potensi?: string[]
+  mapelNames?: Record<string, string>
+}
+
+/**
+ * Generate Student Character Profile Narrative using OpenAI LLM API
+ */
 export async function generateStudentPsychologicalProfileAI(
   namaSiswa: string,
   absensiRecords: Array<{ tanggal: string; jawabanSiswa?: string; pertanyaanHariIni?: string; status: string }>,
-  nilaiRecords: Array<{ nilai: number; jenis: string }>,
-  catatanRecords: Array<{ isi: string }>
+  nilaiRecords: Array<{ nilai: number; jenis: string; mapelId?: string }>,
+  catatanRecords: Array<{ isi: string }>,
+  extra?: ExtraStudentContext
 ): Promise<AnalisisPsikologis> {
   const config = getLLMConfig()
 
-  // Fallback to local heuristic engine if API key is not provided
   if (!config.apiKey.trim()) {
-    const fallback = synthesizePsychologicalProfile(namaSiswa, absensiRecords, nilaiRecords, catatanRecords)
-    const result: AnalisisPsikologis = {
-      id: generateId(),
-      siswaId: '',
-      updatedAt: fallback.updatedAt,
-      karakterUtama: fallback.karakterUtama,
-      narasiKarakter: fallback.narasiKarakter,
-      saranPendekatan: fallback.saranPendekatan,
-      rekomendasiBakat: fallback.rekomendasiBakat,
-    }
-    return result
+    throw new Error('API Key belum dikonfigurasi. Harap pilih preset OmniRoute atau masukkan API Key di menu Pengaturan.')
   }
 
   const answeredList = absensiRecords.filter((a) => a.jawabanSiswa && a.jawabanSiswa.trim() !== '')
   const totalHadir = absensiRecords.filter((a) => a.status === 'H').length
+  const totalIzin = absensiRecords.filter((a) => a.status === 'I').length
+  const totalSakit = absensiRecords.filter((a) => a.status === 'S').length
+  const totalAlpa = absensiRecords.filter((a) => a.status === 'A').length
   const totalAbsen = absensiRecords.length || 1
   const persenHadir = Math.round((totalHadir / totalAbsen) * 100)
   const avgNilai = nilaiRecords.length
     ? Math.round(nilaiRecords.reduce((acc, curr) => acc + curr.nilai, 0) / nilaiRecords.length)
     : 0
 
-  const systemPrompt = `Anda adalah seorang Wali Kelas Sekolah Dasar (SD) yang bijaksana, hangat, kebapakan/keibuan, dan sangat mengenal kepribadian murid-muridnya.
-Tugas Anda adalah menulis narasi pengamatan karakter dan perkembangan siswa untuk laporan wali kelas yang akan dibaca oleh guru dan orang tua murid.
+  const systemPrompt = `Anda adalah seorang Psikolog Pendidikan Anak dan Wali Kelas Sekolah Dasar (SD) yang sangat berpengalaman, empatis, dan berwawasan mendalam.
+Tugas Anda adalah melakukan ANALISIS PSIKOLOGIS, KARAKTERISTIK, DAN POTENSI SISWA SECARA MENDALAM, OTENTIK, DAN BEBAS DARI TEMPLATE KALIMAT KAKU berdasarkan data pengamatan nyata.
 
-ATURAN GAYA BAHASA (MUTLAK):
-1. GUNAKAN BAHASA GURU ASLI: Tulis dalam bahasa Indonesia yang mengalir luwes, hangat, komunikatif, dan membumi.
-2. DILARANG KERAS MENGGUNAKAN BAHASA ROBOT, JARGON PSIKOMETRI KAKU, ATAU AI SLOP:
-   - JANGAN PERNAH gunakan kalimat klise seperti: "Berdasarkan rangkuman observasi...", "Subjek menunjukkan indikator afektif...", "Secara holistik...", "Spektrum kepribadian...", dsb.
-   - JANGAN PERNAH gunakan tanda em dash (—).
-3. CERITAKAN PERILAKU NYATA:
-   - Ceritakan bagaimana sikap anak di kelas, pergaulannya dengan sesama teman, rasa ingin tahunya saat belajar, dan apa yang membuatnya bersemangat.
-   - Singgung pilihan presensi "gue banget" atau jawaban santai siswa sebagai cerminan minat dan karakter otentik anak.
-   - Buat narasi dalam 2 paragraf yang rapi dan mengalir enak dibaca.
-4. SARAN PENDEKATAN KONKRET:
-   - Berikan rekomendasi taktis yang ramah dan langsung bisa dipraktikkan guru di kelas atau orang tua di rumah.
-5. REKOMENDASI BAKAT:
-   - Sebutkan 2 sampai 4 kegiatan atau ekstrakurikuler SD yang nyata (misal: Seni Gambar, Pramuka, Futsal, Sains Cilik).
+PANDUAN ANALISIS (MUTLAK & BEBAS TEMPLATE):
+1. BUKAN TEMPLATE: Dilarang keras menggunakan pola kalimat kaku yang berulang ("Dalam keseharian di kelas...", "Tingkat kehadirannya sangat baik...", "Di bidang pelajaran..."). Tulis analisis yang hidup, mengalir bebas, dan benar-benar personal untuk anak ini.
+2. TELAAH MAKNA JAWABAN SISWA: Analisis secara mendalam bagaimana pilihan-pilihan jawaban santai yang dipilih siswa saat presensi pagi (misal: pilihan buah, pakaian, hewan kesukaan, superhero impian, tempat liburan, dll) mencerminkan cara berpikir, kepekaan emosional, nilai hidup, serta interaksi sosialnya.
+3. KORELASIKAN DENGAN AKADEMIS & CATATAN GURU: Hubungkan kepribadian anak dengan performa akademisnya dan catatan interaksi guru di kelas. Ungkapkan bagaimana anak menghadapi tantangan belajar.
+4. GAYA PENULISAN: Bahasa Indonesia yang kaya, hangat, berjiwa pendidik, mengalir alami, dan berwawasan mendalam untuk dibaca wali kelas dan orang tua murid.
+5. STRICT RULES:
+   - Dilarang menggunakan tanda em dash (—).
+   - Dilarang menggunakan istilah birokratis kaku atau jargon AI klise.
+6. SARAN PENDEKATAN: Berikan panduan bimbingan yang taktis, personal, dan relevan dengan kepribadian anak ini (untuk diterapkan guru di kelas dan orang tua di rumah).
+7. REKOMENDASI BAKAT: Sebutkan 2 sampai 4 bidang minat, talenta, atau ekstrakurikuler SD yang paling sesuai untuk memfasilitasi potensinya.
 
-Format balasan WAJIB berupa JSON murni:
+Format balasan HARUS JSON valid tanpa markdown pembungkus:
 {
   "karakterUtama": ["Sifat 1", "Sifat 2", "Sifat 3"],
-  "narasiKarakter": "Paragraf narasi karakter anak yang mengalir hangat dan luwes...",
-  "saranPendekatan": "Saran pendekatan taktis bagi guru dan orang tua...",
-  "rekomendasiBakat": "Daftar ekskul atau bidang minat yang cocok (dipisahkan koma)..."
+  "narasiKarakter": "Ulasan karakter dan psikologis siswa yang mendalam, kaya wawasan, mengalir alami, dan personal...",
+  "saranPendekatan": "Saran pendekatan pembelajaran dan pendampingan personal...",
+  "rekomendasiBakat": "Rekomendasi ekstrakurikuler atau bidang pengembangan bakat..."
 }`
 
-  const userPrompt = `Data Siswa:
-Nama: ${namaSiswa}
-Kehadiran: ${persenHadir}% hadir (${totalHadir} dari ${totalAbsen} pertemuan)
-Rata-rata Nilai: ${avgNilai}
+  const genderLabel = extra?.jenisKelamin === 'L' ? 'Laki-laki' : extra?.jenisKelamin === 'P' ? 'Perempuan' : ''
+  const potensiList = extra?.potensi && extra.potensi.length > 0 ? extra.potensi.join(', ') : 'Belum ditandai khusus'
+  const mapelNames = extra?.mapelNames || {}
 
-Pilihan Jawaban Santai Siswa Saat Presensi Pagi:
-${answeredList.length > 0 ? answeredList.slice(-10).map((a) => `- Pertanyaan "${a.pertanyaanHariIni}" -> Pilihan anak: "${a.jawabanSiswa}"`).join('\n') : '(Belum ada respon santai yang tercatat)'}
+  const nilaiFormatted = nilaiRecords.map((n) => {
+    const mapelName = n.mapelId && mapelNames[n.mapelId] ? mapelNames[n.mapelId] : 'Mata Pelajaran'
+    return `- ${mapelName} (${n.jenis}): ${n.nilai}`
+  }).join('\n')
+
+  const userPrompt = `Data Observasi Siswa:
+Nama: ${namaSiswa}${genderLabel ? ` (${genderLabel})` : ''}
+Rekap Kehadiran: ${persenHadir}% hadir (${totalHadir} Hadir, ${totalIzin} Izin, ${totalSakit} Sakit, ${totalAlpa} Alpa dari ${totalAbsen} hari)
+Minat/Potensi Terdaftar: ${potensiList}
+
+Data Akademis (Rata-rata kelas: ${avgNilai}):
+${nilaiRecords.length > 0 ? nilaiFormatted : '(Belum ada data nilai)'}
+
+Pilihan Jawaban Santai Presensi Harian Siswa:
+${answeredList.length > 0 ? answeredList.map((a) => `- ${a.tanggal}: Pertanyaan "${a.pertanyaanHariIni || 'Pertanyaan presensi'}" -> Pilihan anak: "${a.jawabanSiswa}"`).join('\n') : '(Belum ada respon santai yang tercatat)'}
 
 ${catatanRecords.length > 0 ? `Catatan Observasi Guru di Kelas:\n${catatanRecords.map((c) => `- ${c.isi}`).join('\n')}` : ''}
 
-Tuliskan catatan profil karakter untuk ${namaSiswa} dengan gaya bahasa wali kelas yang hidup, luwes, dan hangat.`
+Lakukan analisis psikologis dan kepribadian ${namaSiswa} secara mendalam dan otentik. Tuliskan dalam format JSON yang ditentukan.`
 
   const response = await fetch(config.apiUrl, {
     method: 'POST',
@@ -435,16 +446,25 @@ Tuliskan catatan profil karakter untuk ${namaSiswa} dengan gaya bahasa wali kela
     throw new Error('Respon dari API LLM kosong.')
   }
 
-  const fallback = synthesizePsychologicalProfile(namaSiswa, absensiRecords, nilaiRecords, catatanRecords)
   const parsed = cleanAndParseJSON<any>(content)
+  if (!parsed || typeof parsed !== 'object') {
+    throw new Error('Format respon AI tidak dapat dibaca sebagai objek JSON.')
+  }
+
   const result: AnalisisPsikologis = {
     id: generateId(),
     siswaId: '',
     updatedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-    karakterUtama: (Array.isArray(parsed.karakterUtama) && parsed.karakterUtama.length > 0) ? parsed.karakterUtama : fallback.karakterUtama,
-    narasiKarakter: parsed.narasiKarakter || parsed.narasi || parsed.profile || parsed.deskripsi || fallback.narasiKarakter,
-    saranPendekatan: parsed.saranPendekatan || parsed.saran || parsed.pendekatan || fallback.saranPendekatan,
-    rekomendasiBakat: parsed.rekomendasiBakat || parsed.bakat || parsed.ekstrakurikuler || fallback.rekomendasiBakat,
+    karakterUtama: Array.isArray(parsed.karakterUtama) && parsed.karakterUtama.length > 0
+      ? parsed.karakterUtama
+      : ['Kreatif', 'Tekun', 'Santun'],
+    narasiKarakter: parsed.narasiKarakter || parsed.narasi || parsed.profile || parsed.deskripsi || '',
+    saranPendekatan: parsed.saranPendekatan || parsed.saran || parsed.pendekatan || '',
+    rekomendasiBakat: parsed.rekomendasiBakat || parsed.bakat || parsed.ekstrakurikuler || '',
+  }
+
+  if (!result.narasiKarakter.trim()) {
+    throw new Error('AI tidak mengembalikan narasi karakter yang memadai. Silakan coba analisis ulang.')
   }
 
   return result

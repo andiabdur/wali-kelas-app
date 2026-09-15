@@ -61,6 +61,7 @@ export function SiswaDetail() {
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
   const [editingNoteText, setEditingNoteText] = useState('')
   const [isGeneratingAI, setIsGeneratingAI] = useState(false)
+  const [showDraftEstimate, setShowDraftEstimate] = useState(false)
 
   // Absensi Editing States
   const [editingAbsensiId, setEditingAbsensiId] = useState<string | null>(null)
@@ -82,28 +83,33 @@ export function SiswaDetail() {
   const { catatan } = useCatatanList(activeKelasId, selectedSiswaId || undefined)
   const savedAI = useAnalisisPsikologis(activeKelasId, selectedSiswaId || undefined)
 
-  // Synthesize Psychological Profile
-  const profileAI = useMemo(() => {
+  // Fallback draft calculation (only displayed on explicit user request)
+  const fallbackEstimate = useMemo(() => {
     if (!siswa) return null
-    if (savedAI) {
-      return {
-        karakterUtama: savedAI.karakterUtama,
-        narasiKarakter: savedAI.narasiKarakter,
-        saranPendekatan: savedAI.saranPendekatan,
-        rekomendasiBakat: savedAI.rekomendasiBakat,
-        totalRespon: absensi.filter((a) => a.jawabanSiswa).length,
-        updatedAt: savedAI.updatedAt,
-      }
-    }
     return synthesizePsychologicalProfile(siswa.nama, absensi, nilai, catatan)
-  }, [siswa, absensi, nilai, catatan, savedAI])
+  }, [siswa, absensi, nilai, catatan])
 
   async function handleGenerateAI() {
     if (!siswa) return
     setIsGeneratingAI(true)
-    notify('Menganalisis data karakteristik siswa...', 'info')
+    notify('Menganalisis karakteristik siswa dengan AI...', 'info')
     try {
-      const generated = await generateStudentPsychologicalProfileAI(siswa.nama, absensi, nilai, catatan)
+      const mapelNames = Object.fromEntries(mapel.map((m) => [m.id, m.nama]))
+      const potensiLabels = siswa.potensi
+        .map((pId) => KATEGORI_POTENSI.find((k) => k.id === pId)?.label)
+        .filter(Boolean) as string[]
+
+      const generated = await generateStudentPsychologicalProfileAI(
+        siswa.nama,
+        absensi,
+        nilai,
+        catatan,
+        {
+          jenisKelamin: siswa.jenisKelamin,
+          potensi: potensiLabels,
+          mapelNames,
+        }
+      )
       await saveAnalisisPsikologis({
         ...generated,
         id: savedAI?.id || generateId(),
@@ -111,9 +117,9 @@ export function SiswaDetail() {
         siswaId: siswa.id,
         updatedAt: new Date().toISOString().slice(0, 10),
       })
-      notify(`Analisis karakteristik ${siswa.nama} berhasil diperbarui.`, 'success')
+      notify(`Analisis AI untuk ${siswa.nama} berhasil disimpan.`, 'success')
     } catch (err: any) {
-      notify(err.message || 'Gagal memproses analisis karakteristik.', 'error')
+      notify(err.message || 'Gagal memproses analisis AI.', 'error')
     } finally {
       setIsGeneratingAI(false)
     }
@@ -531,83 +537,140 @@ export function SiswaDetail() {
       )}
 
       {/* Tab: Karakter / Profil Psikologis */}
-      {activeTab === 'psikologis' && profileAI && (
+      {activeTab === 'psikologis' && (
         <div className="space-y-4">
-          <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-5 space-y-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--border)] pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
-                  <Compass size={18} />
+          {savedAI ? (
+            <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-5 space-y-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-[var(--border)] pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+                    <Compass size={18} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="font-heading text-base font-bold text-[var(--text-primary)]">
+                        Profil Karakter Siswa
+                      </h2>
+                      <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold">
+                        <UserCheck size={11} />
+                        Dianalisis AI
+                      </span>
+                    </div>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      Berdasarkan data presensi ({absensi.filter((a) => a.jawabanSiswa).length} respon) &bull; Diperbarui: {savedAI.updatedAt}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="font-heading text-base font-bold text-[var(--text-primary)]">
-                    Catatan Perkembangan Karakter Siswa
-                  </h2>
-                  <p className="text-xs text-[var(--text-muted)]">
-                    Observasi harian dan {profileAI.totalRespon} respon presensi
+
+                <button
+                  onClick={handleGenerateAI}
+                  disabled={isGeneratingAI}
+                  className="flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors disabled:opacity-50"
+                >
+                  {isGeneratingAI ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                  <span>{isGeneratingAI ? 'Menyusun Analisis...' : 'Analisis Ulang dengan AI'}</span>
+                </button>
+              </div>
+
+              {/* Dominant Traits */}
+              <div>
+                <p className="text-xs font-semibold text-[var(--text-muted)] mb-2">Karakter & Potensi Utama:</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {savedAI.karakterUtama.map((trait) => (
+                    <span
+                      key={trait}
+                      className="inline-flex items-center gap-1 rounded-md bg-primary-50 text-primary px-2.5 py-1 text-xs font-semibold dark:bg-primary-950/60 dark:text-primary-300"
+                    >
+                      <UserCheck size={13} />
+                      <span>{trait}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Narrative Story */}
+              <div className="rounded-lg bg-[var(--surface)] p-4 border border-[var(--border)]">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
+                  Ulasan Karakter & Keseharian Siswa:
+                </h3>
+                <p className="text-xs leading-relaxed text-[var(--text-primary)] whitespace-pre-line">
+                  {savedAI.narasiKarakter}
+                </p>
+              </div>
+
+              {/* Recommendations */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-lg bg-[var(--surface)] p-3.5 border border-[var(--border)]">
+                  <div className="flex items-center gap-1.5 text-primary font-bold text-xs mb-1.5">
+                    <Compass size={15} />
+                    <span>Saran Pendekatan Pembelajaran:</span>
+                  </div>
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                    {savedAI.saranPendekatan}
+                  </p>
+                </div>
+
+                <div className="rounded-lg bg-[var(--surface)] p-3.5 border border-[var(--border)]">
+                  <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 font-bold text-xs mb-1.5">
+                    <Award size={15} />
+                    <span>Rekomendasi Bakat:</span>
+                  </div>
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                    {savedAI.rekomendasiBakat}
                   </p>
                 </div>
               </div>
-
-              <button
-                onClick={handleGenerateAI}
-                disabled={isGeneratingAI}
-                className="flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors disabled:opacity-50"
-              >
-                {isGeneratingAI ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                <span>{isGeneratingAI ? 'Menyusun Catatan...' : 'Analisis Ulang Karakter'}</span>
-              </button>
-            </div>
-
-            {/* Dominant Traits */}
-            <div>
-              <p className="text-xs font-semibold text-[var(--text-muted)] mb-2">Karakter Dominan:</p>
-              <div className="flex flex-wrap gap-1.5">
-                {profileAI.karakterUtama.map((trait) => (
-                  <span
-                    key={trait}
-                    className="inline-flex items-center gap-1 rounded-md bg-primary-50 text-primary px-2.5 py-1 text-xs font-semibold dark:bg-primary-950/60 dark:text-primary-300"
-                  >
-                    <UserCheck size={13} />
-                    <span>{trait}</span>
-                  </span>
-                ))}
+            </article>
+          ) : (
+            /* Dedicated State when AI has not been triggered yet */
+            <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-6 sm:p-8 text-center space-y-4">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Compass size={24} />
               </div>
-            </div>
-
-            {/* Narrative Story */}
-            <div className="rounded-lg bg-[var(--surface)] p-4 border border-[var(--border)]">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
-                Ulasan Karakter & Keseharian Siswa:
-              </h3>
-              <p className="text-xs leading-relaxed text-[var(--text-primary)] whitespace-pre-line">
-                {profileAI.narasiKarakter}
-              </p>
-            </div>
-
-            {/* Recommendations */}
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-lg bg-[var(--surface)] p-3.5 border border-[var(--border)]">
-                <div className="flex items-center gap-1.5 text-primary font-bold text-xs mb-1.5">
-                  <Compass size={15} />
-                  <span>Saran Pendekatan:</span>
-                </div>
+              <div className="max-w-md mx-auto space-y-1.5">
+                <h2 className="font-heading text-base font-bold text-[var(--text-primary)]">
+                  Profil Karakter Belum Dianalisis AI
+                </h2>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  {profileAI.saranPendekatan}
+                  Data observasi {siswa.nama} ({absensi.filter((a) => a.jawabanSiswa).length} respon presensi santai, {nilai.length} data nilai akademis, dan {catatan.length} catatan guru) sudah siap untuk dianalisis oleh model AI secara mendalam dan otentik.
                 </p>
               </div>
 
-              <div className="rounded-lg bg-[var(--surface)] p-3.5 border border-[var(--border)]">
-                <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 font-bold text-xs mb-1.5">
-                  <Award size={15} />
-                  <span>Rekomendasi Bakat:</span>
-                </div>
-                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  {profileAI.rekomendasiBakat}
-                </p>
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleGenerateAI}
+                  disabled={isGeneratingAI}
+                  className="flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors disabled:opacity-50 w-full sm:w-auto"
+                >
+                  {isGeneratingAI ? <Loader2 size={15} className="animate-spin" /> : <Compass size={15} />}
+                  <span>{isGeneratingAI ? 'Sedang Menganalisis dengan AI...' : 'Jalankan Analisis Karakter AI'}</span>
+                </button>
               </div>
-            </div>
-          </article>
+
+              {/* Optional local fallback preview */}
+              <div className="pt-3 border-t border-[var(--border)] max-w-lg mx-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowDraftEstimate(!showDraftEstimate)}
+                  className="text-[11px] font-medium text-[var(--text-muted)] hover:text-primary transition-colors underline"
+                >
+                  {showDraftEstimate ? 'Sembunyikan Draf Bawaan Tanpa AI' : 'Lihat Draf Perkiraan Awal (Tanpa AI)'}
+                </button>
+
+                {showDraftEstimate && fallbackEstimate && (
+                  <div className="mt-3 text-left rounded-lg border border-dashed border-[var(--border)] bg-[var(--surface)] p-3.5 space-y-2">
+                    <p className="text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                      Perkiraan Awal Bawaan (Bukan Hasil AI):
+                    </p>
+                    <p className="text-xs text-[var(--text-muted)] whitespace-pre-line leading-relaxed">
+                      {fallbackEstimate.narasiKarakter}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </article>
+          )}
         </div>
       )}
 
