@@ -20,6 +20,11 @@ export interface Kelas {
   waliKelasEmail?: string
   logoDinas?: string
   logoSekolah?: string
+  llmConfig?: {
+    apiUrl: string
+    apiKey: string
+    model: string
+  }
   createdAt?: string
   updatedAt?: string
 }

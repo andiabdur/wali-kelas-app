@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { db, generateId, type AnalisisPsikologis } from '../db/database'
-import { CURRICULUM_PERTANYAAN_HARIAN, type PertanyaanItem, synthesizePsychologicalProfile } from './psychologyEngine'
+import { CURRICULUM_PERTANYAAN_HARIAN, type PertanyaanItem, synthesizePsychologicalProfile, saveCurriculumQuestions } from './psychologyEngine'
 
 export interface LLMConfig {
   apiUrl: string
@@ -8,9 +8,15 @@ export interface LLMConfig {
   model: string
 }
 
+export const OMNIROUTE_DEFAULT_PRESET: LLMConfig = {
+  apiUrl: 'http://127.0.0.1:20128/v1/chat/completions',
+  apiKey: 'sk-25df769ef46500b5-22caec-85267272',
+  model: 'auto/best-fast',
+}
+
 export function normalizeApiUrl(url: string): string {
   let trimmed = url.trim()
-  if (!trimmed) return 'https://api.openai.com/v1/chat/completions'
+  if (!trimmed) return OMNIROUTE_DEFAULT_PRESET.apiUrl
   trimmed = trimmed.replace(/\/+$/, '')
 
   if (trimmed.endsWith('/chat/completions')) {
@@ -29,12 +35,12 @@ export function getLLMConfig(): LLMConfig {
 
   const metaEnv = (import.meta as any).env || {}
 
-  const rawUrl = localUrl || metaEnv.VITE_OPENAI_API_URL || 'https://api.openai.com/v1/chat/completions'
+  const rawUrl = localUrl || metaEnv.VITE_OPENAI_API_URL || OMNIROUTE_DEFAULT_PRESET.apiUrl
 
   return {
     apiUrl: normalizeApiUrl(rawUrl),
-    apiKey: localKey || metaEnv.VITE_OPENAI_API_KEY || '',
-    model: localModel || metaEnv.VITE_OPENAI_MODEL || 'gpt-4o-mini',
+    apiKey: localKey !== null ? localKey : (metaEnv.VITE_OPENAI_API_KEY || OMNIROUTE_DEFAULT_PRESET.apiKey),
+    model: localModel || metaEnv.VITE_OPENAI_MODEL || OMNIROUTE_DEFAULT_PRESET.model,
   }
 }
 
@@ -50,10 +56,13 @@ export function setLLMConfig(config: Partial<LLMConfig>) {
 function cleanAndParseJSON<T>(rawText: string): T {
   let cleaned = rawText.trim()
 
-  // Remove markdown fences like ```json ... ```
+  // 1. Strip reasoning / thinking tags like <think>...</think> produced by reasoning models
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, '').trim()
+
+  // 2. Remove markdown code fences like ```json ... ``` or ``` ... ```
   cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
 
-  // Extract array or object
+  // 3. Extract array or object
   const arrayMatch = cleaned.match(/\[[\s\S]*\]/)
   const objectMatch = cleaned.match(/\{[\s\S]*\}/)
 
@@ -72,7 +81,7 @@ function cleanAndParseJSON<T>(rawText: string): T {
         } catch {}
       }
     }
-    throw new Error(`Respon AI tidak dapat di-parse sebagai JSON valid. Pastikan model AI mendukung format JSON. Raw: ${candidate.slice(0, 150)}...`)
+    throw new Error(`Respon AI tidak dapat di-parse sebagai JSON valid. Pastikan model AI merespon dengan format JSON. Raw: ${candidate.slice(0, 150)}...`)
   }
 }
 
@@ -123,23 +132,18 @@ async function extractContentFromResponse(response: Response): Promise<string> {
 }
 
 /**
- * Generate 30 Daily Interactive Presensi Questions using OpenAI LLM API
+ * Generate 30 Daily Interactive Presensi Questions using OpenAI / OmniRoute LLM API
  */
 export async function generate30PresensiQuestionsAI(): Promise<PertanyaanItem[]> {
   const config = getLLMConfig()
 
   if (!config.apiKey.trim()) {
-    throw new Error('API Key LLM belum dikonfigurasi. Harap isi API Key di Pengaturan atau file .env.')
+    throw new Error('API Key LLM belum dikonfigurasi. Harap isi API Key di menu Pengaturan.')
   }
 
   const systemPrompt = `Anda adalah seorang pendidik SD dan pengamat karakter anak yang ramah, kreatif, dan menyenangkan.
 Tugas Anda adalah membuat 30 pertanyaan presensi harian yang sangat simpel, seru, dan bernuansa 'gue banget' untuk siswa SD (1 bulan penuh).
-Contoh topik pertanyaan yang sangat dekat dengan dunia anak-anak:
-- Buah kesukaan (misal: Pisang, Apel, Jeruk, Semangka)
-- Model pakaian/baju favorit saat liburan (misal: Kaos Santai & Celana Pendek, Gaun/Kemeja Rapi, Baju Olahraga, Jaket Hype/Keren)
-- Negara/Tempat impian yang ingin dikunjungi (misal: Jepang, Arab Saudi, Korea, Disneyland/Luar Angkasa)
-- Hewan paling lucu (misal: Kucing, Anjing/Kelinci, Burung Warna-warni, Ikan Hias)
-- Makanan sarapan impian, minuman paling segar, kegiatan sore favorit, dll.
+Topik pertanyaan meliputi: buah kesukaan, baju/pakaian favorit liburan, negara/tempat impian, hewan paling lucu, makanan sarapan impian, minuman segar, kegiatan sore, kekuatan superhero, cita-cita, dll.
 
 Setiap pertanyaan memiliki 4 pilihan jawaban yang mudah dipilih siswa dan mencerminkan kecenderungan karakter anak secara positif.
 
@@ -161,22 +165,27 @@ Skema JSON:
   }
 ]`
 
-  const response = await fetch(config.apiUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${config.apiKey.trim()}`,
-    },
-    body: JSON.stringify({
-      model: config.model,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: 'Hasilkan 30 pertanyaan presensi harian interaktif dan ramah anak ("gue banget") dalam format JSON Array.' },
-      ],
-      temperature: 0.7,
-      max_tokens: 3500,
-    }),
-  })
+  let response: Response
+  try {
+    response = await fetch(config.apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${config.apiKey.trim()}`,
+      },
+      body: JSON.stringify({
+        model: config.model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: 'Hasilkan 30 pertanyaan presensi harian interaktif dan ramah anak ("gue banget") dalam format JSON Array dari hari ke-1 sampai hari ke-30.' },
+        ],
+        temperature: 0.7,
+        max_tokens: 8192,
+      }),
+    })
+  } catch (networkErr: any) {
+    throw new Error(`Gagal terhubung ke endpoint LLM (${config.apiUrl}). Pastikan server/gateway AI aktif dan mengizinkan CORS: ${networkErr.message}`)
+  }
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => '')
@@ -200,9 +209,16 @@ Skema JSON:
     throw new Error('Hasil JSON dari AI tidak memuat daftar pertanyaan yang valid.')
   }
 
-  // Save generated questions to localStorage
-  localStorage.setItem('AI_GENERATED_QUESTIONS', JSON.stringify(items))
-  return items
+  // Ensure each item has an id and hariKe
+  const formattedItems: PertanyaanItem[] = items.map((item, index) => ({
+    ...item,
+    id: item.id || `p${index + 1}`,
+    hariKe: item.hariKe || index + 1,
+  }))
+
+  // Save generated questions using helper which dispatches storage event
+  saveCurriculumQuestions(formattedItems)
+  return formattedItems
 }
 
 /**
