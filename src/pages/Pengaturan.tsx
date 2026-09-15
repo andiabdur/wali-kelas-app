@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Download, Moon, RotateCcw, Save, Upload, Check, Bot, Sparkles, Loader2, Key, Server, Cpu, Cloud, Shield, UserCheck } from 'lucide-react'
+import { Download, Moon, RotateCcw, Save, Upload, Check, Loader2, Key, Sliders, Database } from 'lucide-react'
 import {
   useKelas,
   saveKelas,
@@ -16,14 +15,14 @@ import { getLLMConfig, setLLMConfig, generate30PresensiQuestionsAI } from '../ut
 export function Pengaturan() {
   const { darkMode, toggleDarkMode, notify } = useStore()
   const { activeKelasId, role, profile } = useAuth()
-  const { data: kelas, loading: kelasLoading } = useKelas(activeKelasId)
+  const { data: kelas } = useKelas(activeKelasId)
 
   const [form, setForm] = useState<Kelas>({
     id: activeKelasId,
     nama: 'Kelas V',
     tahunAjaran: '2026/2027',
-    namaWaliKelas: 'Evi Purnamasari, S.pd',
-    nipWaliKelas: '23123213123123',
+    namaWaliKelas: 'Evi Purnamasari, S.Pd.',
+    nipWaliKelas: '19850101 201001 2 001',
     namaSekolah: 'SDN Cijurey I',
     logoDinas: '/logo-majalengka.png',
     logoSekolah: '/logo-sekolah.png',
@@ -47,7 +46,7 @@ export function Pengaturan() {
     try {
       await saveKelas({ ...form, id: activeKelasId })
       setSavedSuccess(true)
-      notify('Profil kelas berhasil disimpan ke Cloud Firestore.', 'success')
+      notify('Profil kelas berhasil disimpan.', 'success')
       setTimeout(() => setSavedSuccess(false), 2000)
     } catch (err: any) {
       notify(err.message || 'Gagal menyimpan profil kelas.', 'error')
@@ -56,19 +55,19 @@ export function Pengaturan() {
 
   function saveLLM() {
     setLLMConfig(llmForm)
-    notify('Konfigurasi API LLM AI berhasil disimpan.', 'success')
+    notify('Konfigurasi inferensi AI tersimpan.', 'success')
   }
 
   async function handleGenerateQuestions() {
     setIsGeneratingQuestions(true)
-    notify('Menghubungi AI untuk menggenerasi 30 pertanyaan presensi...', 'info')
+    notify('Menyusun 30 pertanyaan presensi interaktif...', 'info')
     try {
       setLLMConfig(llmForm)
       const items = await generate30PresensiQuestionsAI()
       window.dispatchEvent(new Event('storage'))
-      notify(`Berhasil menggenerasi ${items.length} pertanyaan presensi interaktif baru dari AI!`, 'success')
+      notify(`Berhasil menyusun ${items.length} pertanyaan presensi baru.`, 'success')
     } catch (err: any) {
-      notify(err.message || 'Gagal menggenerasi pertanyaan dari AI.', 'error')
+      notify(err.message || 'Gagal menyusun pertanyaan AI.', 'error')
     } finally {
       setIsGeneratingQuestions(false)
     }
@@ -85,7 +84,7 @@ export function Pengaturan() {
       a.download = `wali-kelas-backup-${activeKelasId}-${new Date().toISOString().split('T')[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
-      notify('Data JSON berhasil diekspor dari Firestore.', 'success')
+      notify('Data kelas berhasil diekspor.', 'success')
     } catch (err: any) {
       notify(err.message || 'Gagal mengekspor data.', 'error')
     }
@@ -94,13 +93,13 @@ export function Pengaturan() {
   async function handleImport(file?: File) {
     if (!file) return
     try {
-      notify('Mengimpor data ke Cloud Firestore...', 'info')
+      notify('Memulihkan data ke Firestore...', 'info')
       const text = await file.text()
       const data = JSON.parse(text)
       await importAllKelasData(activeKelasId, data)
-      notify('Data JSON cadangan berhasil diimpor ke Firestore.', 'success')
+      notify('Data kelas berhasil dipulihkan.', 'success')
     } catch (err: any) {
-      notify(err.message || 'Gagal mengimpor file JSON.', 'error')
+      notify(err.message || 'Gagal mengimpor data.', 'error')
     }
   }
 
@@ -108,99 +107,122 @@ export function Pengaturan() {
     try {
       await resetKelasData(activeKelasId)
       setConfirmReset(false)
-      notify('Semua data kelas aktif berhasil direset.', 'info')
+      notify('Seluruh data kelas berhasil direset.', 'info')
     } catch (err: any) {
-      notify(err.message || 'Gagal mereset data.', 'error')
+      notify(err.message || 'Gagal mereset data kelas.', 'error')
     }
   }
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Pengaturan</p>
-          <h1 className="mt-2 font-heading text-3xl font-bold">Data Kelas, Akun & Cloud Database</h1>
-          <p className="mt-1 text-[var(--text-muted)]">Atur profil kelas, integrasi AI LLM, dan sinkronisasi Cloud Firestore.</p>
-        </div>
-
-        {/* Cloud Status Badge */}
-        <div className="flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-2.5 text-xs font-semibold text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-300">
-          <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Cloud Firestore Aktif</span>
-          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">({activeKelasId})</span>
-        </div>
+      {/* Header */}
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-primary">Konfigurasi</p>
+        <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight sm:text-3xl text-[var(--text-primary)]">
+          Pengaturan Aplikasi
+        </h1>
       </div>
 
-      {/* Info Akun Login */}
-      <article className="rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm dark:bg-dark-surface-2">
-        <h2 className="font-heading text-xl font-bold">Informasi Akun</h2>
-        <div className="mt-4 flex flex-wrap items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            {role === 'admin' ? <Shield size={24} /> : <UserCheck size={24} />}
+      {/* User Session Info Card */}
+      <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:p-5">
+        <h2 className="font-heading text-sm font-bold text-[var(--text-primary)]">Sesi Login Pengguna</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3 text-xs">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
+            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">Akun Email</p>
+            <p className="mt-1 font-semibold text-[var(--text-primary)] truncate">{profile?.email || '-'}</p>
           </div>
-          <div>
-            <p className="font-bold text-base text-[var(--text-primary)]">{profile?.nama || 'Pengguna'}</p>
-            <p className="text-xs text-[var(--text-muted)]">{profile?.email}</p>
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
+            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">Peran Akses</p>
+            <p className="mt-1 font-semibold text-primary capitalize">
+              {role === 'admin' ? 'Administrator Sekolah' : 'Wali Kelas'}
+            </p>
           </div>
-          <div className="ml-auto">
-            <span className="rounded-xl bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary uppercase tracking-wider">
-              {role === 'admin' ? 'Administrator' : 'Wali Kelas'}
-            </span>
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
+            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)]">Kelas Terpilih</p>
+            <p className="mt-1 font-semibold text-[var(--text-primary)]">{form.nama || activeKelasId}</p>
           </div>
         </div>
       </article>
 
-      <article className="rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm dark:bg-dark-surface-2">
-        <h2 className="font-heading text-xl font-bold">Profil Kelas & Instansi Sekolah</h2>
-        
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] p-3.5 bg-white/50 dark:bg-dark-surface-1">
-            <img src={form.logoDinas || '/logo-majalengka.png'} alt="Logo Pemkab Majalengka" className="h-16 w-16 object-contain rounded-lg border bg-white p-1 shrink-0" />
+      {/* Class Profile Form */}
+      <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:p-5">
+        <h2 className="font-heading text-sm font-bold text-[var(--text-primary)]">Profil Kelas & Instansi Sekolah</h2>
+
+        <div className="mt-3.5 grid gap-3 sm:grid-cols-2">
+          <div className="flex items-center gap-3 rounded-lg border border-[var(--border)] p-3 bg-[var(--surface)]">
+            <img
+              src={form.logoDinas || '/logo-majalengka.png'}
+              alt="Logo Dinas"
+              className="h-12 w-12 object-contain rounded border bg-white p-1 shrink-0"
+            />
             <div>
-              <p className="font-bold text-sm">Logo Pemkab Majalengka</p>
-              <p className="text-xs text-[var(--text-muted)]">Kop Surat Kiri</p>
+              <p className="font-semibold text-xs text-[var(--text-primary)]">Logo Pemkab Majalengka</p>
+              <p className="text-[10px] text-[var(--text-muted)]">Kop Surat Sisi Kiri</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] p-3.5 bg-white/50 dark:bg-dark-surface-1">
-            <img src={form.logoSekolah || '/logo-sekolah.png'} alt="Logo SDN Cijurey I" className="h-16 w-16 object-contain rounded-lg border bg-white p-1 shrink-0" />
+          <div className="flex items-center gap-3 rounded-lg border border-[var(--border)] p-3 bg-[var(--surface)]">
+            <img
+              src={form.logoSekolah || '/logo-sekolah.png'}
+              alt="Logo Sekolah"
+              className="h-12 w-12 object-contain rounded border bg-white p-1 shrink-0"
+            />
             <div>
-              <p className="font-bold text-sm">Logo SDN Cijurey I</p>
-              <p className="text-xs text-[var(--text-muted)]">Kop Surat Kanan</p>
+              <p className="font-semibold text-xs text-[var(--text-primary)]">Logo SDN Cijurey I</p>
+              <p className="text-[10px] text-[var(--text-muted)]">Kop Surat Sisi Kanan</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <Input label="Nama Kelas" value={form.nama} onChange={(nama) => setForm({ ...form, nama })} />
-          <Input label="Tahun Ajaran" value={form.tahunAjaran} onChange={(tahunAjaran) => setForm({ ...form, tahunAjaran })} />
-          <Input label="Nama Wali Kelas" value={form.namaWaliKelas} onChange={(namaWaliKelas) => setForm({ ...form, namaWaliKelas })} />
-          <Input label="NIP Wali Kelas" value={form.nipWaliKelas || ''} placeholder="Contoh: 19850101 201001 1 001" onChange={(nipWaliKelas) => setForm({ ...form, nipWaliKelas })} />
-          <Input label="Nama Sekolah" value={form.namaSekolah} onChange={(namaSekolah) => setForm({ ...form, namaSekolah })} />
+          <Input
+            label="Tahun Ajaran"
+            value={form.tahunAjaran}
+            onChange={(tahunAjaran) => setForm({ ...form, tahunAjaran })}
+          />
+          <Input
+            label="Nama Wali Kelas"
+            value={form.namaWaliKelas}
+            onChange={(namaWaliKelas) => setForm({ ...form, namaWaliKelas })}
+          />
+          <Input
+            label="NIP Wali Kelas"
+            value={form.nipWaliKelas || ''}
+            placeholder="19850101 201001 2 001"
+            onChange={(nipWaliKelas) => setForm({ ...form, nipWaliKelas })}
+          />
+          <div className="sm:col-span-2">
+            <Input
+              label="Nama Sekolah"
+              value={form.namaSekolah}
+              onChange={(namaSekolah) => setForm({ ...form, namaSekolah })}
+            />
+          </div>
         </div>
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={save}
-          className={`mt-5 flex min-h-11 items-center gap-2 rounded-xl px-5 font-semibold text-white shadow-md transition-colors ${savedSuccess ? 'bg-emerald-600' : 'bg-primary'}`}
+          className={`mt-4 flex min-h-10 items-center gap-2 rounded-lg px-4 text-xs font-semibold text-white shadow-sm transition-colors ${
+            savedSuccess ? 'bg-emerald-600' : 'bg-primary hover:bg-primary-600'
+          }`}
         >
-          {savedSuccess ? <Check size={18} /> : <Save size={18} />}
-          <span>{savedSuccess ? 'Tersimpan ke Firestore' : 'Simpan Profil Kelas'}</span>
-        </motion.button>
+          {savedSuccess ? <Check size={16} /> : <Save size={16} />}
+          <span>{savedSuccess ? 'Tersimpan' : 'Simpan Profil Kelas'}</span>
+        </button>
       </article>
 
-      {/* AI LLM Settings */}
-      <article className="rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm dark:bg-dark-surface-2">
+      {/* AI LLM Integration */}
+      <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:p-5">
         <div className="flex items-center gap-2">
-          <Bot className="text-primary" size={24} />
-          <h2 className="font-heading text-xl font-bold">Integrasi AI LLM</h2>
+          <Sliders className="text-primary" size={18} />
+          <h2 className="font-heading text-sm font-bold text-[var(--text-primary)]">Integrasi Model Inferensi AI</h2>
         </div>
-        <p className="mt-1 text-sm text-[var(--text-muted)]">
-          Konfigurasi koneksi API model bahasa (OpenAI, Gemini, OpenClaw, Ollama) untuk analisis kepribadian siswa dan pembuatan pertanyaan presensi.
+        <p className="mt-1 text-xs text-[var(--text-muted)]">
+          Koneksi API model bahasa untuk pembuatan profil karakteristik dan rotasi pertanyaan presensi harian.
         </p>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <Input
               label="API Endpoint URL"
@@ -210,7 +232,7 @@ export function Pengaturan() {
             />
           </div>
           <Input
-            label="API Key / Token Kredensial"
+            label="Kredensial API Key"
             type="password"
             autoComplete="off"
             value={llmForm.apiKey}
@@ -218,105 +240,105 @@ export function Pengaturan() {
             onChange={(apiKey) => setLlmForm({ ...llmForm, apiKey })}
           />
           <Input
-            label="Nama Model LLM"
+            label="Nama Model"
             value={llmForm.model}
-            placeholder="gpt-4o-mini / gemini-1.5-flash / llama3"
+            placeholder="gpt-4o-mini / gemini-2.0-flash"
             onChange={(model) => setLlmForm({ ...llmForm, model })}
           />
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-3">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.95 }}
+        <div className="mt-4 flex flex-wrap gap-2.5">
+          <button
             onClick={saveLLM}
-            className="flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 font-semibold text-white shadow-md"
+            className="flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors"
           >
-            <Key size={18} /> Simpan Konfigurasi AI
-          </motion.button>
+            <Key size={15} />
+            <span>Simpan Konfigurasi AI</span>
+          </button>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             disabled={isGeneratingQuestions}
             onClick={handleGenerateQuestions}
-            className="flex min-h-11 items-center gap-2 rounded-xl border border-primary/40 bg-primary-50/50 px-5 font-semibold text-primary shadow-sm hover:bg-primary-100/50 dark:bg-primary-950/30 dark:border-primary-800 dark:text-primary-300 disabled:opacity-50"
+            className="flex min-h-10 items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 text-xs font-semibold text-[var(--text-primary)] hover:border-primary/40 transition-colors disabled:opacity-50"
           >
-            {isGeneratingQuestions ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-            <span>{isGeneratingQuestions ? 'Menggenerasi Pertanyaan...' : 'Generate 30 Pertanyaan Presensi AI'}</span>
-          </motion.button>
+            {isGeneratingQuestions ? <Loader2 size={15} className="animate-spin" /> : <Sliders size={15} />}
+            <span>{isGeneratingQuestions ? 'Menyusun...' : 'Generate 30 Pertanyaan Presensi'}</span>
+          </button>
         </div>
       </article>
 
-      {/* Backup, Restore & Display */}
+      {/* Backup & System Controls */}
       <div className="grid gap-5 lg:grid-cols-2">
-        <article className="rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm dark:bg-dark-surface-2">
-          <h2 className="font-heading text-xl font-bold">Backup & Restore Cloud</h2>
-          <p className="mt-1 text-sm text-[var(--text-muted)]">
-            Cadangkan data kelas ({activeKelasId}) ke file JSON atau pulihkan data dari file cadangan sebelumnya.
+        <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:p-5">
+          <div className="flex items-center gap-2">
+            <Database size={18} className="text-primary" />
+            <h2 className="font-heading text-sm font-bold text-[var(--text-primary)]">Cadangan Data Cloud</h2>
+          </div>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
+            Ekspor atau impor data kelas ({activeKelasId}) dalam format berkas JSON.
           </p>
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
+          <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+            <button
               onClick={handleExport}
-              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-100 dark:hover:bg-dark-surface-2"
+              className="flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 text-xs font-semibold text-[var(--text-primary)] hover:border-primary/40 transition-colors"
             >
-              <Download size={18} /> Export JSON
-            </motion.button>
-            <motion.label
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-100 dark:hover:bg-dark-surface-2"
-            >
-              <Upload size={18} /> Import JSON
-              <input type="file" accept="application/json" className="hidden" onChange={(e) => handleImport(e.target.files?.[0])} />
-            </motion.label>
+              <Download size={15} />
+              <span>Ekspor JSON</span>
+            </button>
+            <label className="flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 text-xs font-semibold text-[var(--text-primary)] hover:border-primary/40 transition-colors">
+              <Upload size={15} />
+              <span>Impor JSON</span>
+              <input
+                type="file"
+                accept="application/json"
+                className="hidden"
+                onChange={(e) => handleImport(e.target.files?.[0])}
+              />
+            </label>
           </div>
         </article>
 
-        <article className="rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm dark:bg-dark-surface-2">
-          <h2 className="font-heading text-xl font-bold">Tampilan & Reset</h2>
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
+        <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:p-5">
+          <h2 className="font-heading text-sm font-bold text-[var(--text-primary)]">Tampilan & Reset</h2>
+          <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+            <button
               onClick={toggleDarkMode}
-              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-100 dark:hover:bg-dark-surface-2"
+              className="flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 text-xs font-semibold text-[var(--text-primary)] hover:border-primary/40 transition-colors"
             >
-              <Moon size={18} /> {darkMode ? 'Mode Terang' : 'Mode Gelap'}
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
+              <Moon size={15} />
+              <span>{darkMode ? 'Tema Terang' : 'Tema Gelap'}</span>
+            </button>
+            <button
               onClick={() => setConfirmReset(true)}
-              className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50/50 px-4 font-semibold text-red-600 shadow-sm hover:bg-red-100/50 dark:bg-red-950/40 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-900/50"
+              className="flex min-h-10 items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50/50 px-4 text-xs font-semibold text-red-600 hover:bg-red-100/50 dark:bg-red-950/40 dark:border-red-900 dark:text-red-300 transition-colors"
             >
-              <RotateCcw size={18} /> Reset Data Kelas
-            </motion.button>
+              <RotateCcw size={15} />
+              <span>Reset Data Kelas</span>
+            </button>
           </div>
         </article>
       </div>
 
+      {/* Confirm Reset Dialog */}
       {confirmReset && (
-        <div className="fixed inset-0 z-[60] flex items-end bg-black/30 p-4 sm:items-center sm:justify-center">
-          <div className="w-full max-w-md rounded-3xl bg-[var(--surface)] p-5 shadow-lg border border-[var(--border)]">
-            <h2 className="font-heading text-2xl font-bold">Hapus semua data kelas?</h2>
-            <p className="mt-2 text-[var(--text-muted)]">
-              Tindakan ini menghapus seluruh siswa, absensi, nilai, dan catatan pada kelas {activeKelasId} dari Cloud Firestore.
+        <div className="fixed inset-0 z-[60] flex items-end bg-black/50 p-4 sm:items-center sm:justify-center">
+          <div className="w-full max-w-md rounded-xl bg-[var(--surface)] p-6 shadow-xl border border-[var(--border)]">
+            <h2 className="font-heading text-base font-bold text-[var(--text-primary)]">Reset Data Kelas?</h2>
+            <p className="mt-2 text-xs text-[var(--text-muted)] leading-relaxed">
+              Tindakan ini akan menghapus seluruh rekaman siswa, absensi, nilai, dan catatan pada kelas {activeKelasId}.
             </p>
-            <div className="mt-6 flex gap-3">
+            <div className="mt-5 flex gap-2.5">
               <button
                 onClick={() => setConfirmReset(false)}
-                className="min-h-11 flex-1 rounded-xl border border-[var(--border)] font-semibold dark:text-gray-100"
+                className="min-h-9 flex-1 rounded-lg border border-[var(--border)] text-xs font-semibold text-[var(--text-muted)] hover:bg-[var(--surface-2)] transition-colors"
               >
                 Batal
               </button>
               <button
                 onClick={doReset}
-                className="min-h-11 flex-1 rounded-xl bg-red-600 font-semibold text-white"
+                className="min-h-9 flex-1 rounded-lg bg-red-600 text-xs font-semibold text-white shadow-sm hover:bg-red-700 transition-colors"
               >
-                Ya, Hapus
+                Reset Data
               </button>
             </div>
           </div>
@@ -343,14 +365,14 @@ function Input({
 }) {
   return (
     <label className="block">
-      <span className="text-sm font-semibold">{label}</span>
+      <span className="text-xs font-semibold text-[var(--text-primary)]">{label}</span>
       <input
         type={type}
         autoComplete={autoComplete}
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-gray-400 dark:bg-dark-surface-1 dark:text-gray-100 dark:placeholder:text-gray-500"
+        className="mt-1 min-h-9 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 text-xs outline-none focus:border-primary text-[var(--text-primary)] placeholder:text-[var(--text-subtle)]"
       />
     </label>
   )

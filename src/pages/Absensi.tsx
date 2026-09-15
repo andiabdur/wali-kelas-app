@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
-import { Calendar, CheckCircle2, CheckCheck, HelpCircle, Sparkles, MessageSquare } from 'lucide-react'
+import { Calendar, CheckCircle2, CheckCheck, MessageSquare } from 'lucide-react'
 import {
   useSiswaList,
   useAbsensiList,
@@ -9,15 +8,15 @@ import {
 } from '../db/firestore'
 import { useStore } from '../store/useStore'
 import { useAuth } from '../context/AuthContext'
-import { getActiveCurriculum, getPertanyaanForDay, type PertanyaanItem } from '../utils/psychologyEngine'
+import { getActiveCurriculum, getPertanyaanForDay } from '../utils/psychologyEngine'
 
 type Status = AbsensiRecord['status']
 
-const statusMeta: Record<Status, { label: string; className: string }> = {
-  H: { label: 'Hadir', className: 'bg-emerald-500 text-white border-emerald-600 shadow-sm' },
-  I: { label: 'Izin', className: 'bg-blue-500 text-white border-blue-600 shadow-sm' },
-  S: { label: 'Sakit', className: 'bg-amber-500 text-white border-amber-600 shadow-sm' },
-  A: { label: 'Alfa', className: 'bg-red-500 text-white border-red-600 shadow-sm' },
+const statusMeta: Record<Status, { label: string; activeClass: string }> = {
+  H: { label: 'Hadir', activeClass: 'bg-emerald-600 text-white border-emerald-700 shadow-sm' },
+  I: { label: 'Izin', activeClass: 'bg-blue-600 text-white border-blue-700 shadow-sm' },
+  S: { label: 'Sakit', activeClass: 'bg-amber-600 text-white border-amber-700 shadow-sm' },
+  A: { label: 'Alpa', activeClass: 'bg-red-600 text-white border-red-700 shadow-sm' },
 }
 
 function todayISO() {
@@ -31,7 +30,7 @@ export function Absensi() {
   const { siswa: allSiswa } = useSiswaList(activeKelasId)
   const siswa = allSiswa.filter((item) => item.aktif)
   const { records } = useAbsensiList(activeKelasId, tanggal)
-  
+
   const [curriculumVersion, setCurriculumVersion] = useState(0)
 
   useEffect(() => {
@@ -62,7 +61,9 @@ export function Absensi() {
   }, [records, draftStatus])
 
   const valuesJawaban = useMemo(() => {
-    const fromDb = Object.fromEntries(records.map((item) => [item.siswaId, item.jawabanSiswa || ''])) as Record<string, string>
+    const fromDb = Object.fromEntries(
+      records.map((item) => [item.siswaId, item.jawabanSiswa || ''])
+    ) as Record<string, string>
     return { ...fromDb, ...draftJawaban }
   }, [records, draftJawaban])
 
@@ -78,7 +79,7 @@ export function Absensi() {
 
   function setAllHadir() {
     setDraftStatus(Object.fromEntries(siswa.map((item) => [item.id, 'H' as Status])))
-    notify('Semua siswa ditandai Hadir.', 'info')
+    notify('Seluruh siswa ditandai Hadir.', 'info')
   }
 
   async function save() {
@@ -94,40 +95,50 @@ export function Absensi() {
 
     try {
       await batchSaveAbsensi(activeKelasId, rows, tanggal, records)
-      notify(`Absensi & Respon Pertanyaan Harian tanggal ${tanggal} berhasil disimpan.`)
+      notify(`Presensi tanggal ${tanggal} tersimpan.`)
       setDraftStatus({})
       setDraftJawaban({})
     } catch (err: any) {
-      notify(err.message || 'Gagal menyimpan absensi.', 'error')
+      notify(err.message || 'Gagal menyimpan presensi.', 'error')
     }
   }
 
   return (
     <section className="space-y-5">
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+      {/* Header */}
+      <header className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Absensi Interaktif</p>
-          <h1 className="mt-2 font-heading text-3xl font-bold">Input Harian & Karakter Siswa</h1>
-          <p className="mt-1 text-[var(--text-muted)]">Absen siswa sambil menanyakan pertanyaan harian yang seru untuk analisis karakteristik siswa.</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Presensi Harian</p>
+          <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight sm:text-3xl text-[var(--text-primary)]">
+            Input Presensi Siswa
+          </h1>
         </div>
-        <label className="flex min-h-12 items-center gap-2 rounded-xl border border-[var(--border)] bg-white/70 px-4 dark:bg-dark-surface-2 focus-within:ring-2 focus-within:ring-primary/20 transition">
-          <Calendar size={18} className="text-primary" />
-          <input type="date" value={tanggal} onChange={(e) => { setTanggal(e.target.value); setDraftStatus({}); setDraftJawaban({}) }} className="bg-transparent text-base outline-none cursor-pointer" />
+        <label className="flex min-h-10 items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3 text-xs font-medium text-[var(--text-primary)] cursor-pointer">
+          <Calendar size={16} className="text-primary shrink-0" />
+          <input
+            type="date"
+            value={tanggal}
+            onChange={(e) => {
+              setTanggal(e.target.value)
+              setDraftStatus({})
+              setDraftJawaban({})
+            }}
+            className="bg-transparent text-xs font-semibold outline-none cursor-pointer text-[var(--text-primary)]"
+          />
         </label>
-      </div>
+      </header>
 
-      {/* Interactive Question Banner */}
-      <article className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary-50/70 via-white/80 to-accent-50/40 p-5 shadow-sm dark:bg-dark-surface-2 dark:from-dark-surface-2 dark:to-dark-surface-1">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-1.5 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary-100 px-3 py-1 text-xs font-bold text-primary">
-                <Sparkles size={14} /> Pertanyaan Presensi Harian
-              </span>
+      {/* Daily Question Selector */}
+      <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-1 flex-1">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+              <MessageSquare size={14} />
+              <span>Pertanyaan Karakter Hari Ini</span>
             </div>
-            <h2 className="font-heading text-xl font-bold text-gray-900 dark:text-gray-100">
+            <p className="font-heading text-base font-bold text-[var(--text-primary)]">
               "{activeQuestionText}"
-            </h2>
+            </p>
           </div>
 
           <div className="w-full sm:w-auto">
@@ -137,12 +148,12 @@ export function Absensi() {
                 setSelectedQuestionId(e.target.value)
                 setCustomQuestionText('')
               }}
-              className="min-h-11 w-full max-w-full sm:w-72 rounded-xl border border-[var(--border)] bg-white px-3 text-xs font-semibold shadow-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100 dark:border-gray-700 truncate cursor-pointer"
+              className="min-h-9 w-full sm:w-72 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs font-medium text-[var(--text-primary)] outline-none cursor-pointer truncate"
             >
               {activeCurriculum.map((q) => {
-                const shortText = q.pertanyaan.length > 30 ? q.pertanyaan.slice(0, 30) + '...' : q.pertanyaan
+                const shortText = q.pertanyaan.length > 32 ? q.pertanyaan.slice(0, 32) + '...' : q.pertanyaan
                 return (
-                  <option key={q.id} value={q.id} className="bg-white text-gray-900 dark:bg-[#1E2025] dark:text-gray-100">
+                  <option key={q.id} value={q.id}>
                     Hari {q.hariKe}: {shortText}
                   </option>
                 )
@@ -152,32 +163,32 @@ export function Absensi() {
         </div>
       </article>
 
-      {/* Sticky Action Bar */}
-      <div className="sticky top-0 z-10 -mx-4 border-y border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md px-4 py-3 sm:mx-0 sm:rounded-2xl sm:border shadow-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm font-semibold text-[var(--text-muted)]">Terisi {filled}/{siswa.length} siswa</p>
+      {/* Action Toolbar */}
+      <div className="sticky top-0 z-10 -mx-3 sm:mx-0 border-y sm:border sm:rounded-xl border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-md px-4 py-2.5 shadow-sm">
+        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs font-semibold text-[var(--text-muted)]">
+            Terisi {filled} dari {siswa.length} siswa
+          </p>
           <div className="flex gap-2">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={setAllHadir}
-              className="flex min-h-11 items-center gap-1.5 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-100 dark:hover:bg-dark-surface-2 dark:border-gray-700"
+              className="flex min-h-9 items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3 text-xs font-semibold text-[var(--text-primary)] hover:border-primary/40 transition-colors"
             >
-              <CheckCheck size={16} className="text-emerald-600" /> Tandai Semua Hadir
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
+              <CheckCheck size={15} className="text-emerald-600" />
+              <span>Semua Hadir</span>
+            </button>
+            <button
               onClick={save}
-              className="flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-semibold text-white shadow-md"
+              className="flex min-h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors"
             >
-              <CheckCircle2 size={18} /> Simpan Presensi & Respon
-            </motion.button>
+              <CheckCircle2 size={15} />
+              <span>Simpan Presensi</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Student List Grid */}
+      {/* Student Attendance List */}
       <div className="grid gap-3">
         {siswa.map((item) => {
           const currentStatus = valuesStatus[item.id]
@@ -185,41 +196,50 @@ export function Absensi() {
           const currentJawaban = valuesJawaban[item.id] || ''
 
           return (
-            <article key={item.id} className="rounded-2xl border border-[var(--border)] bg-white/70 p-4 shadow-sm dark:bg-dark-surface-2 transition hover:shadow-md">
+            <article
+              key={item.id}
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 shadow-sm"
+            >
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <p className="font-heading text-lg font-bold">{item.nama}</p>
-                  <p className="text-sm text-[var(--text-muted)]">No. Absen {item.nomorAbsen}</p>
+                  <p className="font-heading text-sm font-bold text-[var(--text-primary)]">{item.nama}</p>
+                  <p className="text-xs text-[var(--text-muted)]">Absen #{item.nomorAbsen}</p>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-xs font-bold ${currentStatus ? 'bg-primary-50 text-primary dark:bg-primary-950/70 dark:text-primary-300' : 'bg-gray-100 text-gray-500 dark:bg-dark-surface-1 dark:text-gray-400'}`}>
-                  {currentStatus ? statusMeta[currentStatus].label : 'Belum Absen'}
+                <span
+                  className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
+                    currentStatus
+                      ? 'bg-primary-50 text-primary dark:bg-primary-900/40 dark:text-primary-300'
+                      : 'bg-[var(--surface-3)] text-[var(--text-muted)]'
+                  }`}
+                >
+                  {currentStatus ? statusMeta[currentStatus].label : 'Belum Terisi'}
                 </span>
               </div>
 
+              {/* Status Buttons: H, I, S, A */}
               <div className="grid grid-cols-4 gap-2">
                 {(Object.keys(statusMeta) as Status[]).map((status) => (
-                  <motion.button
+                  <button
                     key={status}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.92 }}
+                    type="button"
                     onClick={() => setStatus(item.id, status)}
-                    className={`min-h-11 rounded-xl border text-sm font-extrabold transition-all ${
+                    className={`min-h-10 rounded-md border text-xs font-bold transition-colors ${
                       currentStatus === status
-                        ? statusMeta[status].className
-                        : 'border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-muted)] hover:border-gray-300 dark:hover:bg-dark-surface-1 dark:text-gray-300'
+                        ? statusMeta[status].activeClass
+                        : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-primary/40'
                     }`}
                   >
                     {status}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
 
-              {/* Interactive Student Answer Section (Visible when Hadir) */}
+              {/* Child Response Section (When Present) */}
               {isHadir && (
-                <div className="mt-3.5 pt-3 border-t border-dashed border-[var(--border)] space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-primary dark:text-primary-300">
-                    <MessageSquare size={14} /> Jawaban Siswa untuk Pertanyaan Hari Ini:
-                  </div>
+                <div className="mt-3 pt-2.5 border-t border-[var(--border)] space-y-2">
+                  <p className="text-[11px] font-semibold text-[var(--text-muted)]">
+                    Respon Pertanyaan Siswa:
+                  </p>
 
                   <div className="flex flex-wrap gap-1.5">
                     {selectedQuestion.pilihan.map((p) => {
@@ -229,10 +249,10 @@ export function Absensi() {
                           key={p.label}
                           type="button"
                           onClick={() => setJawaban(item.id, p.label)}
-                          className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                          className={`rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
                             isSelected
                               ? 'border-primary bg-primary text-white shadow-sm'
-                              : 'border-[var(--border)] bg-white text-[var(--text-primary)] hover:border-gray-300 dark:bg-dark-surface-1 dark:text-gray-200 dark:hover:bg-dark-surface-2 dark:border-gray-700'
+                              : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] hover:border-primary/40'
                           }`}
                         >
                           {p.label}
@@ -241,14 +261,12 @@ export function Absensi() {
                     })}
                   </div>
 
-                  <div className="flex items-center gap-2 mt-1">
-                    <input
-                      value={currentJawaban}
-                      onChange={(e) => setJawaban(item.id, e.target.value)}
-                      placeholder="Atau ketik jawaban khusus siswa..."
-                      className="min-h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-xs outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100 dark:border-gray-700 dark:placeholder:text-gray-500"
-                    />
-                  </div>
+                  <input
+                    value={currentJawaban}
+                    onChange={(e) => setJawaban(item.id, e.target.value)}
+                    placeholder="Atau masukkan respon siswa..."
+                    className="min-h-9 w-full rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 text-xs outline-none focus:border-primary text-[var(--text-primary)] placeholder:text-[var(--text-subtle)]"
+                  />
                 </div>
               )}
             </article>

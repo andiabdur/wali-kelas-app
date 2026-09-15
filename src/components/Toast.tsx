@@ -12,27 +12,27 @@ export function Toast({ toast, onClose }: { toast: ToastMessage | null; onClose:
     <AnimatePresence>
       {toast && (
         <motion.div
-          initial={{ opacity: 0, y: 40, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.95 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          className="fixed bottom-6 right-6 z-[100] flex items-center gap-3 rounded-2xl bg-gray-900/95 px-5 py-3.5 text-white shadow-2xl backdrop-blur-md dark:bg-white dark:text-gray-900 border border-white/10 dark:border-black/10"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          transition={{ duration: 0.15 }}
+          className="fixed bottom-6 right-6 z-[100] flex items-center gap-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-4 py-2.5 text-[var(--text-primary)] shadow-lg"
         >
           {toast.type === 'error' ? (
-            <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
+            <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0" />
           ) : toast.type === 'info' ? (
-            <Info className="h-5 w-5 text-blue-400 shrink-0" />
+            <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
           ) : (
-            <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 animate-bounce" />
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           )}
 
-          <span className="text-sm font-semibold tracking-wide">{toast.title}</span>
+          <span className="text-xs font-medium">{toast.title}</span>
 
           <button
             onClick={onClose}
-            className="ml-2 rounded-lg p-1 text-gray-400 hover:bg-white/10 hover:text-white dark:hover:bg-black/10 dark:hover:text-black transition"
+            className="ml-2 rounded p-0.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </button>
         </motion.div>
       )}

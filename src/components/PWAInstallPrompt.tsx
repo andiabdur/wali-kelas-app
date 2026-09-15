@@ -67,36 +67,35 @@ export function PWAInstallPrompt() {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
-        className="fixed bottom-20 left-3 right-3 z-[100] mx-auto max-w-lg rounded-2xl border-2 border-primary/30 bg-[var(--surface)]/95 backdrop-blur-md p-4 shadow-2xl dark:bg-dark-surface-2 dark:border-primary-900"
+        className="fixed bottom-20 left-3 right-3 z-[100] mx-auto max-w-md rounded-xl border border-[var(--border)] bg-[var(--surface-1)] p-4 shadow-lg"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-md">
-              <Smartphone size={22} />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-white shadow-xs">
+              <Smartphone size={20} />
             </div>
             <div>
-              <h3 className="font-heading text-sm font-bold text-[var(--text-primary)]">
+              <h3 className="font-heading text-sm font-semibold text-[var(--text-primary)]">
                 Pasang Aplikasi Wali Kelas
               </h3>
               <p className="mt-0.5 text-xs text-[var(--text-muted)] leading-relaxed">
                 {isIOS
-                  ? 'Pasang di iPhone/iPad: Ketuk ikon Bagikan (Share) di browser Safari, lalu pilih "Tambah ke Layar Utama".'
-                  : 'Pasang aplikasi di layar utama HP Anda untuk akses cepat & penuh secara offline!'}
+                  ? 'Pasang di Safari iOS: ketuk tombol Bagikan lalu pilih Tambah ke Layar Utama.'
+                  : 'Tambahkan ke layar utama perangkat untuk akses praktis dan performa optimal.'}
               </p>
 
               {isIOS ? (
-                <div className="mt-2.5 flex items-center gap-1.5 text-xs font-bold text-primary dark:text-primary-300">
-                  <Share size={15} /> <span>Buka menu Safari → Tambah ke Layar Utama</span>
+                <div className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-primary">
+                  <Share size={14} /> <span>Menu Safari &rarr; Tambah ke Layar Utama</span>
                 </div>
               ) : (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
+                  type="button"
                   onClick={handleInstallClick}
-                  className="mt-3 flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-md"
+                  className="mt-3 flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-primary/90 cursor-pointer"
                 >
-                  <Download size={15} /> Pasang di HP Sekarang
-                </motion.button>
+                  <Download size={14} /> Pasang Aplikasi
+                </button>
               )}
             </div>
           </div>

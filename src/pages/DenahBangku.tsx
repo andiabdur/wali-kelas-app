@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Dices, Printer, ArrowLeftRight, RefreshCw, Sparkles, UserCheck, Shield, Check, Monitor, LayoutGrid, AlertCircle } from 'lucide-react'
+import { Dices, Printer, Grid3X3, ArrowLeftRight } from 'lucide-react'
 import { useKelas, useSiswaList, type Siswa } from '../db/firestore'
 import { useStore } from '../store/useStore'
 import { useAuth } from '../context/AuthContext'
@@ -29,19 +28,15 @@ export function DenahBangku() {
   const allSiswa = useMemo(() => rawSiswa.filter((s) => s.aktif), [rawSiswa])
 
   const [isRolling, setIsRolling] = useState(false)
-  const [tickerCount, setTickerCount] = useState(0)
   const [swapSource, setSwapSource] = useState<{ mejaNo: number; side: 'L' | 'R' } | null>(null)
-
   const [seating, setSeating] = useState<MejaPair[]>([])
 
-  // Load saved seating or initialize
   useEffect(() => {
     if (!allSiswa.length) return
     const saved = localStorage.getItem('DENAH_BANGKU_SAVED')
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
-        // Map saved IDs back to active Siswa objects
         const restored: MejaPair[] = parsed.map((item: any) => ({
           mejaNo: item.mejaNo,
           siswaL: allSiswa.find((s) => s.id === item.siswaLId) || null,
@@ -51,57 +46,36 @@ export function DenahBangku() {
         return
       } catch {}
     }
-    // Default initial arrangement
     generateDefaultSeating(allSiswa)
   }, [allSiswa.length])
-
-  // Rolling Dice Animation Ticker
-  useEffect(() => {
-    let timer: any
-    if (isRolling) {
-      timer = setInterval(() => {
-        setTickerCount((prev) => prev + 1)
-      }, 120)
-    }
-    return () => clearInterval(timer)
-  }, [isRolling])
 
   function generateDefaultSeating(siswaList: Siswa[]) {
     const pairs = buildGenderConstrainedPairs(siswaList)
     setSeating(pairs)
   }
 
-  /**
-   * Same-Gender Seating Algorithm:
-   * Pairs Males with Males (L & L) and Females with Females (P & P)
-   */
   function buildGenderConstrainedPairs(siswaList: Siswa[]): MejaPair[] {
     const males = shuffleArray(siswaList.filter((s) => s.jenisKelamin === 'L'))
     const females = shuffleArray(siswaList.filter((s) => s.jenisKelamin === 'P'))
 
     const pairedList: { siswaL: Siswa | null; siswaR: Siswa | null }[] = []
 
-    // 1. Pair Males (L & L)
     for (let i = 0; i < males.length; i += 2) {
       if (i + 1 < males.length) {
         pairedList.push({ siswaL: males[i], siswaR: males[i + 1] })
       } else {
-        // Odd male remaining
         pairedList.push({ siswaL: males[i], siswaR: null })
       }
     }
 
-    // 2. Pair Females (P & P)
     for (let i = 0; i < females.length; i += 2) {
       if (i + 1 < females.length) {
         pairedList.push({ siswaL: females[i], siswaR: females[i + 1] })
       } else {
-        // Odd female remaining
         pairedList.push({ siswaL: females[i], siswaR: null })
       }
     }
 
-    // 3. Shuffle desk order so class layout is well-mixed
     const shuffledPairs = shuffleArray(pairedList)
 
     return shuffledPairs.map((pair, index) => ({
@@ -121,18 +95,14 @@ export function DenahBangku() {
     localStorage.setItem('DENAH_BANGKU_SAVED', JSON.stringify(payload))
   }
 
-  function handleToggleRoll() {
-    if (!isRolling) {
-      // Start rolling dice animation
-      setIsRolling(true)
-      notify('Pengacakan tempat duduk dimulai! Ketuk tombol lagi untuk berhenti & menetapkan denah.', 'info')
-    } else {
-      // Stop rolling dice animation & shuffle final seating
-      setIsRolling(false)
+  function handleShuffle() {
+    setIsRolling(true)
+    setTimeout(() => {
       const newSeating = buildGenderConstrainedPairs(allSiswa)
       saveSeating(newSeating)
-      notify('Denah tempat duduk berhasil diacak & ditetapkan! (Laki-laki & Perempuan terpisah)', 'success')
-    }
+      setIsRolling(false)
+      notify('Denah tempat duduk berhasil diacak berpasangan sesama gender.', 'success')
+    }, 200)
   }
 
   function handleSwap(mejaNo: number, side: 'L' | 'R') {
@@ -147,16 +117,13 @@ export function DenahBangku() {
       return
     }
 
-    // Swap students between swapSource and target
     const updated = seating.map((m) => {
       const item = { ...m }
       if (m.mejaNo === swapSource.mejaNo && m.mejaNo === mejaNo) {
-        // Swap within same desk
         const temp = item.siswaL
         item.siswaL = item.siswaR
         item.siswaR = temp
       } else if (m.mejaNo === swapSource.mejaNo) {
-        const sourceSiswa = swapSource.side === 'L' ? item.siswaL : item.siswaR
         const targetMeja = seating.find((sm) => sm.mejaNo === mejaNo)
         const targetSiswa = side === 'L' ? targetMeja?.siswaL : targetMeja?.siswaR
 
@@ -174,7 +141,7 @@ export function DenahBangku() {
 
     saveSeating(updated)
     setSwapSource(null)
-    notify('Posisi tempat duduk siswa berhasil ditukar.', 'success')
+    notify('Posisi tempat duduk berhasil ditukar.', 'success')
   }
 
   function handlePrint() {
@@ -189,159 +156,132 @@ export function DenahBangku() {
 
   return (
     <section className="space-y-6">
-      {/* Header & Controls */}
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end print:hidden">
+      {/* Header */}
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end print:hidden">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Denah Bangku Interaktif</p>
-          <h1 className="mt-2 font-heading text-3xl font-bold">Denah Tempat Duduk Kelas</h1>
-          <p className="mt-1 text-[var(--text-muted)]">
-            Pengacakan denah tempat duduk siswa secara periodik dengan aturan pasangan sesama gender ({counts.l} Laki-laki & {counts.p} Perempuan).
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Tata Letak Kelas</p>
+          <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight sm:text-3xl text-[var(--text-primary)]">
+            Denah Bangku Kelas
+          </h1>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
+            Total {counts.total} siswa aktif ({counts.l} Laki-laki, {counts.p} Perempuan). Pasangan bangku terpisah berdasarkan gender.
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-2.5">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleToggleRoll}
-            className={`flex min-h-12 items-center gap-2.5 rounded-xl px-5 text-sm font-bold text-white shadow-md transition-all ${
-              isRolling ? 'bg-amber-600 animate-pulse ring-4 ring-amber-300 dark:ring-amber-900/50' : 'bg-primary hover:bg-primary-600'
-            }`}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={handleShuffle}
+            disabled={isRolling}
+            className="flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors disabled:opacity-50"
           >
-            <motion.div
-              animate={isRolling ? { rotate: [0, 90, 180, 270, 360], scale: [1, 1.2, 1] } : {}}
-              transition={isRolling ? { repeat: Infinity, duration: 0.4, ease: 'linear' } : {}}
-            >
-              <Dices size={20} />
-            </motion.div>
-            <span>{isRolling ? 'Pengacakan Berjalan... (Ketuk Lagi untuk Berhenti)' : 'Acak Tempat Duduk (Dadu)'}</span>
-          </motion.button>
+            <Dices size={16} />
+            <span>Acak Denah Bangku</span>
+          </button>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={handlePrint}
-            className="flex min-h-12 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 text-sm font-semibold shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-100 dark:hover:bg-dark-surface-2"
+            className="flex min-h-10 items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3.5 py-2 text-xs font-semibold text-[var(--text-primary)] hover:border-primary/40 transition-colors"
           >
-            <Printer size={18} /> Cetak Denah
-          </motion.button>
+            <Printer size={16} />
+            <span>Cetak Denah</span>
+          </button>
         </div>
       </div>
 
-      {/* Rolling Dice Animation Banner */}
-      <AnimatePresence>
-        {isRolling && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            className="rounded-3xl border-2 border-amber-400/60 bg-gradient-to-r from-amber-500/10 via-amber-400/20 to-primary-500/10 p-5 shadow-lg dark:bg-amber-950/40 print:hidden"
+      {/* Swap Mode Indicator */}
+      {swapSource && (
+        <div className="flex items-center justify-between rounded-lg border border-primary/30 bg-primary-50/60 dark:bg-primary-950/30 p-3 text-xs text-primary print:hidden">
+          <div className="flex items-center gap-2 font-medium">
+            <ArrowLeftRight size={16} />
+            <span>Mode Tukar: Meja #{swapSource.mejaNo} (Sisi {swapSource.side === 'L' ? 'Kiri' : 'Kanan'}). Klik bangku tujuan untuk menukar posisi.</span>
+          </div>
+          <button
+            onClick={() => setSwapSource(null)}
+            className="text-xs font-bold underline hover:opacity-80 ml-2"
           >
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <motion.div
-                  animate={{ rotate: [0, 180, 360], scale: [1, 1.3, 1] }}
-                  transition={{ repeat: Infinity, duration: 0.3 }}
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-md"
-                >
-                  <Dices size={28} />
-                </motion.div>
-                <div>
-                  <h3 className="font-heading text-lg font-bold text-amber-900 dark:text-amber-200">
-                    Sedang Menyusun Ulang Tempat Duduk Siswa...
-                  </h3>
-                  <p className="text-xs text-amber-800 dark:text-amber-300">
-                    Sistem sedang mengacak pasangan tempat duduk sesama gender. Ketuk tombol <strong className="underline">Pengacakan Berjalan</strong> di atas untuk menetapkan denah!
-                  </p>
-                </div>
-              </div>
-
-              <div className="hidden sm:flex items-center gap-2 font-mono text-xl font-bold text-amber-700 dark:text-amber-300">
-                <Sparkles size={20} className="animate-spin" />
-                <span>ACAK #{tickerCount}</span>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            Batal
+          </button>
+        </div>
+      )}
 
       {/* Classroom Seating Grid Area */}
-      <div className="rounded-3xl border border-[var(--border)] bg-white/80 p-6 shadow-sm dark:bg-dark-surface-2 print:border-none print:p-0 print:shadow-none">
-        
-        {/* Printable Kop Surat Header */}
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-5 print:border-none print:p-0 print:bg-white">
+        {/* Printable Official Header */}
         <div className="hidden print:block mb-6 border-b-2 border-black pb-4 text-center">
           <div className="flex items-center justify-between">
-            <img src={kelasInfo?.logoDinas || '/logo-majalengka.png'} alt="Logo Dinas" className="h-16 w-16 object-contain" />
+            <img
+              src={kelasInfo?.logoDinas || '/logo-majalengka.png'}
+              alt="Logo Dinas"
+              className="h-16 w-16 object-contain"
+            />
             <div>
-              <h2 className="font-bold text-lg uppercase tracking-wide">Pemerintah Kabupaten Majalengka</h2>
-              <h3 className="font-bold text-xl uppercase">{kelasInfo?.namaSekolah || 'SDN CIJUREY I'}</h3>
-              <p className="text-xs">DENAH TEMPAT DUDUK SISWA - {kelasInfo?.nama || 'KELAS 3A'} ({kelasInfo?.tahunAjaran || '2025/2026'})</p>
+              <h2 className="font-bold text-base uppercase tracking-wide">Pemerintah Kabupaten Majalengka</h2>
+              <h3 className="font-bold text-lg uppercase">{kelasInfo?.namaSekolah || 'SDN CIJUREY I'}</h3>
+              <p className="text-xs">
+                DENAH TEMPAT DUDUK SISWA &bull; {kelasInfo?.nama || 'KELAS V'} ({kelasInfo?.tahunAjaran || '2026/2027'})
+              </p>
             </div>
-            <img src={kelasInfo?.logoSekolah || '/logo-sekolah.png'} alt="Logo Sekolah" className="h-16 w-16 object-contain" />
+            <img
+              src={kelasInfo?.logoSekolah || '/logo-sekolah.png'}
+              alt="Logo Sekolah"
+              className="h-16 w-16 object-contain"
+            />
           </div>
         </div>
 
-        {/* Classroom Front Board & Teacher Desk */}
-        <div className="mb-8 grid gap-4 sm:grid-cols-4">
-          <div className="sm:col-span-3 rounded-2xl bg-emerald-900 p-4 text-center text-white shadow-md border-4 border-emerald-950 dark:bg-emerald-950">
-            <p className="font-heading text-sm font-bold tracking-[0.3em] uppercase text-emerald-200">
-              Papan Tulis Utama (Depan Kelas)
+        {/* Classroom Front: Blackboard & Teacher Desk */}
+        <div className="mb-6 grid gap-3 sm:grid-cols-4">
+          <div className="sm:col-span-3 rounded-lg bg-emerald-900 dark:bg-emerald-950 p-3 text-center text-white border border-emerald-950">
+            <p className="font-heading text-xs font-bold tracking-[0.2em] uppercase text-emerald-200">
+              Papan Tulis Depan Kelas
             </p>
           </div>
 
-          <div className="rounded-2xl border-2 border-amber-300 bg-amber-50/80 p-3.5 text-center shadow-sm dark:bg-amber-950/30 dark:border-amber-800">
-            <p className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">Meja Wali Kelas</p>
-            <p className="font-heading text-sm font-bold mt-0.5 text-gray-900 dark:text-gray-100">{kelasInfo?.namaWaliKelas || 'Wali Kelas'}</p>
-            {kelasInfo?.nipWaliKelas && <p className="text-[10px] text-[var(--text-muted)]">NIP: {kelasInfo.nipWaliKelas}</p>}
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Meja Guru</p>
+            <p className="font-heading text-xs font-bold mt-0.5 text-[var(--text-primary)]">
+              {kelasInfo?.namaWaliKelas || 'Wali Kelas'}
+            </p>
           </div>
         </div>
 
         {/* Desk Grid (3 Meja per baris) */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {seating.map((meja) => (
-            <motion.div
+            <div
               key={meja.mejaNo}
-              layout
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className="rounded-3xl border-2 border-[var(--border)] bg-gradient-to-b from-white to-gray-50/80 p-4 shadow-sm dark:from-dark-surface-1 dark:to-dark-surface-2"
+              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3.5 shadow-sm"
             >
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-2.5 mb-3">
-                <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary-50 dark:bg-primary-950/50 px-2.5 py-1 rounded-full">
-                  <LayoutGrid size={13} /> Meja #{meja.mejaNo}
+              <div className="flex items-center justify-between border-b border-[var(--border)] pb-2 mb-2.5">
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-primary">
+                  <Grid3X3 size={13} /> Meja #{meja.mejaNo}
                 </span>
-                <span className="text-[10px] font-semibold text-[var(--text-muted)]">Bangku Berpasangan</span>
+                <span className="text-[10px] text-[var(--text-muted)]">Bangku Berpasangan</span>
               </div>
 
-              {/* Student Seats Pair (Left & Right) */}
-              <div className="grid grid-cols-2 gap-3">
-                {/* Left Seat */}
+              {/* Student Seats Pair */}
+              <div className="grid grid-cols-2 gap-2">
                 <SeatCard
                   siswa={meja.siswaL}
                   mejaNo={meja.mejaNo}
                   side="L"
-                  isRolling={isRolling}
                   isSwapSelected={swapSource?.mejaNo === meja.mejaNo && swapSource?.side === 'L'}
                   onSwapSelect={() => handleSwap(meja.mejaNo, 'L')}
                 />
-
-                {/* Right Seat */}
                 <SeatCard
                   siswa={meja.siswaR}
                   mejaNo={meja.mejaNo}
                   side="R"
-                  isRolling={isRolling}
                   isSwapSelected={swapSource?.mejaNo === meja.mejaNo && swapSource?.side === 'R'}
                   onSwapSelect={() => handleSwap(meja.mejaNo, 'R')}
                 />
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {!seating.length && (
-          <div className="rounded-2xl border border-[var(--border)] bg-white/70 p-8 text-center text-[var(--text-muted)] dark:bg-dark-surface-2">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8 text-center text-xs text-[var(--text-muted)]">
             Belum ada data siswa aktif untuk menyusun denah tempat duduk.
           </div>
         )}
@@ -358,7 +298,7 @@ export function DenahBangku() {
             </div>
             <div className="text-right">
               <p>Majalengka, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-              <p className="font-bold">Wali Kelas {kelasInfo?.nama || '3A'}</p>
+              <p className="font-bold">Wali Kelas {kelasInfo?.nama || 'Kelas V'}</p>
               <div className="h-16"></div>
               <p className="font-bold underline">{kelasInfo?.namaWaliKelas || 'Wali Kelas'}</p>
               <p>NIP. {kelasInfo?.nipWaliKelas || '____________________'}</p>
@@ -372,32 +312,21 @@ export function DenahBangku() {
 
 function SeatCard({
   siswa,
-  mejaNo,
-  side,
-  isRolling,
+  mejaNo: _mejaNo,
+  side: _side,
   isSwapSelected,
   onSwapSelect,
 }: {
   siswa: Siswa | null
   mejaNo: number
   side: 'L' | 'R'
-  isRolling: boolean
   isSwapSelected: boolean
   onSwapSelect: () => void
 }) {
-  if (isRolling) {
-    return (
-      <div className="flex min-h-[90px] flex-col items-center justify-center rounded-2xl border border-dashed border-amber-300 bg-amber-50/50 p-2 text-center animate-pulse">
-        <Dices size={18} className="text-amber-500 animate-spin mb-1" />
-        <span className="text-[10px] font-bold text-amber-700">Mengacak...</span>
-      </div>
-    )
-  }
-
   if (!siswa) {
     return (
-      <div className="flex min-h-[90px] flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--border)] bg-gray-50/50 p-2 text-center dark:bg-dark-surface-1">
-        <span className="text-[10px] font-semibold text-[var(--text-muted)]">Kosong</span>
+      <div className="flex min-h-[76px] flex-col items-center justify-center rounded-md border border-dashed border-[var(--border)] bg-[var(--surface-2)] p-2 text-center">
+        <span className="text-[10px] text-[var(--text-muted)]">Kosong</span>
       </div>
     )
   }
@@ -405,29 +334,31 @@ function SeatCard({
   const isBoy = siswa.jenisKelamin === 'L'
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.03 }}
+    <div
       onClick={onSwapSelect}
-      className={`relative flex min-h-[85px] sm:min-h-[90px] flex-col items-center justify-center rounded-2xl border p-2 sm:p-2.5 text-center cursor-pointer transition-all shadow-2xs ${
+      className={`relative flex min-h-[76px] flex-col items-center justify-center rounded-md border p-2 text-center cursor-pointer transition-colors ${
         isSwapSelected
-          ? 'border-primary ring-2 ring-primary bg-primary-50 dark:bg-primary-950/50'
+          ? 'border-primary ring-2 ring-primary bg-primary-50 dark:bg-primary-950/40'
           : isBoy
-          ? 'border-blue-200 bg-blue-50/40 hover:bg-blue-50 dark:border-blue-900/50 dark:bg-blue-950/20'
-          : 'border-pink-200 bg-pink-50/40 hover:bg-pink-50 dark:border-pink-900/50 dark:bg-pink-950/20'
+          ? 'border-blue-200/80 bg-blue-50/20 hover:border-blue-300 dark:border-blue-900/30 dark:bg-blue-950/10'
+          : 'border-emerald-200/80 bg-emerald-50/20 hover:border-emerald-300 dark:border-emerald-900/30 dark:bg-emerald-950/10'
       }`}
     >
-      {/* Gender Badge Tag */}
       <span
-        className={`absolute top-1 right-1 sm:top-1.5 sm:right-1.5 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase ${
-          isBoy ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200'
+        className={`absolute top-1 right-1 px-1 py-0.2 rounded text-[9px] font-bold ${
+          isBoy
+            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200'
+            : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200'
         }`}
       >
         {isBoy ? 'L' : 'P'}
       </span>
 
       <Avatar name={siswa.nama} />
-      <p className="font-heading text-xs font-bold leading-tight line-clamp-1 text-gray-900 dark:text-gray-100">{siswa.nama}</p>
-      <p className="text-[10px] font-medium text-[var(--text-muted)]">No. Absen {siswa.nomorAbsen}</p>
-    </motion.div>
+      <p className="mt-1 font-heading text-xs font-bold leading-tight line-clamp-1 text-[var(--text-primary)]">
+        {siswa.nama}
+      </p>
+      <p className="text-[10px] text-[var(--text-muted)]">Absen #{siswa.nomorAbsen}</p>
+    </div>
   )
 }

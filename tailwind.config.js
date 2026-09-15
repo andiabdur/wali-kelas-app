@@ -24,11 +24,13 @@ export default {
         },
         surface: {
           DEFAULT: '#FAFAF8',
+          1: '#FFFFFF',
           2: '#F2F2EE',
           3: '#E8E8E4',
         },
         dark: {
           surface: '#1A1A18',
+          'surface-1': '#1E2025',
           'surface-2': '#242422',
           'surface-3': '#2E2E2C',
           border: '#3A3A38',

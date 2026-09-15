@@ -51,36 +51,36 @@ export function Login() {
         className="w-full max-w-md space-y-6"
       >
         <div className="text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-md">
-            <GraduationCap size={36} />
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
+            <GraduationCap size={30} />
           </div>
-          <h1 className="mt-4 font-heading text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+          <h1 className="mt-4 font-heading text-2xl font-bold tracking-tight text-[var(--text-primary)]">
             Aplikasi Wali Kelas
           </h1>
-          <p className="mt-1.5 text-sm text-[var(--text-muted)]">
-            Sistem Informasi & Manajemen Kelas Kolaboratif
+          <p className="mt-1 text-xs text-[var(--text-muted)]">
+            Sistem Informasi dan Manajemen Kelas
           </p>
         </div>
 
-        <div className="rounded-3xl border border-[var(--border)] bg-white/80 p-6 sm:p-8 shadow-sm dark:bg-dark-surface-2 backdrop-blur-md">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-1)] p-6 sm:p-8 shadow-sm">
           {errorMessage && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50/80 p-3.5 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300"
+              className="mb-5 flex items-start gap-2.5 rounded-lg border border-rose-200 bg-rose-50/90 p-3 text-xs text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
             >
-              <AlertCircle size={16} className="mt-0.5 shrink-0" />
+              <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-600 dark:text-rose-400" />
               <span>{errorMessage}</span>
             </motion.div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              <label className="block text-xs font-medium text-[var(--text-muted)]">
                 Alamat Email
               </label>
-              <div className="mt-1.5 flex min-h-12 items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/60 px-4 shadow-sm dark:bg-dark-surface-1 focus-within:ring-2 focus-within:ring-primary/20 transition">
-                <Mail size={18} className="text-[var(--text-muted)] shrink-0" />
+              <div className="mt-1.5 flex h-10 items-center gap-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-3 shadow-xs focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-colors">
+                <Mail size={16} className="text-[var(--text-muted)] shrink-0" />
                 <input
                   type="email"
                   value={email}
@@ -93,11 +93,11 @@ export function Login() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+              <label className="block text-xs font-medium text-[var(--text-muted)]">
                 Kata Sandi
               </label>
-              <div className="mt-1.5 flex min-h-12 items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/60 px-4 shadow-sm dark:bg-dark-surface-1 focus-within:ring-2 focus-within:ring-primary/20 transition">
-                <Lock size={18} className="text-[var(--text-muted)] shrink-0" />
+              <div className="mt-1.5 flex h-10 items-center gap-2.5 rounded-lg border border-[var(--border)] bg-[var(--surface-1)] px-3 shadow-xs focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-colors">
+                <Lock size={16} className="text-[var(--text-muted)] shrink-0" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -109,50 +109,48 @@ export function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
 
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
+            <button
               type="submit"
               disabled={isLoading}
-              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-md transition disabled:opacity-70"
+              className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-primary/90 disabled:opacity-60 cursor-pointer"
             >
               {isLoading ? (
                 <>
-                  <Loader2 size={18} className="animate-spin" />
+                  <Loader2 size={16} className="animate-spin" />
                   <span>Memverifikasi...</span>
                 </>
               ) : (
                 <span>Masuk ke Akun</span>
               )}
-            </motion.button>
+            </button>
           </form>
 
-          <div className="mt-6 border-t border-[var(--border)] pt-5">
-            <p className="text-center text-xs font-medium text-[var(--text-muted)]">
-              Akses Cepat Akun Demo (Klik untuk mengisi):
+          <div className="mt-6 border-t border-[var(--border)] pt-4">
+            <p className="text-center text-xs text-[var(--text-muted)]">
+              Akses Cepat Akun Demo:
             </p>
-            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={() => fillCredentials('admin@sdncijurey1.sch.id')}
-                className="flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5 text-xs font-semibold text-[var(--text-primary)] hover:border-primary/50 transition"
+                className="flex items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] hover:border-[var(--text-muted)] transition-colors cursor-pointer"
               >
-                <ShieldCheck size={16} className="text-primary" />
+                <ShieldCheck size={15} className="text-primary" />
                 <span>Admin Sekolah</span>
               </button>
               <button
                 type="button"
                 onClick={() => fillCredentials('evi.purnamasari@sdncijurey1.sch.id')}
-                className="flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2.5 text-xs font-semibold text-[var(--text-primary)] hover:border-primary/50 transition"
+                className="flex items-center justify-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] hover:border-[var(--text-muted)] transition-colors cursor-pointer"
               >
-                <UserCheck size={16} className="text-emerald-600" />
+                <UserCheck size={15} className="text-emerald-600" />
                 <span>Wali Kelas V</span>
               </button>
             </div>

@@ -39,38 +39,43 @@ export function SiswaList() {
 
   return (
     <section className="space-y-5">
-      <div className="flex items-end justify-between gap-3">
+      {/* Header */}
+      <header className="flex items-end justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Data Siswa</p>
-          <h1 className="mt-2 font-heading text-3xl font-bold">Daftar Siswa</h1>
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Data Siswa</p>
+          <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight sm:text-3xl text-[var(--text-primary)]">
+            Daftar Siswa
+          </h1>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => { setEditingSiswa(null); setShowForm(true); }}
-          className="flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-md"
+        <button
+          onClick={() => {
+            setEditingSiswa(null)
+            setShowForm(true)
+          }}
+          className="flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors"
         >
-          <Plus size={18} /> Tambah Siswa
-        </motion.button>
-      </div>
+          <Plus size={16} />
+          <span>Tambah Siswa</span>
+        </button>
+      </header>
 
-      <label className="flex min-h-12 items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/70 px-4 shadow-sm dark:bg-dark-surface-2 focus-within:ring-2 focus-within:ring-primary/20 transition">
-        <Search size={20} className="text-[var(--text-muted)]" />
+      {/* Search Input */}
+      <label className="flex min-h-11 items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3.5 focus-within:ring-2 focus-within:ring-primary/20 transition-colors">
+        <Search size={18} className="text-[var(--text-muted)] shrink-0" />
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Cari nama siswa..."
-          className="w-full bg-transparent text-base outline-none placeholder:text-[var(--text-subtle)]"
+          className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-subtle)] text-[var(--text-primary)]"
         />
       </label>
 
+      {/* Students Grid */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {filtered.map((item) => (
-          <motion.div
+          <div
             key={item.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="group relative flex flex-col justify-between rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm transition hover:shadow-md dark:bg-dark-surface-2"
+            className="flex flex-col justify-between rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 shadow-sm transition-colors hover:border-primary/30"
           >
             <div>
               <div className="flex items-start justify-between gap-3">
@@ -79,7 +84,7 @@ export function SiswaList() {
                   <div>
                     <h2
                       onClick={() => navigate('siswa-detail', item.id)}
-                      className="font-heading text-lg font-bold hover:text-primary cursor-pointer transition line-clamp-1"
+                      className="font-heading text-base font-bold text-[var(--text-primary)] hover:text-primary cursor-pointer transition-colors line-clamp-1"
                     >
                       {item.nama}
                     </h2>
@@ -91,46 +96,60 @@ export function SiswaList() {
 
                 <div className="flex gap-1">
                   <button
-                    onClick={() => { setEditingSiswa(item); setShowForm(true); }}
-                    className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-dark-surface-1"
+                    onClick={() => {
+                      setEditingSiswa(item)
+                      setShowForm(true)
+                    }}
+                    className="rounded-md p-1.5 text-[var(--text-muted)] hover:bg-[var(--surface-3)] hover:text-[var(--text-primary)] transition-colors"
                     title="Edit Siswa"
                   >
-                    <Pencil size={16} />
+                    <Pencil size={15} />
                   </button>
                   <button
                     onClick={() => setDeletingSiswa(item)}
-                    className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                    className="rounded-md p-1.5 text-[var(--text-muted)] hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 transition-colors"
                     title="Hapus Siswa"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </div>
 
-              <div className="mt-4 space-y-1.5 border-t border-[var(--border)] pt-3 text-xs text-[var(--text-muted)]">
+              <div className="mt-3.5 space-y-1 border-t border-[var(--border)] pt-2.5 text-xs text-[var(--text-muted)]">
                 {item.tanggalLahir && (
-                  <p><span className="font-semibold text-[var(--text-primary)]">TTL:</span> {formatTTL(item.tempatLahir, item.tanggalLahir)}</p>
+                  <p>
+                    <span className="font-semibold text-[var(--text-primary)]">TTL:</span>{' '}
+                    {formatTTL(item.tempatLahir, item.tanggalLahir)}
+                  </p>
                 )}
                 {item.nisn && (
-                  <p><span className="font-semibold text-[var(--text-primary)]">NISN/NIS:</span> {item.nisn} {item.nis ? `(${item.nis})` : ''}</p>
+                  <p>
+                    <span className="font-semibold text-[var(--text-primary)]">NISN:</span> {item.nisn}
+                    {item.nis ? ` (${item.nis})` : ''}
+                  </p>
                 )}
                 {item.teleponOrtu && (
-                  <p><span className="font-semibold text-[var(--text-primary)]">Kontak Ortu:</span> {item.teleponOrtu}</p>
+                  <p>
+                    <span className="font-semibold text-[var(--text-primary)]">Kontak Ortu:</span> {item.teleponOrtu}
+                  </p>
                 )}
               </div>
 
               {item.potensi && item.potensi.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1.5">
+                <div className="mt-3 flex flex-wrap gap-1">
                   {item.potensi.slice(0, 3).map((pId) => {
                     const cat = KATEGORI_POTENSI.find((k) => k.id === pId)
                     return (
-                      <span key={pId} className="rounded-md bg-primary-50 px-2 py-0.5 text-[10px] font-semibold text-primary dark:bg-primary-950/60 dark:text-primary-300">
+                      <span
+                        key={pId}
+                        className="rounded-md bg-primary-50 px-2 py-0.5 text-[10px] font-semibold text-primary dark:bg-primary-950/60 dark:text-primary-300"
+                      >
                         {cat?.label || pId}
                       </span>
                     )
                   })}
                   {item.potensi.length > 3 && (
-                    <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-600 dark:bg-dark-surface-1 dark:text-gray-400">
+                    <span className="rounded-md bg-[var(--surface-3)] px-1.5 py-0.5 text-[10px] text-[var(--text-muted)]">
                       +{item.potensi.length - 3}
                     </span>
                   )}
@@ -138,19 +157,18 @@ export function SiswaList() {
               )}
             </div>
 
-            <motion.button
-              whileTap={{ scale: 0.98 }}
+            <button
               onClick={() => navigate('siswa-detail', item.id)}
-              className="mt-4 flex min-h-10 w-full items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface-2)] text-xs font-semibold text-[var(--text-primary)] hover:border-primary/50 transition"
+              className="mt-4 flex min-h-9 w-full items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)] text-xs font-semibold text-[var(--text-primary)] hover:border-primary/40 transition-colors"
             >
-              Lihat Profil & Rapor Lengkap
-            </motion.button>
-          </motion.div>
+              Lihat Profil & Riwayat
+            </button>
+          </div>
         ))}
       </div>
 
       {filtered.length === 0 && (
-        <div className="rounded-2xl border border-[var(--border)] bg-white/40 p-8 text-center text-sm text-[var(--text-muted)] dark:bg-dark-surface-2">
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-8 text-center text-xs text-[var(--text-muted)]">
           {query ? `Tidak ada siswa yang cocok dengan pencarian "${query}".` : 'Belum ada data siswa di kelas ini.'}
         </div>
       )}
@@ -161,7 +179,10 @@ export function SiswaList() {
             kelasId={activeKelasId}
             initialData={editingSiswa}
             nextAbsenNumber={siswa.length + 1}
-            onClose={() => { setShowForm(false); setEditingSiswa(null); }}
+            onClose={() => {
+              setShowForm(false)
+              setEditingSiswa(null)
+            }}
           />
         )}
         {deletingSiswa && (
@@ -249,41 +270,55 @@ export function StudentForm({
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[60] flex items-end bg-black/40 backdrop-blur-sm p-4 sm:items-center sm:justify-center"
-    >
-      <motion.div
-        initial={{ scale: 0.95, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.95, y: 20 }}
-        className="w-full max-w-lg rounded-3xl bg-[var(--surface)] p-6 shadow-xl max-h-[90vh] overflow-y-auto border border-[var(--border)]"
-      >
+    <div className="fixed inset-0 z-[60] flex items-end bg-black/50 backdrop-blur-sm p-4 sm:items-center sm:justify-center">
+      <div className="w-full max-w-lg rounded-xl bg-[var(--surface)] p-6 shadow-xl max-h-[90vh] overflow-y-auto border border-[var(--border)]">
         <div className="flex items-center justify-between">
-          <h2 className="font-heading text-2xl font-bold">{initialData ? 'Edit Data Siswa' : 'Tambah Siswa'}</h2>
-          <button onClick={onClose} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-dark-surface-1">
-            <X size={20} />
+          <h2 className="font-heading text-lg font-bold text-[var(--text-primary)]">
+            {initialData ? 'Edit Data Siswa' : 'Tambah Siswa'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 text-[var(--text-muted)] hover:bg-[var(--surface-2)] transition-colors"
+          >
+            <X size={18} />
           </button>
         </div>
 
-        <div className="mt-5 space-y-4">
+        <div className="mt-4 space-y-3.5">
           <Input label="Nama Lengkap *" value={form.nama} onChange={(nama) => setForm({ ...form, nama })} />
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Nomor Absen *" type="number" value={String(form.nomorAbsen)} onChange={(nomorAbsen) => setForm({ ...form, nomorAbsen: Number(nomorAbsen) })} />
+            <Input
+              label="Nomor Absen *"
+              type="number"
+              value={String(form.nomorAbsen)}
+              onChange={(nomorAbsen) => setForm({ ...form, nomorAbsen: Number(nomorAbsen) })}
+            />
             <label className="block">
-              <span className="text-sm font-semibold">Jenis Kelamin</span>
-              <select value={form.jenisKelamin} onChange={(e) => setForm({ ...form, jenisKelamin: e.target.value as 'L' | 'P' })} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-2 dark:text-gray-100">
-                <option value="L" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Laki-laki</option>
-                <option value="P" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Perempuan</option>
+              <span className="text-xs font-semibold text-[var(--text-primary)]">Jenis Kelamin</span>
+              <select
+                value={form.jenisKelamin}
+                onChange={(e) => setForm({ ...form, jenisKelamin: e.target.value as 'L' | 'P' })}
+                className="mt-1 min-h-10 w-full rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-3 text-xs outline-none focus:border-primary text-[var(--text-primary)]"
+              >
+                <option value="L">Laki-laki</option>
+                <option value="P">Perempuan</option>
               </select>
             </label>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Tempat Lahir" value={form.tempatLahir} onChange={(tempatLahir) => setForm({ ...form, tempatLahir })} placeholder="Contoh: Majalengka" />
-            <Input label="Tanggal Lahir" type="date" value={form.tanggalLahir} onChange={(tanggalLahir) => setForm({ ...form, tanggalLahir })} />
+            <Input
+              label="Tempat Lahir"
+              value={form.tempatLahir}
+              onChange={(tempatLahir) => setForm({ ...form, tempatLahir })}
+              placeholder="Majalengka"
+            />
+            <Input
+              label="Tanggal Lahir"
+              type="date"
+              value={form.tanggalLahir}
+              onChange={(tanggalLahir) => setForm({ ...form, tanggalLahir })}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -296,16 +331,30 @@ export function StudentForm({
             <Input label="Nama Ibu" value={form.namaIbu} onChange={(namaIbu) => setForm({ ...form, namaIbu })} />
           </div>
 
-          <Input label="Telepon Orang Tua" value={form.teleponOrtu} onChange={(teleponOrtu) => setForm({ ...form, teleponOrtu })} />
-          <Input label="Alamat" value={form.alamat} onChange={(alamat) => setForm({ ...form, alamat })} />
+          <Input
+            label="Telepon Orang Tua"
+            value={form.teleponOrtu}
+            onChange={(teleponOrtu) => setForm({ ...form, teleponOrtu })}
+          />
+          <Input label="Alamat Rumah" value={form.alamat} onChange={(alamat) => setForm({ ...form, alamat })} />
         </div>
 
-        <div className="mt-6 flex gap-3">
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={onClose} className="min-h-11 flex-1 rounded-xl border border-[var(--border)] font-semibold hover:bg-gray-50 dark:hover:bg-dark-surface-1 dark:text-gray-100">Batal</motion.button>
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={save} className="min-h-11 flex-1 rounded-xl bg-primary font-semibold text-white shadow-md">{initialData ? 'Simpan Perubahan' : 'Tambah Siswa'}</motion.button>
+        <div className="mt-5 flex gap-2.5">
+          <button
+            onClick={onClose}
+            className="min-h-10 flex-1 rounded-lg border border-[var(--border)] text-xs font-semibold text-[var(--text-muted)] hover:bg-[var(--surface-2)] transition-colors"
+          >
+            Batal
+          </button>
+          <button
+            onClick={save}
+            className="min-h-10 flex-1 rounded-lg bg-primary text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors"
+          >
+            {initialData ? 'Simpan Perubahan' : 'Tambah Siswa'}
+          </button>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   )
 }
 
@@ -319,45 +368,74 @@ export function ConfirmDeleteModal({
   onClose: () => void
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[70] flex items-end bg-black/40 backdrop-blur-sm p-4 sm:items-center sm:justify-center"
-    >
-      <motion.div
-        initial={{ scale: 0.95, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.95, y: 20 }}
-        className="w-full max-w-md rounded-3xl bg-[var(--surface)] p-6 shadow-xl border border-[var(--border)] text-center"
-      >
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
-          <AlertTriangle size={28} />
+    <div className="fixed inset-0 z-[70] flex items-end bg-black/50 backdrop-blur-sm p-4 sm:items-center sm:justify-center">
+      <div className="w-full max-w-md rounded-xl bg-[var(--surface)] p-6 shadow-xl border border-[var(--border)] text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400">
+          <AlertTriangle size={24} />
         </div>
-        <h3 className="mt-4 font-heading text-xl font-bold">Hapus Data Siswa?</h3>
-        <p className="mt-2 text-sm text-[var(--text-muted)]">
-          Apakah Anda yakin ingin menghapus siswa <span className="font-semibold text-[var(--text-primary)]">"{studentName}"</span>? Seluruh data nilai, absensi, dan catatan siswa ini akan terhapus.
+        <h3 className="mt-3 font-heading text-lg font-bold text-[var(--text-primary)]">Hapus Data Siswa</h3>
+        <p className="mt-2 text-xs text-[var(--text-muted)] leading-relaxed">
+          Apakah Anda yakin ingin menghapus <span className="font-semibold text-[var(--text-primary)]">"{studentName}"</span>?
+          Seluruh data nilai, absensi, dan catatan siswa ini akan dibersihkan secara permanen.
         </p>
 
-        <div className="mt-6 flex gap-3">
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={onClose} className="min-h-11 flex-1 rounded-xl border border-[var(--border)] font-semibold hover:bg-gray-50 dark:hover:bg-dark-surface-1 dark:text-gray-100">Batal</motion.button>
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={onConfirm} className="min-h-11 flex-1 rounded-xl bg-red-600 font-semibold text-white shadow-md hover:bg-red-700">Ya, Hapus</motion.button>
+        <div className="mt-5 flex gap-2.5">
+          <button
+            onClick={onClose}
+            className="min-h-10 flex-1 rounded-lg border border-[var(--border)] text-xs font-semibold text-[var(--text-muted)] hover:bg-[var(--surface-2)] transition-colors"
+          >
+            Batal
+          </button>
+          <button
+            onClick={onConfirm}
+            className="min-h-10 flex-1 rounded-lg bg-red-600 text-xs font-semibold text-white shadow-sm hover:bg-red-700 transition-colors"
+          >
+            Hapus Siswa
+          </button>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   )
 }
 
-function Input({ label, value, onChange, type = 'text', placeholder }: { label: string; value: string; onChange: (value: string) => void; type?: string; placeholder?: string }) {
+function Input({
+  label,
+  value,
+  onChange,
+  type = 'text',
+  placeholder,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  type?: string
+  placeholder?: string
+}) {
   return (
     <label className="block">
-      <span className="text-sm font-semibold">{label}</span>
-      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="mt-1 min-h-12 w-full rounded-xl border border-[var(--border)] bg-white px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-2 dark:text-gray-100" />
+      <span className="text-xs font-semibold text-[var(--text-primary)]">{label}</span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="mt-1 min-h-10 w-full rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-3 text-xs outline-none focus:border-primary text-[var(--text-primary)] placeholder:text-[var(--text-subtle)]"
+      />
     </label>
   )
 }
 
 export function Avatar({ name }: { name: string }) {
-  const initials = name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()
-  return <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary-50 font-heading text-lg font-bold text-primary">{initials || '?'}</div>
+  const initials = name
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+  return (
+    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 font-heading text-sm font-bold text-primary">
+      {initials || '?'}
+    </div>
+  )
 }

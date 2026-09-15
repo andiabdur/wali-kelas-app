@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarCheck, ClipboardList, TrendingUp, Users, Dices } from 'lucide-react'
+import { AlertTriangle, CalendarCheck, ClipboardList, TrendingUp, Users, Grid3X3 } from 'lucide-react'
 import { KATEGORI_POTENSI, useKelas, useSiswaList, useAbsensiList, useNilaiList } from '../db/firestore'
 import { useStore } from '../store/useStore'
 import { useAuth } from '../context/AuthContext'
@@ -61,72 +61,72 @@ export function Dashboard() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+      {/* Header */}
+      <header className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Dashboard</p>
-          <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">Ringkasan Kelas</p>
+          <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight sm:text-3xl text-[var(--text-primary)]">
             {kelas?.nama || 'Kelas SD'}
           </h1>
-          <p className="mt-2 text-base text-[var(--text-muted)]">
-            Pantau kondisi kelas {kelas?.nama ? `(${kelas.nama})` : ''} hari ini dengan cepat dan rapi.
-          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => navigate('denah-bangku')}
-            className="flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm font-semibold text-gray-800 shadow-sm hover:bg-gray-50 dark:bg-dark-surface-1 dark:text-gray-200"
+            className="flex min-h-10 items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3.5 py-2 text-xs font-semibold text-[var(--text-primary)] hover:border-primary/40 transition-colors"
           >
-            <Dices size={18} className="text-primary" /> Denah Bangku
+            <Grid3X3 size={16} className="text-primary" />
+            <span>Denah Bangku</span>
           </button>
           <button
             onClick={() => navigate('absensi')}
-            className="min-h-11 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5"
+            className="flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors"
           >
-            Isi Absensi Hari Ini
+            <CalendarCheck size={16} />
+            <span>Presensi Hari Ini</span>
           </button>
         </div>
-      </div>
+      </header>
 
+      {/* 4 Stat Tiles */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile icon={Users} label="Total Siswa" value={siswa.length.toString()} />
+        <StatTile icon={Users} label="Total Siswa Aktif" value={siswa.length.toString()} />
         <StatTile icon={CalendarCheck} label="Hadir Hari Ini" value={`${hadirHariIni}/${siswa.length}`} />
-        <StatTile icon={TrendingUp} label="Rata-rata Nilai" value={rataNilai ? rataNilai.toString() : '-'} />
+        <StatTile icon={TrendingUp} label="Rata-rata Nilai Bulan Ini" value={rataNilai ? rataNilai.toString() : '-'} />
         <StatTile
           icon={AlertTriangle}
-          label="Perlu Perhatian"
+          label="Perlu Perhatian Kehadiran"
           value={siswaPerluPerhatian.length.toString()}
           tone="warning"
         />
       </div>
 
+      {/* Visual Charts */}
       <div className="grid gap-5 xl:grid-cols-[1.5fr_1fr]">
-        <article className="rounded-2xl border border-[var(--border)] bg-white/60 p-5 shadow-sm dark:bg-dark-surface-2">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <h2 className="font-heading text-xl font-bold">Kehadiran 14 Hari</h2>
-              <p className="text-sm text-[var(--text-muted)]">Jumlah siswa hadir per hari.</p>
-            </div>
+        <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+          <div className="mb-4">
+            <h2 className="font-heading text-base font-bold text-[var(--text-primary)]">Kehadiran 14 Hari Terakhir</h2>
           </div>
           <AttendanceBarChart data={chartData} />
         </article>
 
-        <article className="rounded-2xl border border-[var(--border)] bg-white/60 p-5 shadow-sm dark:bg-dark-surface-2">
-          <h2 className="font-heading text-xl font-bold">Distribusi Potensi</h2>
-          <p className="mb-5 text-sm text-[var(--text-muted)]">Kategori bakat yang tercatat.</p>
-          {potentialData.length ? <PotentialBars data={potentialData} /> : <Empty text="Belum ada potensi yang dicatat." />}
+        <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+          <h2 className="mb-4 font-heading text-base font-bold text-[var(--text-primary)]">Distribusi Potensi Siswa</h2>
+          {potentialData.length ? <PotentialBars data={potentialData} /> : <Empty text="Belum ada pemetaan potensi siswa." />}
         </article>
       </div>
 
+      {/* Attendance Detail Table */}
       <TabelDetailKehadiran
         siswa={siswa}
         absensi={absensi}
         onSelectSiswa={(id) => navigate('siswa-detail', id)}
       />
 
-      <article className="rounded-2xl border border-[var(--border)] bg-white/60 p-5 shadow-sm dark:bg-dark-surface-2">
-        <div className="mb-4 flex items-center gap-2">
-          <ClipboardList className="text-primary" size={22} />
-          <h2 className="font-heading text-xl font-bold">Siswa Perlu Perhatian</h2>
+      {/* Attention Required List */}
+      <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+        <div className="mb-3 flex items-center gap-2">
+          <ClipboardList className="text-primary" size={18} />
+          <h2 className="font-heading text-base font-bold text-[var(--text-primary)]">Siswa Perlu Perhatian</h2>
         </div>
         {siswaPerluPerhatian.length ? (
           <div className="divide-y divide-[var(--border)]">
@@ -134,36 +134,56 @@ export function Dashboard() {
               <button
                 key={anak.id}
                 onClick={() => navigate('siswa-detail', anak.id)}
-                className="flex w-full items-center justify-between py-3 text-left"
+                className="flex w-full items-center justify-between py-2.5 text-left hover:text-primary transition-colors"
               >
                 <div>
-                  <p className="font-semibold">{anak.nama}</p>
-                  <p className="text-sm text-[var(--text-muted)]">Kehadiran bulan ini {rate}%</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{anak.nama}</p>
+                  <p className="text-xs text-[var(--text-muted)]">Kehadiran bulan ini {rate}%</p>
                 </div>
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">Pantau</span>
+                <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">
+                  Pantau
+                </span>
               </button>
             ))}
           </div>
         ) : (
-          <Empty text="Belum ada siswa yang perlu perhatian khusus bulan ini." />
+          <Empty text="Seluruh siswa memiliki tingkat kehadiran normal bulan ini." />
         )}
       </article>
     </section>
   )
 }
 
-function StatTile({ icon: Icon, label, value, tone = 'primary' }: { icon: typeof Users; label: string; value: string; tone?: 'primary' | 'warning' }) {
+function StatTile({
+  icon: Icon,
+  label,
+  value,
+  tone = 'primary',
+}: {
+  icon: typeof Users
+  label: string
+  value: string
+  tone?: 'primary' | 'warning'
+}) {
   return (
-    <article className="rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm dark:bg-dark-surface-2">
-      <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${tone === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-primary-50 text-primary'}`}>
-        <Icon size={22} />
+    <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium text-[var(--text-muted)]">{label}</p>
+        <div
+          className={`flex h-8 w-8 items-center justify-center rounded-md ${
+            tone === 'warning'
+              ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300'
+              : 'bg-primary/10 text-primary'
+          }`}
+        >
+          <Icon size={16} />
+        </div>
       </div>
-      <p className="font-heading text-3xl font-bold tracking-tight">{value}</p>
-      <p className="mt-1 text-sm text-[var(--text-muted)]">{label}</p>
+      <p className="mt-2 font-heading text-2xl font-bold tracking-tight text-[var(--text-primary)]">{value}</p>
     </article>
   )
 }
 
 function Empty({ text }: { text: string }) {
-  return <div className="rounded-xl bg-[var(--surface-2)] p-5 text-center text-sm text-[var(--text-muted)]">{text}</div>
+  return <div className="rounded-lg bg-[var(--surface)] p-4 text-center text-xs text-[var(--text-muted)]">{text}</div>
 }

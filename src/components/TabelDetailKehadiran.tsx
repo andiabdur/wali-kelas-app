@@ -60,23 +60,23 @@ export function TabelDetailKehadiran({ siswa, absensi, onSelectSiswa }: Props) {
   }, [absensi, selectedMonth])
 
   return (
-    <article className="space-y-4 rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm dark:bg-dark-surface-2">
+    <article className="space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface-1)] p-4 sm:p-5 shadow-xs">
       {/* Table Title & Filter Toolbar */}
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2">
-            <FileText className="text-primary shrink-0" size={22} />
-            <h2 className="font-heading text-xl font-bold">Detail & Matriks Kehadiran Siswa</h2>
+            <FileText className="text-primary shrink-0" size={20} />
+            <h2 className="font-heading text-lg font-bold">Detail & Matriks Kehadiran Siswa</h2>
           </div>
           <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-            Rekapitulasi presensi harian per tanggal beserta total H, S, I, A dan persentase kehadiran.
+            Rekapitulasi presensi harian per tanggal dan persentase kehadiran.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Month Select Picker */}
-          <div className="flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-white px-3 py-1.5 dark:bg-dark-surface-1">
-            <Calendar size={16} className="text-primary shrink-0" />
+          <div className="flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-2.5 py-1.5">
+            <Calendar size={15} className="text-primary shrink-0" />
             <input
               type="month"
               value={selectedMonth}
@@ -86,43 +86,43 @@ export function TabelDetailKehadiran({ siswa, absensi, onSelectSiswa }: Props) {
           </div>
 
           {/* Student Search */}
-          <div className="flex items-center gap-1.5 rounded-xl border border-[var(--border)] bg-white px-3 py-1.5 dark:bg-dark-surface-1">
-            <Search size={15} className="text-gray-400 shrink-0" />
+          <div className="flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-2.5 py-1.5">
+            <Search size={14} className="text-[var(--text-muted)] shrink-0" />
             <input
               type="text"
               placeholder="Cari siswa..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-28 sm:w-36 bg-transparent text-xs outline-none text-[var(--text-primary)] placeholder:text-gray-400"
+              className="w-28 sm:w-36 bg-transparent text-xs outline-none text-[var(--text-primary)] placeholder:text-[var(--text-subtle)]"
             />
           </div>
         </div>
       </div>
 
       {/* Attendance Status Legend */}
-      <div className="flex flex-wrap items-center gap-3 text-xs font-medium border-t border-[var(--border)] pt-3">
-        <span className="text-[var(--text-muted)] font-semibold">Keterangan:</span>
-        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-100 dark:bg-emerald-950/80 px-2 py-0.5 font-bold text-emerald-800 dark:text-emerald-300">
+      <div className="flex flex-wrap items-center gap-2.5 text-xs font-medium border-t border-[var(--border)] pt-3">
+        <span className="text-[var(--text-muted)] font-medium">Keterangan:</span>
+        <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
           H = Hadir
         </span>
-        <span className="inline-flex items-center gap-1 rounded-md bg-amber-100 dark:bg-amber-950/80 px-2 py-0.5 font-bold text-amber-800 dark:text-amber-300">
+        <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300">
           S = Sakit
         </span>
-        <span className="inline-flex items-center gap-1 rounded-md bg-blue-100 dark:bg-blue-950/80 px-2 py-0.5 font-bold text-blue-800 dark:text-blue-300">
+        <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-semibold bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300">
           I = Izin
         </span>
-        <span className="inline-flex items-center gap-1 rounded-md bg-red-100 dark:bg-red-950/80 px-2 py-0.5 font-bold text-red-800 dark:text-red-300">
+        <span className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-semibold bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300">
           A = Alfa
         </span>
       </div>
 
       {/* Matrix Table Container */}
-      <div className="overflow-x-auto scrollbar-thin rounded-xl border border-[var(--border)] bg-white dark:bg-dark-surface-1">
+      <div className="overflow-x-auto scrollbar-thin rounded-lg border border-[var(--border)] bg-[var(--surface-1)]">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             {/* Header Row 1 */}
-            <tr className="bg-gray-100 dark:bg-[#1E2025] text-gray-800 dark:text-gray-100 font-bold border-b border-[var(--border)]">
-              <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-[var(--border)] w-10">
+            <tr className="bg-[var(--surface-2)] text-[var(--text-primary)] font-semibold border-b border-[var(--border)]">
+              <th rowSpan={2} className="px-3 py-2 text-center border-r border-[var(--border)] w-10">
                 No
               </th>
               <th rowSpan={2} className="px-4 py-2.5 border-r border-[var(--border)] min-w-[150px]">

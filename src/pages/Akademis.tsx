@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   BookPlus,
   Plus,
@@ -40,7 +39,7 @@ export function Akademis() {
   const { siswa: allSiswa } = useSiswaList(activeKelasId)
   const siswa = allSiswa.filter((s) => s.aktif)
   const { nilai } = useNilaiList(activeKelasId)
-  
+
   // Input batch state
   const [namaMapel, setNamaMapel] = useState('')
   const [selectedMapel, setSelectedMapel] = useState('')
@@ -48,7 +47,7 @@ export function Akademis() {
   const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10))
   const [scores, setScores] = useState<Record<string, string>>({})
 
-  // Dynamic filter & sort state
+  // Filter & sort state
   const [filterSiswa, setFilterSiswa] = useState('')
   const [filterMapel, setFilterMapel] = useState('')
   const [filterJenis, setFilterJenis] = useState('')
@@ -69,7 +68,7 @@ export function Akademis() {
   }
 
   async function deleteMapel(id: string) {
-    if (!confirm('Hapus mata pelajaran ini? Nilai terkait juga akan dihapus.')) return
+    if (!confirm('Hapus mata pelajaran ini? Seluruh rekaman nilai terkait juga akan dibersihkan.')) return
     await deleteMataPelajaranCascade(id, activeKelasId)
     notify('Mata pelajaran berhasil dihapus.', 'info')
   }
@@ -92,7 +91,7 @@ export function Akademis() {
         tanggal,
         nilai: Number(value),
       }))
-    if (!rows.length) return notify('Isi minimal satu nilai.', 'error')
+    if (!rows.length) return notify('Isi minimal satu nilai siswa.', 'error')
     await batchSaveNilai(rows)
     notify(`Berhasil menyimpan ${rows.length} nilai siswa.`)
     setScores({})
@@ -102,22 +101,18 @@ export function Akademis() {
   const filteredAndSortedNilai = useMemo(() => {
     let result = [...nilai]
 
-    // 1. Filter Siswa
     if (filterSiswa) {
       result = result.filter((n) => n.siswaId === filterSiswa)
     }
 
-    // 2. Filter Mapel
     if (filterMapel) {
       result = result.filter((n) => n.mapelId === filterMapel)
     }
 
-    // 3. Filter Jenis
     if (filterJenis) {
       result = result.filter((n) => n.jenis === filterJenis)
     }
 
-    // 4. Search Query (Nama siswa atau Nama Mapel)
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim()
       result = result.filter((n) => {
@@ -127,7 +122,6 @@ export function Akademis() {
       })
     }
 
-    // 5. Sorting
     result.sort((a, b) => {
       let valA: string | number = ''
       let valB: string | number = ''
@@ -154,7 +148,6 @@ export function Akademis() {
     return result
   }, [nilai, siswa, mapel, filterSiswa, filterMapel, filterJenis, searchQuery, sortField, sortOrder])
 
-  // Analytics Stats
   const stats = useMemo(() => {
     if (!filteredAndSortedNilai.length) {
       return { total: 0, average: 0, highest: 0, lowest: 0 }
@@ -189,142 +182,180 @@ export function Akademis() {
 
   return (
     <section className="space-y-6">
+      {/* Header */}
       <div>
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Akademis</p>
-        <h1 className="mt-2 font-heading text-3xl font-bold">Mata Pelajaran & Nilai</h1>
-        <p className="mt-1 text-[var(--text-muted)]">Kelola mapel, input nilai batch, dan analisis rekap nilai siswa secara dinamis.</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-primary">Evaluasi Akademis</p>
+        <h1 className="mt-1 font-heading text-2xl font-bold tracking-tight sm:text-3xl text-[var(--text-primary)]">
+          Mata Pelajaran & Nilai Siswa
+        </h1>
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[0.8fr_1.2fr]">
-        <article className="rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm dark:bg-dark-surface-2">
-          <div className="mb-4 flex items-center gap-2"><BookPlus className="text-primary" /><h2 className="font-heading text-xl font-bold">Daftar Mapel</h2></div>
-          <div className="flex gap-2">
-            <input value={namaMapel} onChange={(e) => setNamaMapel(e.target.value)} placeholder="Contoh: Matematika" className="min-h-12 flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20" />
-            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.93 }} onClick={addMapel} className="min-h-12 rounded-xl bg-primary px-4 text-white shadow-md flex items-center justify-center"><Plus /></motion.button>
+        {/* Master Mapel Card */}
+        <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:p-5">
+          <div className="mb-3.5 flex items-center gap-2">
+            <BookPlus className="text-primary" size={18} />
+            <h2 className="font-heading text-base font-bold text-[var(--text-primary)]">Daftar Mapel</h2>
           </div>
-          <div className="mt-4 space-y-2 max-h-[460px] overflow-auto">
+
+          <div className="flex gap-2">
+            <input
+              value={namaMapel}
+              onChange={(e) => setNamaMapel(e.target.value)}
+              placeholder="Tambah mapel baru..."
+              className="min-h-10 flex-1 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 text-xs outline-none focus:border-primary text-[var(--text-primary)] placeholder:text-[var(--text-subtle)]"
+            />
+            <button
+              onClick={addMapel}
+              className="min-h-10 rounded-md bg-primary px-3 text-white text-xs font-semibold hover:bg-primary-600 transition-colors flex items-center justify-center gap-1"
+            >
+              <Plus size={15} />
+              <span>Tambah</span>
+            </button>
+          </div>
+
+          <div className="mt-3.5 space-y-1.5 max-h-[420px] overflow-y-auto scrollbar-thin">
             {mapel.map((item) => (
-              <div key={item.id} className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2">
-                <span className="font-semibold">{item.nama}</span>
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.93 }} onClick={() => deleteMapel(item.id)} className="text-sm font-semibold text-red-600 p-1 hover:bg-red-50 rounded-lg flex items-center gap-1"><Trash2 size={16} /> Hapus</motion.button>
+              <div
+                key={item.id}
+                className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs"
+              >
+                <span className="font-medium text-[var(--text-primary)]">{item.nama}</span>
+                <button
+                  onClick={() => deleteMapel(item.id)}
+                  className="text-xs font-semibold text-red-600 hover:text-red-700 transition-colors p-1 flex items-center gap-1"
+                >
+                  <Trash2 size={13} />
+                  <span>Hapus</span>
+                </button>
               </div>
             ))}
-            {!mapel.length && <p className="rounded-xl bg-[var(--surface-2)] p-4 text-sm text-[var(--text-muted)]">Belum ada mapel.</p>}
+            {!mapel.length && (
+              <p className="rounded-lg bg-[var(--surface)] p-3 text-center text-xs text-[var(--text-muted)]">
+                Belum ada mata pelajaran terdaftar.
+              </p>
+            )}
           </div>
         </article>
 
-        <article className="rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm dark:bg-dark-surface-2">
-          <h2 className="font-heading text-xl font-bold">Input Nilai Batch</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <select value={selectedMapel} onChange={(e) => setSelectedMapel(e.target.value)} className="min-h-12 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100">
-              <option value="" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Pilih mapel</option>
-              {mapel.map((item) => <option key={item.id} value={item.id} className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">{item.nama}</option>)}
+        {/* Input Nilai Batch Card */}
+        <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:p-5">
+          <h2 className="font-heading text-base font-bold text-[var(--text-primary)]">Input Nilai Batch</h2>
+          
+          <div className="mt-3.5 grid gap-2.5 sm:grid-cols-3">
+            <select
+              value={selectedMapel}
+              onChange={(e) => setSelectedMapel(e.target.value)}
+              className="min-h-10 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs outline-none focus:border-primary text-[var(--text-primary)] cursor-pointer"
+            >
+              <option value="">Pilih Mapel</option>
+              {mapel.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.nama}
+                </option>
+              ))}
             </select>
-            <select value={jenis} onChange={(e) => setJenis(e.target.value as Nilai['jenis'])} className="min-h-12 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100">
-              <option value="kuis" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Kuis</option>
-              <option value="latihan" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Latihan</option>
-              <option value="ulangan" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Ulangan</option>
-              <option value="tugas" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Tugas</option>
+
+            <select
+              value={jenis}
+              onChange={(e) => setJenis(e.target.value as Nilai['jenis'])}
+              className="min-h-10 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs outline-none focus:border-primary text-[var(--text-primary)] cursor-pointer capitalize"
+            >
+              <option value="kuis">Kuis</option>
+              <option value="latihan">Latihan</option>
+              <option value="ulangan">Ulangan Harian</option>
+              <option value="tugas">Tugas</option>
             </select>
-            <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} className="min-h-12 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-base outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100" />
+
+            <input
+              type="date"
+              value={tanggal}
+              onChange={(e) => setTanggal(e.target.value)}
+              className="min-h-10 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs outline-none focus:border-primary text-[var(--text-primary)]"
+            />
           </div>
-          <div className="mt-4 max-h-[460px] space-y-2 overflow-auto pr-1">
+
+          <div className="mt-3.5 max-h-[380px] space-y-1.5 overflow-y-auto scrollbar-thin pr-1">
             {siswa.map((anak) => (
-              <label key={anak.id} className="grid grid-cols-[1fr_92px] items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 hover:border-gray-300 transition">
-                <span><b>{anak.nomorAbsen}.</b> {anak.nama}</span>
-                <input type="number" min="0" max="100" value={scores[anak.id] || ''} onChange={(e) => setScores({ ...scores, [anak.id]: e.target.value })} className="min-h-11 rounded-lg border border-[var(--border)] bg-white px-2 text-center text-base focus:ring-2 focus:ring-primary/20 outline-none dark:bg-dark-surface-2" />
+              <label
+                key={anak.id}
+                className="grid grid-cols-[1fr_80px] items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs"
+              >
+                <span className="truncate text-[var(--text-primary)]">
+                  <span className="font-semibold">{anak.nomorAbsen}.</span> {anak.nama}
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  placeholder="0-100"
+                  value={scores[anak.id] || ''}
+                  onChange={(e) => setScores({ ...scores, [anak.id]: e.target.value })}
+                  className="min-h-8 rounded border border-[var(--border)] bg-[var(--surface-2)] px-2 text-center text-xs font-semibold focus:border-primary outline-none text-[var(--text-primary)]"
+                />
               </label>
             ))}
           </div>
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={saveScores} className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary font-semibold text-white shadow-md"><Save size={18} /> Simpan Nilai</motion.button>
+
+          <button
+            onClick={saveScores}
+            className="mt-3.5 flex min-h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors"
+          >
+            <Save size={15} />
+            <span>Simpan Nilai Evaluasi</span>
+          </button>
         </article>
       </div>
 
-      {/* Dynamic Summary Analytics */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-[var(--border)] bg-white/70 p-4 shadow-sm dark:bg-dark-surface-2 flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 text-primary">
-            <TrendingUp size={22} />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Rata-Rata Nilai</p>
-            <p className="text-2xl font-bold font-heading">{stats.average || '-'}</p>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-[var(--border)] bg-white/70 p-4 shadow-sm dark:bg-dark-surface-2 flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-            <Award size={22} />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Nilai Tertinggi</p>
-            <p className="text-2xl font-bold font-heading text-emerald-600">{stats.highest || '-'}</p>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-[var(--border)] bg-white/70 p-4 shadow-sm dark:bg-dark-surface-2 flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-            <BarChart2 size={22} />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Nilai Terendah</p>
-            <p className="text-2xl font-bold font-heading text-amber-600">{stats.lowest || '-'}</p>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-[var(--border)] bg-white/70 p-4 shadow-sm dark:bg-dark-surface-2 flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-            <BookOpen size={22} />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Total Nilai Terdata</p>
-            <p className="text-2xl font-bold font-heading">{stats.total}</p>
-          </div>
-        </div>
+      {/* Summary Metrics */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricTile icon={TrendingUp} label="Rata-rata Nilai" value={stats.average || '-'} tone="primary" />
+        <MetricTile icon={Award} label="Nilai Tertinggi" value={stats.highest || '-'} tone="emerald" />
+        <MetricTile icon={BarChart2} label="Nilai Terendah" value={stats.lowest || '-'} tone="amber" />
+        <MetricTile icon={BookOpen} label="Total Nilai Terdata" value={stats.total} tone="blue" />
       </div>
 
-      {/* Dynamic Table with Filters & Sorting */}
-      <article className="rounded-2xl border border-[var(--border)] bg-white/70 p-5 shadow-sm dark:bg-dark-surface-2 space-y-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      {/* Dynamic Records Table */}
+      <article className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-4 sm:p-5 space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
-            <Filter size={20} className="text-primary" />
-            <h2 className="font-heading text-xl font-bold">Daftar Rekap Nilai Siswa</h2>
+            <Filter size={18} className="text-primary" />
+            <h2 className="font-heading text-base font-bold text-[var(--text-primary)]">
+              Rekapitulasi Nilai Siswa
+            </h2>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {isFiltered && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={resetFilters}
-                className="flex items-center gap-1 rounded-xl border border-red-200 bg-red-50/60 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100/60"
-              >
-                <RotateCcw size={14} /> Reset Filter
-              </motion.button>
-            )}
-          </div>
+          {isFiltered && (
+            <button
+              onClick={resetFilters}
+              className="flex items-center gap-1 rounded-md border border-red-200 bg-red-50/50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100/50 dark:bg-red-950/40 dark:border-red-900 dark:text-red-300 transition-colors"
+            >
+              <RotateCcw size={13} />
+              <span>Reset Filter</span>
+            </button>
+          )}
         </div>
 
-        {/* Filters Controls */}
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <label className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2">
-            <Search size={18} className="text-[var(--text-muted)] shrink-0" />
+        {/* Filter Controls */}
+        <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="flex items-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5">
+            <Search size={15} className="text-[var(--text-muted)] shrink-0" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari siswa / mapel..."
-              className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-subtle)]"
+              placeholder="Cari siswa atau mapel..."
+              className="w-full bg-transparent text-xs outline-none placeholder:text-[var(--text-subtle)] text-[var(--text-primary)]"
             />
           </label>
 
           <select
             value={filterSiswa}
             onChange={(e) => setFilterSiswa(e.target.value)}
-            className="min-h-11 w-full max-w-full truncate rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100"
+            className="min-h-9 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs outline-none focus:border-primary text-[var(--text-primary)] cursor-pointer truncate"
           >
-            <option value="" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Semua Siswa ({siswa.length})</option>
+            <option value="">Semua Siswa ({siswa.length})</option>
             {siswa.map((s) => (
-              <option key={s.id} value={s.id} className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">
+              <option key={s.id} value={s.id}>
                 {s.nomorAbsen}. {s.nama}
               </option>
             ))}
@@ -333,11 +364,11 @@ export function Akademis() {
           <select
             value={filterMapel}
             onChange={(e) => setFilterMapel(e.target.value)}
-            className="min-h-11 w-full max-w-full truncate rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 dark:bg-dark-surface-1 dark:text-gray-100"
+            className="min-h-9 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs outline-none focus:border-primary text-[var(--text-primary)] cursor-pointer truncate"
           >
-            <option value="" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Semua Mapel ({mapel.length})</option>
+            <option value="">Semua Mapel ({mapel.length})</option>
             {mapel.map((m) => (
-              <option key={m.id} value={m.id} className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">
+              <option key={m.id} value={m.id}>
                 {m.nama}
               </option>
             ))}
@@ -346,111 +377,107 @@ export function Akademis() {
           <select
             value={filterJenis}
             onChange={(e) => setFilterJenis(e.target.value)}
-            className="min-h-11 w-full max-w-full truncate rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 capitalize dark:bg-dark-surface-1 dark:text-gray-100"
+            className="min-h-9 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2.5 text-xs outline-none focus:border-primary text-[var(--text-primary)] cursor-pointer capitalize"
           >
-            <option value="" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Semua Kategori Nilai</option>
-            <option value="kuis" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Kuis</option>
-            <option value="latihan" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Latihan</option>
-            <option value="ulangan" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Ulangan</option>
-            <option value="tugas" className="bg-white text-gray-900 dark:bg-dark-surface-2 dark:text-gray-100">Tugas</option>
+            <option value="">Semua Kategori</option>
+            <option value="kuis">Kuis</option>
+            <option value="latihan">Latihan</option>
+            <option value="ulangan">Ulangan</option>
+            <option value="tugas">Tugas</option>
           </select>
         </div>
 
-        {/* Dynamic Table */}
-        <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
-          <table className="w-full min-w-[700px] text-left text-sm border-collapse">
-            <thead className="bg-[var(--surface-2)] text-[var(--text-muted)] font-semibold border-b border-[var(--border)]">
+        {/* Table Container with scrollbar */}
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] scrollbar-thin">
+          <table className="w-full min-w-[620px] text-left text-xs border-collapse">
+            <thead className="bg-[var(--surface)] text-[var(--text-muted)] font-semibold border-b border-[var(--border)]">
               <tr>
                 <th
                   onClick={() => handleHeaderSort('tanggal')}
-                  className="py-3 px-4 cursor-pointer hover:text-primary transition"
+                  className="py-2.5 px-3 cursor-pointer hover:text-primary transition-colors"
                 >
                   <div className="flex items-center gap-1">
-                    Tanggal
+                    <span>Tanggal</span>
                     <SortIcon field="tanggal" currentField={sortField} order={sortOrder} />
                   </div>
                 </th>
                 <th
                   onClick={() => handleHeaderSort('siswa')}
-                  className="py-3 px-4 cursor-pointer hover:text-primary transition"
+                  className="py-2.5 px-3 cursor-pointer hover:text-primary transition-colors"
                 >
                   <div className="flex items-center gap-1">
-                    Nama Siswa
+                    <span>Nama Siswa</span>
                     <SortIcon field="siswa" currentField={sortField} order={sortOrder} />
                   </div>
                 </th>
                 <th
                   onClick={() => handleHeaderSort('mapel')}
-                  className="py-3 px-4 cursor-pointer hover:text-primary transition"
+                  className="py-2.5 px-3 cursor-pointer hover:text-primary transition-colors"
                 >
                   <div className="flex items-center gap-1">
-                    Mata Pelajaran
+                    <span>Mata Pelajaran</span>
                     <SortIcon field="mapel" currentField={sortField} order={sortOrder} />
                   </div>
                 </th>
-                <th className="py-3 px-4">Kategori</th>
+                <th className="py-2.5 px-3">Kategori</th>
                 <th
                   onClick={() => handleHeaderSort('nilai')}
-                  className="py-3 px-4 cursor-pointer hover:text-primary transition text-center"
+                  className="py-2.5 px-3 cursor-pointer hover:text-primary transition-colors text-center"
                 >
                   <div className="flex items-center justify-center gap-1">
-                    Nilai
+                    <span>Nilai</span>
                     <SortIcon field="nilai" currentField={sortField} order={sortOrder} />
                   </div>
                 </th>
-                <th className="py-3 px-4 text-center">Predikat</th>
-                <th className="py-3 px-4 text-right">Aksi</th>
+                <th className="py-2.5 px-3 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border)] bg-white/40 dark:bg-dark-surface-1/40">
-              <AnimatePresence>
-                {filteredAndSortedNilai.map((n) => {
-                  const s = siswa.find((item) => item.id === n.siswaId)
-                  const m = mapel.find((item) => item.id === n.mapelId)
-                  const predikat = getPredikatBadge(n.nilai)
+            <tbody className="divide-y divide-[var(--border)] bg-[var(--surface-2)]">
+              {filteredAndSortedNilai.map((item) => {
+                const s = siswa.find((anak) => anak.id === item.siswaId)
+                const m = mapel.find((map) => map.id === item.mapelId)
 
-                  return (
-                    <motion.tr
-                      key={n.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="hover:bg-gray-50/80 dark:hover:bg-dark-surface-2/80 transition-colors"
-                    >
-                      <td className="py-3 px-4 font-medium text-[var(--text-muted)]">{n.tanggal}</td>
-                      <td className="py-3 px-4 font-bold">{s ? `${s.nomorAbsen}. ${s.nama}` : '-'}</td>
-                      <td className="py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">{m?.nama || '-'}</td>
-                      <td className="py-3 px-4">
-                        <span className="capitalize text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 dark:bg-dark-surface-2 dark:text-gray-300">
-                          {n.jenis}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-center font-extrabold text-base">{n.nilai}</td>
-                      <td className="py-3 px-4 text-center">
-                        <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold ${predikat.className}`}>
-                          {predikat.label}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => deleteNilai(n.id)}
-                          title="Hapus Nilai"
-                          className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition"
-                        >
-                          <Trash2 size={16} />
-                        </motion.button>
-                      </td>
-                    </motion.tr>
-                  )
-                })}
-              </AnimatePresence>
-
+                return (
+                  <tr key={item.id} className="hover:bg-[var(--surface)] transition-colors">
+                    <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--text-muted)]">{item.tanggal}</td>
+                    <td className="py-2.5 px-3 font-semibold text-[var(--text-primary)]">
+                      {s?.nama || 'Siswa Dihapus'}
+                    </td>
+                    <td className="py-2.5 px-3 text-[var(--text-primary)]">{m?.nama || 'Mapel Dihapus'}</td>
+                    <td className="py-2.5 px-3">
+                      <span className="rounded px-2 py-0.5 text-[10px] font-semibold bg-primary-50 text-primary capitalize dark:bg-primary-950/60 dark:text-primary-300">
+                        {item.jenis}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3 text-center">
+                      <span
+                        className={`inline-block font-heading font-bold text-xs ${
+                          item.nilai >= 75
+                            ? 'text-emerald-600'
+                            : item.nilai >= 60
+                            ? 'text-amber-600'
+                            : 'text-red-600'
+                        }`}
+                      >
+                        {item.nilai}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3 text-right">
+                      <button
+                        onClick={() => deleteNilai(item.id)}
+                        className="p-1 text-[var(--text-muted)] hover:text-red-600 transition-colors"
+                        title="Hapus Nilai"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
               {!filteredAndSortedNilai.length && (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-sm text-[var(--text-muted)] italic">
-                    {isFiltered ? 'Tidak ada data nilai yang sesuai dengan filter.' : 'Belum ada data nilai terdaftar.'}
+                  <td colSpan={6} className="py-6 text-center text-xs text-[var(--text-muted)]">
+                    Tidak ada rekaman nilai yang sesuai kriteria filter.
                   </td>
                 </tr>
               )}
@@ -462,22 +489,48 @@ export function Akademis() {
   )
 }
 
-function SortIcon({ field, currentField, order }: { field: SortField; currentField: SortField; order: SortOrder }) {
-  if (field !== currentField) {
-    return <ArrowUpDown size={14} className="opacity-40" />
+function MetricTile({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: any
+  label: string
+  value: string | number
+  tone: 'primary' | 'emerald' | 'amber' | 'blue'
+}) {
+  const toneMap = {
+    primary: 'bg-primary/10 text-primary',
+    emerald: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300',
+    amber: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300',
+    blue: 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300',
   }
-  return order === 'asc' ? <ArrowUp size={14} className="text-primary" /> : <ArrowDown size={14} className="text-primary" />
+
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3.5 flex items-center gap-3">
+      <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${toneMap[tone]} shrink-0`}>
+        <Icon size={18} />
+      </div>
+      <div>
+        <p className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">{label}</p>
+        <p className="text-xl font-bold font-heading text-[var(--text-primary)]">{value}</p>
+      </div>
+    </div>
+  )
 }
 
-function getPredikatBadge(score: number) {
-  if (score >= 85) {
-    return { label: 'A (Sangat Baik)', className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' }
+function SortIcon({
+  field,
+  currentField,
+  order,
+}: {
+  field: SortField
+  currentField: SortField
+  order: SortOrder
+}) {
+  if (field !== currentField) {
+    return <ArrowUpDown size={12} className="opacity-40" />
   }
-  if (score >= 75) {
-    return { label: 'B (Baik)', className: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300' }
-  }
-  if (score >= 65) {
-    return { label: 'C (Cukup)', className: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' }
-  }
-  return { label: 'D (Perlu Bimbingan)', className: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300' }
+  return order === 'asc' ? <ArrowUp size={12} className="text-primary" /> : <ArrowDown size={12} className="text-primary" />
 }
