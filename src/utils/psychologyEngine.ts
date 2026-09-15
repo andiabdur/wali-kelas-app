@@ -452,7 +452,7 @@ export function synthesizePsychologicalProfile(
 ) {
   const answeredList = absensiRecords.filter((a) => a.jawabanSiswa && a.jawabanSiswa.trim() !== '')
   
-  // Aggregate traits from responses
+  // Hitung akumulasi sifat dari respon presensi harian
   const traitCounts: Record<string, number> = {}
   const customAnswers: string[] = []
 
@@ -460,7 +460,7 @@ export function synthesizePsychologicalProfile(
     const jawaban = a.jawabanSiswa?.trim() || ''
     if (!jawaban) return
 
-    // 1. Try matching with curriculum options (exact or partial)
+    // 1. Cocokkan dengan opsi kurikulum
     const matchedPilihan = getActiveCurriculum().flatMap((q) => q.pilihan).find(
       (p) => p.label.toLowerCase() === jawaban.toLowerCase() || jawaban.toLowerCase().includes(p.label.toLowerCase()) || p.label.toLowerCase().includes(jawaban.toLowerCase())
     )
@@ -469,74 +469,125 @@ export function synthesizePsychologicalProfile(
       const sifat = matchedPilihan.sifat
       traitCounts[sifat] = (traitCounts[sifat] || 0) + 1
     } else {
-      // 2. Free-text write-in custom answer
+      // 2. Jawaban bebas siswa
       customAnswers.push(jawaban)
-      traitCounts['Ekspresif & Unik'] = (traitCounts['Ekspresif & Unik'] || 0) + 1
+      traitCounts['Kreatif'] = (traitCounts['Kreatif'] || 0) + 1
     }
   })
 
-  // Calculate top dominant traits
+  // Urutkan sifat karakter dominan
   const sortedTraits = Object.entries(traitCounts)
     .sort((a, b) => b[1] - a[1])
     .map(([trait]) => trait)
 
-  const topTraits = sortedTraits.length > 0 ? sortedTraits.slice(0, 3) : ['Ekspresif', 'Kreatif', 'Eksploratif']
+  const topTraits = sortedTraits.length > 0 ? sortedTraits.slice(0, 3) : ['Ceria', 'Kreatif', 'Santun']
 
-  // Determine academic average
+  // Rata-rata nilai akademis
   const avgNilai = nilaiRecords.length
     ? Math.round(nilaiRecords.reduce((acc, curr) => acc + curr.nilai, 0) / nilaiRecords.length)
     : 80
 
-  // Presence rate
+  // Persentase kehadiran
   const totalHadir = absensiRecords.filter((a) => a.status === 'H').length
   const totalAbsen = absensiRecords.length || 1
   const persenHadir = Math.round((totalHadir / totalAbsen) * 100)
 
-  // Construct Psychological Narrative based on findings
-  let narasiKarakter = `Berdasarkan rangkuman observasi harian melalui presensi interaktif dan rekapitulasi performa, Ananda ${namaSiswa} menunjukkan kecenderungan karakter utama yang ${topTraits.join(', ').toLowerCase()}. `
+  // Pengelompokan tipe karakter untuk pemilihan kalimat yang luwes
+  const isCeria = topTraits.some((t) => ['Ceria', 'Humoris', 'Sosial', 'Ekstrovert', 'Antusias', 'Ramah'].includes(t))
+  const isKreatif = topTraits.some((t) => ['Kreatif', 'Artistik', 'Inovatif', 'Eksploratif', 'Petualang', 'Visioner'].includes(t))
+  const isTenang = topTraits.some((t) => ['Tenang', 'Reflektif', 'Terstruktur', 'Mandiri', 'Introspektif', 'Fokus', 'Disiplin'].includes(t))
+  const isSportif = topTraits.some((t) => ['Sportif', 'Enerjik', 'Pemberani', 'Lincah', 'Dinamis'].includes(t))
+  const isEmpatis = topTraits.some((t) => ['Empatis', 'Penyayang', 'Altruis', 'Harmonis', 'Setia Kawan', 'Kooperatif'].includes(t))
+  const isAnalitis = topTraits.some((t) => ['Analitis', 'Saintifik', 'Kritis', 'Peneliti', 'Cendekia', 'Literat'].includes(t))
 
-  if (persenHadir >= 90) {
-    narasiKarakter += `Ananda memiliki tingkat kedisiplinan dan kehadiran yang sangat konsisten (${persenHadir}%), mencerminkan rasa tanggung jawab serta keterikatan positif terhadap suasana pembelajaran di kelas. `
+  // 1. Kalimat Pembuka yang Hidup dan Manusiawi
+  let pembuka = ''
+  if (isCeria) {
+    pembuka = `Dalam keseharian di kelas, ${namaSiswa} adalah sosok anak yang ceria, luwes bergaul, dan mampu membawa suasana hangat di antara teman-temannya.`
+  } else if (isKreatif) {
+    pembuka = `Dalam keseharian di kelas, ${namaSiswa} memperlihatkan daya imajinasi yang hidup, antusias mencoba hal baru, serta senang mengekspresikan gagasannya.`
+  } else if (isTenang) {
+    pembuka = `Dalam keseharian di kelas, ${namaSiswa} memiliki pembawaan yang tenang, santun, dan menunjukkan ketekunan yang baik saat menyelesaikan tugas.`
+  } else if (isSportif) {
+    pembuka = `Dalam keseharian di kelas, ${namaSiswa} merupakan anak yang lincah, bersemangat tinggi, dan selalu aktif dalam kegiatan bersama teman-temannya.`
+  } else if (isEmpatis) {
+    pembuka = `Dalam keseharian di kelas, ${namaSiswa} dikenal memiliki rasa empati yang hangat, santun dalam bersikap, dan cepat tanggap membantu teman yang membutuhkan.`
+  } else if (isAnalitis) {
+    pembuka = `Dalam keseharian di kelas, ${namaSiswa} menunjukkan daya nalar yang kritis, rasa ingin tahu yang tinggi, dan tekun saat mempelajari materi baru.`
   } else {
-    narasiKarakter += `Tingkat kehadiran Ananda mencapai ${persenHadir}%, menunjukkan potensi perkembangan yang terus dapat didampingi dengan dorongan motivasi harian. `
+    pembuka = `Dalam keseharian di kelas, ${namaSiswa} menampilkan sikap yang santun, tertib, dan memiliki semangat belajar yang positif.`
   }
 
+  // 2. Refleksi Minat & Respon Presensi Santai
+  let responBagian = ''
   if (customAnswers.length > 0) {
-    const sampleText = customAnswers.slice(0, 3).map((t) => `"${t}"`).join(', ')
-    narasiKarakter += `Dalam sesi tanya-jawab interaktif presensi harian, Ananda ${namaSiswa} secara terbuka menyampaikan pilihan dan ide mandirinya seperti ${sampleText}. Hal ini mencerminkan rasa percaya diri, daya imajinasi yang bebas, serta keberanian mengekspresikan pendapat pribadi secara otentik. `
+    const sample = customAnswers.slice(0, 2).map((s) => `"${s}"`).join(' dan ')
+    responBagian = `Saat diajak bercerita mengenai hal-hal yang disukainya saat presensi pagi, ia dengan jujur dan berani menyampaikan pilihannya sendiri (seperti ${sample}), mencerminkan rasa percaya diri yang otentik.`
   } else if (answeredList.length > 0) {
-    narasiKarakter += `Dalam sesi tanya-jawab interaktif harian, ${namaSiswa} secara konsisten memberikan respon yang mencerminkan kecerdasan emosional dan daya imajinasi yang aktif. `
+    const traitsText = topTraits.slice(0, 2).map((t) => t.toLowerCase()).join(' serta ')
+    responBagian = `Respon yang ia berikan pada sesi tanya-jawab santai di pagi hari memperlihatkan kecenderungan sikap yang ${traitsText}, menunjukkan keterbukaan diri yang sehat.`
+  }
+
+  // 3. Kehadiran & Tanggung Jawab
+  let kehadiranBagian = ''
+  if (persenHadir >= 95) {
+    kehadiranBagian = `Tingkat kehadirannya sangat baik dan konsisten (${persenHadir}%), menandakan kedisiplinan serta antusiasme yang tinggi untuk hadir di sekolah.`
+  } else if (persenHadir >= 80) {
+    kehadiranBagian = `Kehadirannya di kelas terjaga dengan baik (${persenHadir}%), mencerminkan rasa tanggung jawab yang terus bertumbuh.`
+  } else {
+    kehadiranBagian = `Kehadirannya saat ini berada pada angka ${persenHadir}%, dan pendampingan bersama yang hangat antara guru dan orang tua akan sangat membantu menjaga keteraturannya.`
+  }
+
+  // 4. Akademis & Catatan Guru
+  let akademisBagian = ''
+  if (catatanRecords.length > 0) {
+    const catatanTerbaru = catatanRecords[catatanRecords.length - 1].isi.trim()
+    const cleanNote = catatanTerbaru.endsWith('.') ? catatanTerbaru.slice(0, -1) : catatanTerbaru
+    akademisBagian = `Catatan guru mencatat bahwa ${cleanNote.toLowerCase()}. `
   }
 
   if (avgNilai >= 85) {
-    narasiKarakter += `Secara akademis, Ananda memiliki daya serap materi yang sangat baik dengan rata-rata pencapaian ${avgNilai}, menunjukkan kombinasi pemahaman logis dan fokus belajar yang matang.`
+    akademisBagian += `Di bidang pelajaran, ${namaSiswa} memiliki daya serap yang cepat dengan rata-rata nilai ${avgNilai}, menunjukkan fokus belajar yang matang.`
   } else if (avgNilai >= 75) {
-    narasiKarakter += `Pencapaian akademis Ananda berada pada kategori baik (rata-rata ${avgNilai}), menunjukkan stabilitas belajar serta potensi besar untuk ditingkatkan melalui variasi metode pembelajaran kinestetik atau visual.`
+    akademisBagian += `Dari segi akademis, capaiannya berkembang stabil dengan rata-rata nilai ${avgNilai}, dan pemahamannya makin kuat ketika diajak berdiskusi aktif.`
   } else {
-    narasiKarakter += `Secara akademis, Ananda meraih rata-rata ${avgNilai}, yang menandakan perlunya pendekatan pendampingan belajar secara bertahap dan personal.`
+    akademisBagian += `Untuk capaian akademis (rata-rata ${avgNilai}), ia terus berproses dan akan berkembang optimal dengan bimbingan personal yang sabar.`
   }
 
-  // Construct recommended teaching strategy
+  // Gabungkan narasi karakter yang mengalir dalam 2 paragraf rapi
+  const narasiKarakter = [
+    `${pembuka} ${responBagian}`.trim(),
+    `${kehadiranBagian} ${akademisBagian}`.trim(),
+  ].filter(Boolean).join('\n\n')
+
+  // Saran pendekatan taktis untuk guru
   let saranPendekatan = ''
-  if (topTraits.includes('Eksploratif') || topTraits.includes('Bebas & Inovatif') || topTraits.includes('Kreatif')) {
-    saranPendekatan = `Berikan proyek berbasis eksperimen atau tugas berbasis karya visual/kreatif. Ananda berkembang pesat saat diberi kebebasan bereksplorasi dan ruang untuk mengutarakan ide-ide baru.`
-  } else if (topTraits.includes('Analitis') || topTraits.includes('Terstruktur') || topTraits.includes('Konstruktif')) {
-    saranPendekatan = `Berikan tantangan pemecahan masalah (puzzle/logika) dengan alur kerja yang jelas. Ananda menyukai struktur yang rapi dan petunjuk yang rinci.`
-  } else if (topTraits.includes('Leader') || topTraits.includes('Ekstrovert') || topTraits.includes('Antusias')) {
-    saranPendekatan = `Libatkan Ananda sebagai koordinator kelompok atau fasilitator diskusi. Dorongan tanggung jawab sosial akan mengoptimalkan potensi kepemimpinan alaminya.`
+  if (isKreatif) {
+    saranPendekatan = `Beri ruang untuk menuangkan ide lewat media visual, bercerita, atau prakarya. Apresiasi keberaniannya bereksplorasi sebelum mengarahkan ke aturan baku.`
+  } else if (isAnalitis) {
+    saranPendekatan = `Sediakan tantangan logika atau eksperimen sederhana. Beri kesempatan untuk menganalisis masalah secara terstruktur agar rasa ingin tahunya tersalurkan.`
+  } else if (isCeria || isSportif) {
+    saranPendekatan = `Libatkan ${namaSiswa} dalam aktivitas kelompok atau peran dinamis di kelas. Pendekatan belajar yang interaktif dan banyak bergerak akan menjaga konsentrasinya.`
+  } else if (isTenang) {
+    saranPendekatan = `Berikan instruksi yang jelas dan beri waktu cukup saat memintanya menjawab di depan kelas. Komunikasi personal yang ramah akan membuatnya semakin percaya diri.`
+  } else if (isEmpatis) {
+    saranPendekatan = `Apresiasi kepekaan sosialnya saat menolong sesama. Libatkan dalam kegiatan berbagi atau gotong royong untuk memperkuat rasa kebersamaan.`
   } else {
-    saranPendekatan = `Apresiasi setiap usaha kecil dan ciptakan suasana belajar yang tenang serta ramah. Pendekatan apresiatif akan memperkuat kepercayaan diri Ananda.`
+    saranPendekatan = `Ciptakan suasana belajar yang suportif dan beri apresiasi atas setiap proses usahanya agar kepercayaan dirinya terus bertumbuh.`
   }
 
+  // Rekomendasi bakat konkret anak SD
   let rekomendasiBakat = ''
-  if (topTraits.includes('Artistik') || topTraits.includes('Kreatif')) {
-    rekomendasiBakat = 'Seni Rupa, Desain Grafis Cilik, Menulis Cerita, Musik'
-  } else if (topTraits.includes('Analitis') || topTraits.includes('Saintifik')) {
-    rekomendasiBakat = 'Sains & Robotik, Matematika Terapan, Coding/Catur'
-  } else if (topTraits.includes('Kepemimpinan') || topTraits.includes('Sosial')) {
-    rekomendasiBakat = 'Organisasi Siswa/Pramuka, Public Speaking, Olahraga Tim'
+  if (isKreatif) {
+    rekomendasiBakat = 'Seni Rupa & Menggambar, Kriya / Prakarya, Menulis Cerita Anak, Musik'
+  } else if (isAnalitis) {
+    rekomendasiBakat = 'Klub Sains Cilik, Catur, Matematika Kreatif, Robotika Dasar'
+  } else if (isSportif) {
+    rekomendasiBakat = 'Futsal, Bulu Tangkis, Atletik / Lari, Senam Irama'
+  } else if (isEmpatis || isCeria) {
+    rekomendasiBakat = 'Pramuka Siaga, Dokter Kecil (UKS), Public Speaking / Puisi'
   } else {
-    rekomendasiBakat = 'Literasi, Seni Budaya, Pengembangan Karakter & Olahraga'
+    rekomendasiBakat = 'Pramuka, Olahraga Siswa, Seni Budaya, Literasi Membaca'
   }
 
   return {

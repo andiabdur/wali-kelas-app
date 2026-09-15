@@ -7,6 +7,7 @@ import {
   useNilaiList,
   useMataPelajaranList,
   useCatatanList,
+  useAnalisisPsikologis,
   KATEGORI_POTENSI,
 } from '../db/firestore'
 import { useStore } from '../store/useStore'
@@ -31,6 +32,7 @@ export function Laporan() {
   const ref = useRef<HTMLDivElement>(null)
 
   const selected = siswa.find((item) => item.id === siswaId) || siswa[0]
+  const savedAI = useAnalisisPsikologis(activeKelasId, selected?.id)
   const absensiBulan = selected ? absensi.filter((a) => a.siswaId === selected.id && a.tanggal.startsWith(bulan)) : []
   const nilaiBulan = selected ? nilai.filter((n) => n.siswaId === selected.id && n.tanggal.startsWith(bulan)) : []
   const catatanBulan = selected ? catatan.filter((c) => c.siswaId === selected.id && c.tanggal.startsWith(bulan)) : []
@@ -199,9 +201,16 @@ export function Laporan() {
 
             {/* Psychological Synthesis */}
             {(() => {
-              const profileAI = synthesizePsychologicalProfile(selected.nama, absensi, nilai, catatan)
+              const profileAI = savedAI
+                ? {
+                    karakterUtama: savedAI.karakterUtama,
+                    narasiKarakter: savedAI.narasiKarakter,
+                    saranPendekatan: savedAI.saranPendekatan,
+                    rekomendasiBakat: savedAI.rekomendasiBakat,
+                  }
+                : synthesizePsychologicalProfile(selected.nama, absensi, nilai, catatan)
               return (
-                <Section title="Analisis & Profil Karakteristik Siswa">
+                <Section title="Catatan Perkembangan Karakter Siswa">
                   <div className="rounded border border-gray-300 bg-gray-50/70 p-3 text-xs space-y-2">
                     <div className="flex items-center gap-2 font-bold text-gray-900">
                       <span>Karakter Dominan:</span>
@@ -209,7 +218,7 @@ export function Laporan() {
                         {profileAI.karakterUtama.join(', ')}
                       </span>
                     </div>
-                    <p className="leading-relaxed text-gray-800 text-justify">{profileAI.narasiKarakter}</p>
+                    <p className="leading-relaxed text-gray-800 text-justify whitespace-pre-line">{profileAI.narasiKarakter}</p>
                     <div className="pt-2 border-t border-gray-200 grid grid-cols-2 gap-2 text-[11px]">
                       <div>
                         <span className="font-bold block text-gray-900">Saran Pendekatan:</span>

@@ -541,10 +541,10 @@ export function SiswaDetail() {
                 </div>
                 <div>
                   <h2 className="font-heading text-base font-bold text-[var(--text-primary)]">
-                    Analisis Karakteristik Siswa
+                    Catatan Perkembangan Karakter Siswa
                   </h2>
                   <p className="text-xs text-[var(--text-muted)]">
-                    Berdasarkan {profileAI.totalRespon} respon presensi interaktif
+                    Observasi harian dan {profileAI.totalRespon} respon presensi
                   </p>
                 </div>
               </div>
@@ -555,13 +555,13 @@ export function SiswaDetail() {
                 className="flex min-h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white shadow-sm hover:bg-primary-600 transition-colors disabled:opacity-50"
               >
                 {isGeneratingAI ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                <span>{isGeneratingAI ? 'Menyusun Analisis...' : 'Analisis Ulang'}</span>
+                <span>{isGeneratingAI ? 'Menyusun Catatan...' : 'Analisis Ulang Karakter'}</span>
               </button>
             </div>
 
             {/* Dominant Traits */}
             <div>
-              <p className="text-xs font-semibold text-[var(--text-muted)] mb-2">Sifat Karakter Dominan:</p>
+              <p className="text-xs font-semibold text-[var(--text-muted)] mb-2">Karakter Dominan:</p>
               <div className="flex flex-wrap gap-1.5">
                 {profileAI.karakterUtama.map((trait) => (
                   <span
@@ -578,7 +578,7 @@ export function SiswaDetail() {
             {/* Narrative Story */}
             <div className="rounded-lg bg-[var(--surface)] p-4 border border-[var(--border)]">
               <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
-                Gambaran Profil & Dinamika Siswa:
+                Ulasan Karakter & Keseharian Siswa:
               </h3>
               <p className="text-xs leading-relaxed text-[var(--text-primary)] whitespace-pre-line">
                 {profileAI.narasiKarakter}
@@ -590,7 +590,7 @@ export function SiswaDetail() {
               <div className="rounded-lg bg-[var(--surface)] p-3.5 border border-[var(--border)]">
                 <div className="flex items-center gap-1.5 text-primary font-bold text-xs mb-1.5">
                   <Compass size={15} />
-                  <span>Saran Pendekatan Pembelajaran:</span>
+                  <span>Saran Pendekatan:</span>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                   {profileAI.saranPendekatan}
@@ -600,7 +600,7 @@ export function SiswaDetail() {
               <div className="rounded-lg bg-[var(--surface)] p-3.5 border border-[var(--border)]">
                 <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 font-bold text-xs mb-1.5">
                   <Award size={15} />
-                  <span>Rekomendasi Pengembangan Bakat:</span>
+                  <span>Rekomendasi Bakat:</span>
                 </div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                   {profileAI.rekomendasiBakat}

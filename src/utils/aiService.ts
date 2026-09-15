@@ -355,30 +355,49 @@ export async function generateStudentPsychologicalProfileAI(
   }
 
   const answeredList = absensiRecords.filter((a) => a.jawabanSiswa && a.jawabanSiswa.trim() !== '')
+  const totalHadir = absensiRecords.filter((a) => a.status === 'H').length
+  const totalAbsen = absensiRecords.length || 1
+  const persenHadir = Math.round((totalHadir / totalAbsen) * 100)
   const avgNilai = nilaiRecords.length
     ? Math.round(nilaiRecords.reduce((acc, curr) => acc + curr.nilai, 0) / nilaiRecords.length)
     : 0
 
-  const userPrompt = `Nama Siswa: ${namaSiswa}
-Jumlah Respon Presensi Interaktif: ${answeredList.length}
-Respon Presensi Harian Siswa (termasuk pilihan 'gue banget' & jawaban bebas siswa):
-${answeredList.map((a) => `- ${a.tanggal}: Pertanyaan "${a.pertanyaanHariIni}" -> Jawaban Siswa "${a.jawabanSiswa}"`).join('\n')}
+  const systemPrompt = `Anda adalah seorang Wali Kelas Sekolah Dasar (SD) yang bijaksana, hangat, kebapakan/keibuan, dan sangat mengenal kepribadian murid-muridnya.
+Tugas Anda adalah menulis narasi pengamatan karakter dan perkembangan siswa untuk laporan wali kelas yang akan dibaca oleh guru dan orang tua murid.
 
-Data Akademis (Rata-rata nilai: ${avgNilai}):
-${nilaiRecords.map((n) => `- Nilai ${n.jenis}: ${n.nilai}`).join('\n')}
+ATURAN GAYA BAHASA (MUTLAK):
+1. GUNAKAN BAHASA GURU ASLI: Tulis dalam bahasa Indonesia yang mengalir luwes, hangat, komunikatif, dan membumi.
+2. DILARANG KERAS MENGGUNAKAN BAHASA ROBOT, JARGON PSIKOMETRI KAKU, ATAU AI SLOP:
+   - JANGAN PERNAH gunakan kalimat klise seperti: "Berdasarkan rangkuman observasi...", "Subjek menunjukkan indikator afektif...", "Secara holistik...", "Spektrum kepribadian...", dsb.
+   - JANGAN PERNAH gunakan tanda em dash (—).
+3. CERITAKAN PERILAKU NYATA:
+   - Ceritakan bagaimana sikap anak di kelas, pergaulannya dengan sesama teman, rasa ingin tahunya saat belajar, dan apa yang membuatnya bersemangat.
+   - Singgung pilihan presensi "gue banget" atau jawaban santai siswa sebagai cerminan minat dan karakter otentik anak.
+   - Buat narasi dalam 2 paragraf yang rapi dan mengalir enak dibaca.
+4. SARAN PENDEKATAN KONKRET:
+   - Berikan rekomendasi taktis yang ramah dan langsung bisa dipraktikkan guru di kelas atau orang tua di rumah.
+5. REKOMENDASI BAKAT:
+   - Sebutkan 2 sampai 4 kegiatan atau ekstrakurikuler SD yang nyata (misal: Seni Gambar, Pramuka, Futsal, Sains Cilik).
 
-Catatan Wali Kelas:
-${catatanRecords.map((c) => `- ${c.isi}`).join('\n')}
-
-Catatan Penting: Siswa memberikan pilihan khas anak-anak dan jawaban bebas yang otentik. Rangkaian jawaban ini mengungkapkan karakter, minat alami, serta potensi kecerdasan anak secara hangat, positif, dan mendalam.
-
-Hasilkan analisis karakteristik siswa dalam format JSON berikut:
+Format balasan WAJIB berupa JSON murni:
 {
   "karakterUtama": ["Sifat 1", "Sifat 2", "Sifat 3"],
-  "narasiKarakter": "Paragraf narasi komprehensif, hangat, dan menginspirasi tentang dinamika karakteristik dan perkembangan anak ini untuk dibaca wali kelas dan orang tua.",
-  "saranPendekatan": "Rekomendasi strategi pendekatan pembelajaran yang paling cocok untuk anak ini.",
-  "rekomendasiBakat": "Rekomendasi ekstrakurikuler atau bidang pengembangan bakat yang sesuai."
+  "narasiKarakter": "Paragraf narasi karakter anak yang mengalir hangat dan luwes...",
+  "saranPendekatan": "Saran pendekatan taktis bagi guru dan orang tua...",
+  "rekomendasiBakat": "Daftar ekskul atau bidang minat yang cocok (dipisahkan koma)..."
 }`
+
+  const userPrompt = `Data Siswa:
+Nama: ${namaSiswa}
+Kehadiran: ${persenHadir}% hadir (${totalHadir} dari ${totalAbsen} pertemuan)
+Rata-rata Nilai: ${avgNilai}
+
+Pilihan Jawaban Santai Siswa Saat Presensi Pagi:
+${answeredList.length > 0 ? answeredList.slice(-10).map((a) => `- Pertanyaan "${a.pertanyaanHariIni}" -> Pilihan anak: "${a.jawabanSiswa}"`).join('\n') : '(Belum ada respon santai yang tercatat)'}
+
+${catatanRecords.length > 0 ? `Catatan Observasi Guru di Kelas:\n${catatanRecords.map((c) => `- ${c.isi}`).join('\n')}` : ''}
+
+Tuliskan catatan profil karakter untuk ${namaSiswa} dengan gaya bahasa wali kelas yang hidup, luwes, dan hangat.`
 
   const response = await fetch(config.apiUrl, {
     method: 'POST',
@@ -391,7 +410,7 @@ Hasilkan analisis karakteristik siswa dalam format JSON berikut:
       messages: [
         {
           role: 'system',
-          content: 'Anda adalah seorang Pendidik & Pengamat Karakteristik Anak yang hangat, empatis, dan berpengalaman. Hasilkan respon HANYA dalam format JSON yang valid.',
+          content: systemPrompt,
         },
         { role: 'user', content: userPrompt },
       ],
