@@ -169,11 +169,27 @@ function cleanAndParseJSON<T>(rawText: string): T {
   // 2. Remove markdown code fences like ```json ... ``` or ``` ... ```
   cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
 
-  // 3. Extract array or object
-  const arrayMatch = cleaned.match(/\[[\s\S]*\]/)
-  const objectMatch = cleaned.match(/\{[\s\S]*\}/)
+  // 3. Try direct JSON parse first
+  try {
+    return JSON.parse(cleaned)
+  } catch {}
 
-  const candidate = arrayMatch ? arrayMatch[0] : (objectMatch ? objectMatch[0] : cleaned)
+  // 4. Identify whether outermost structure is an object or array
+  const firstBrace = cleaned.indexOf('{')
+  const firstBracket = cleaned.indexOf('[')
+
+  let candidate = cleaned
+  if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
+    const lastBrace = cleaned.lastIndexOf('}')
+    if (lastBrace > firstBrace) {
+      candidate = cleaned.slice(firstBrace, lastBrace + 1)
+    }
+  } else if (firstBracket !== -1) {
+    const lastBracket = cleaned.lastIndexOf(']')
+    if (lastBracket > firstBracket) {
+      candidate = cleaned.slice(firstBracket, lastBracket + 1)
+    }
+  }
 
   try {
     return JSON.parse(candidate)
@@ -188,7 +204,17 @@ function cleanAndParseJSON<T>(rawText: string): T {
         } catch {}
       }
     }
-    throw new Error(`Respon AI tidak dapat di-parse sebagai JSON valid. Pastikan model AI merespon dengan format JSON. Raw: ${candidate.slice(0, 150)}...`)
+    // Attempt auto-repair for truncated object
+    if (candidate.startsWith('{')) {
+      const lastQuoteIndex = candidate.lastIndexOf('"')
+      if (lastQuoteIndex > 0) {
+        try {
+          const repaired = candidate.substring(0, lastQuoteIndex + 1) + '}'
+          return JSON.parse(repaired)
+        } catch {}
+      }
+    }
+    throw new Error(`Respon AI tidak dapat di-parse sebagai JSON valid. Raw: ${candidate.slice(0, 150)}...`)
   }
 }
 
@@ -447,23 +473,32 @@ Lakukan analisis psikologis dan kepribadian ${namaSiswa} secara mendalam dan ote
   }
 
   const parsed = cleanAndParseJSON<any>(content)
-  if (!parsed || typeof parsed !== 'object') {
+  const root = Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'object' ? parsed[0] : parsed
+
+  if (!root || typeof root !== 'object') {
     throw new Error('Format respon AI tidak dapat dibaca sebagai objek JSON.')
   }
+
+  const rawTraits = root.karakterUtama || root.karakter_utama || root.karakter || root.traits
+  const karakterUtama = Array.isArray(rawTraits) && rawTraits.length > 0
+    ? rawTraits.map((t: any) => String(t).trim()).filter(Boolean)
+    : ['Kreatif', 'Tekun', 'Santun']
+
+  const narasi = root.narasiKarakter || root.narasi_karakter || root.narasi || root.analisis || root.deskripsi || root.profile || ''
+  const saran = root.saranPendekatan || root.saran_pendekatan || root.saran || root.pendekatan || ''
+  const bakat = root.rekomendasiBakat || root.rekomendasi_bakat || root.bakat || root.ekstrakurikuler || ''
 
   const result: AnalisisPsikologis = {
     id: generateId(),
     siswaId: '',
     updatedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-    karakterUtama: Array.isArray(parsed.karakterUtama) && parsed.karakterUtama.length > 0
-      ? parsed.karakterUtama
-      : ['Kreatif', 'Tekun', 'Santun'],
-    narasiKarakter: parsed.narasiKarakter || parsed.narasi || parsed.profile || parsed.deskripsi || '',
-    saranPendekatan: parsed.saranPendekatan || parsed.saran || parsed.pendekatan || '',
-    rekomendasiBakat: parsed.rekomendasiBakat || parsed.bakat || parsed.ekstrakurikuler || '',
+    karakterUtama,
+    narasiKarakter: String(narasi || '').trim(),
+    saranPendekatan: String(saran || '').trim(),
+    rekomendasiBakat: String(bakat || '').trim(),
   }
 
-  if (!result.narasiKarakter.trim()) {
+  if (!result.narasiKarakter) {
     throw new Error('AI tidak mengembalikan narasi karakter yang memadai. Silakan coba analisis ulang.')
   }
 
